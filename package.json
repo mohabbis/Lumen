@@ -7,10 +7,11 @@
     "dev": "vite --host 0.0.0.0",
     "build": "vite build",
     "preview": "vite preview --host 0.0.0.0",
+    "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",
     "e2e": "playwright test",
-    "ci": "npm run test && npm run build"
+    "ci": "npm run lint && npm run test && npm run build"
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",
@@ -25,6 +26,10 @@
     "@testing-library/jest-dom": "latest",
     "@testing-library/react": "latest",
     "@testing-library/user-event": "latest",
+    "eslint": "latest",
+    "eslint-plugin-react-hooks": "latest",
+    "eslint-plugin-react-refresh": "latest",
+    "jest-axe": "latest",
     "jsdom": "latest",
     "vitest": "latest"
   }
