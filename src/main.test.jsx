@@ -2,11 +2,11 @@ import { describe, expect, it } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import './main.jsx';
+import { App } from './main.jsx';
 
 describe('Lumen public preview', () => {
   it('renders the flagship hero and core product story', () => {
-    render(document.body.querySelector('#root'));
+    render(<App />);
 
     expect(screen.getByRole('heading', { name: /a calmer home, conducted by lumen/i })).toBeInTheDocument();
     expect(screen.getByText(/spatial intelligence for the home/i)).toBeInTheDocument();
@@ -14,12 +14,16 @@ describe('Lumen public preview', () => {
   });
 
   it('exposes accessible navigation links', () => {
+    render(<App />);
+
     expect(screen.getByRole('link', { name: /story/i })).toHaveAttribute('href', '#story');
     expect(screen.getByRole('link', { name: /architecture/i })).toHaveAttribute('href', '#architecture');
     expect(screen.getByRole('link', { name: /stack/i })).toHaveAttribute('href', '#stack');
   });
 
   it('supports the early access form fields', async () => {
+    render(<App />);
+
     const user = userEvent.setup();
     const email = screen.getByLabelText(/email address/i);
     const context = screen.getByLabelText(/what are you building toward/i);
