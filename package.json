@@ -17,7 +17,8 @@
     "vite": "latest",
     "react": "latest",
     "react-dom": "latest",
-    "lucide-react": "latest"
+    "lucide-react": "latest",
+    "framer-motion": "latest"
   },
   "devDependencies": {
     "@playwright/test": "latest",
