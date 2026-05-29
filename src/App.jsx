@@ -1,42 +1,220 @@
 import React, { useMemo, useState } from 'react';
-import { ArrowRight, Brain, CheckCircle2, Home, Layers3, Lightbulb, LockKeyhole, Moon, RadioTower, Sparkles, Waves } from 'lucide-react';
+import {
+  ArrowRight,
+  Brain,
+  CheckCircle2,
+  Home,
+  Infinity,
+  Lightbulb,
+  LockKeyhole,
+  Menu,
+  Microchip,
+  RadioTower,
+  Shield,
+  Sparkles,
+  SunMedium,
+  Waves
+} from 'lucide-react';
 
-const storySteps = [
-  { label: 'Rooms', title: 'Lumen begins with place.', body: 'Every device belongs to a room, zone, and purpose. The interface thinks in spaces before switches.', stat: '12 rooms', icon: Home },
-  { label: 'Presence', title: 'The home learns rhythm without becoming intrusive.', body: 'Motion, contact, time of day, and sensor history become context for useful suggestions.', stat: '4 sensors', icon: Waves },
-  { label: 'Intent', title: 'Suggestions are framed as choices.', body: 'Lumen proposes scenes based on context, but it does not silently take over sensitive actions.', stat: 'confirm first', icon: Brain },
-  { label: 'Action', title: 'One clean confirmation controls the room.', body: 'HomeKit executes today. The Muhome architecture keeps the bridge layer ready for Matter and local devices.', stat: 'HomeKit', icon: Lightbulb }
+const screens = [
+  {
+    id: 'home',
+    label: 'Awareness',
+    title: 'Good evening, Alex',
+    subtitle: 'Everything looks perfect.',
+    card: 'Favorite rooms',
+    icon: Home,
+    rows: ['Living Room 24.0°', 'Bedroom 21.5°', 'Kitchen all off', 'Hallway quiet']
+  },
+  {
+    id: 'room',
+    label: 'Control',
+    title: 'Living Room',
+    subtitle: 'Comfortable · 4 devices',
+    card: 'Devices',
+    icon: Lightbulb,
+    rows: ['Lights 70% → 40%', 'Shades open 35%', 'Temperature 22.5°', 'Air quality excellent']
+  },
+  {
+    id: 'intelligence',
+    label: 'Reasoning',
+    title: 'Why Lumen dimmed the lights',
+    subtitle: 'The sun set, room temperature rose, and presence stayed active.',
+    card: 'Suggested automation',
+    icon: Brain,
+    rows: ['Presence detected', 'Sunset matched', 'Temperature +1.2°', 'Confidence high']
+  },
+  {
+    id: 'action',
+    label: 'Action',
+    title: 'Evening Comfort',
+    subtitle: 'Ready to apply with your approval.',
+    card: 'Scene changes',
+    icon: CheckCircle2,
+    rows: ['Living room lights 70% → 40%', 'Temperature 22.5° → 21.5°', 'Shades 35% → 60%', 'Scene Warm Evening']
+  }
 ];
 
 const architecture = [
-  ['01', 'Experience layer', 'The polished iPhone surface for rooms, scenes, suggestions, sensor state, remotes, and explicit confirmations.'],
-  ['02', 'Semantic home model', 'Homes, rooms, zones, planned devices, routines, presence, and environmental state are structured as context.'],
-  ['03', 'Capability graph', 'Devices expose abilities instead of brand assumptions: brightness, color, motion, power, contact, temperature, and scene participation.'],
-  ['04', 'Bridge layer', 'HomeKit is the first execution bridge. The architecture leaves room for Matter, LAN devices, and future adapters.'],
-  ['05', 'Local-first storage', 'SwiftData keeps the home model on device, while iCloud and CloudKit support continuity without becoming the operating dependency.'],
-  ['06', 'Intelligence and safety', 'The AI layer observes, explains, and suggests. It asks before acting when device control could matter.']
+  ['Devices', 'Matter / Local'],
+  ['Sensors', 'Environmental'],
+  ['Presence', 'People & pets'],
+  ['Automations', 'Context aware'],
+  ['Scenes', 'Adaptive'],
+  ['Insights', 'Private AI']
 ];
 
 const stack = [
-  ['Interface', 'SwiftUI iPhone app'], ['State', 'Observation framework'], ['Persistence', 'SwiftData schema'], ['Sync', 'iCloud / CloudKit'], ['Home bridge', 'HomeKit / HMHomeManager'], ['Future bridge', 'Matter + LAN devices'], ['Model', 'Rooms, zones, capabilities'], ['Safety', 'Suggest first, confirm action']
+  ['SwiftUI', 'Native iPhone interface'],
+  ['HomeKit', 'Secure home control'],
+  ['SwiftData', 'Local home model'],
+  ['CloudKit', 'Private continuity'],
+  ['On-device AI', 'Reasoning without surveillance'],
+  ['Matter-ready', 'Built to evolve']
 ];
 
-function AmbientLighting() { return <div className="ambient" aria-hidden="true"><div className="orb orb-one" /><div className="orb orb-two" /><div className="orb orb-three" /><div className="grid-glow" /></div>; }
-
-function DeviceMockup({ activeStep }) {
-  const current = storySteps[activeStep];
-  const Icon = current.icon;
-  return <div className="device-stage"><div className="halo-ring" /><div className="phone"><div className="screen"><div className="status"><span>9:41</span><span className="island" /><span>Home</span></div><div className="screen-copy"><p className="micro">Evening intelligence</p><h2>Belgravia calm</h2><p>Lumen detected low motion, warm lighting preference, and room context.</p></div><div className="scene-card"><div className="scene-top"><span>{current.label}</span><span>Ready</span></div><div className="glow-orb"><Icon size={36} strokeWidth={1.35} /></div><h3>{current.title}</h3><p>{current.body}</p><div className="metric-grid"><div className="metric"><b>38%</b><span>Brightness</span></div><div className="metric"><b>2700K</b><span>Warmth</span></div><div className="metric"><b>{current.stat}</b><span>Context</span></div><div className="metric"><b>Confirm</b><span>Before act</span></div></div></div><button className="confirm-button" type="button">Apply suggested scene</button></div></div></div>;
+function AppScreen({ screen, featured = false }) {
+  const Icon = screen.icon;
+  return (
+    <div className={featured ? 'phone phone-featured' : 'phone mini-phone'}>
+      <div className="phone-screen">
+        <div className="phone-status"><span>9:41</span><span className="dynamic-island" /><span>⌁</span></div>
+        <div className="app-brand">LUMEN</div>
+        <div className="screen-header">
+          <div>
+            <p className="screen-kicker">{screen.label}</p>
+            <h3>{screen.title}</h3>
+            <p>{screen.subtitle}</p>
+          </div>
+          <div className="avatar-dot"><Icon size={18} /></div>
+        </div>
+        <div className="chip-row">
+          <span>4 rooms</span><span>12 devices</span><span>3 automations</span>
+        </div>
+        <div className="main-card">
+          <div className="main-card-head"><b>{screen.card}</b><ArrowRight size={15} /></div>
+          <div className="room-grid">
+            {screen.rows.map((row, index) => <div className="room-cell" key={row}><span>{row}</span><small>{index % 2 === 0 ? 'Active' : 'Ready'}</small></div>)}
+          </div>
+        </div>
+        <div className="presence-card">
+          <div><b>Lumen suggests</b><span>{screen.id === 'action' ? 'Confirm scene changes' : 'Evening comfort scene'}</span></div>
+          <div className="pulse-dot" />
+        </div>
+        <div className="tabbar"><span className="active">Home</span><span>Rooms</span><span>Intel</span><span>Auto</span></div>
+      </div>
+    </div>
+  );
 }
 
-function ProductStory() {
-  const [activeStep, setActiveStep] = useState(0);
-  return <section className="section story" id="story"><div className="section-head centered"><p className="eyebrow">Product story</p><h2>Rooms become context. Context becomes intent.</h2><p>Lumen is designed around a simple sequence: understand the space, read the moment, suggest the right action, and wait for confirmation.</p></div><div className="story-grid"><div className="story-tabs">{storySteps.map((step, index) => { const Icon = step.icon; return <button className={`story-tab ${activeStep === index ? 'active' : ''}`} key={step.label} onClick={() => setActiveStep(index)} type="button"><span className="tab-index">0{index + 1}</span><span className="tab-icon"><Icon size={19} /></span><span><b>{step.label}</b><small>{step.title}</small></span></button>; })}</div><DeviceMockup activeStep={activeStep} /></div></section>;
+function ProductGallery() {
+  const [active, setActive] = useState(0);
+  return (
+    <section className="section gallery" id="product">
+      <div className="section-copy centered">
+        <p className="eyebrow">The Lumen experience</p>
+        <h2>From awareness to action. All in one calm flow.</h2>
+      </div>
+      <div className="story-steps">
+        {screens.map((screen, index) => {
+          const Icon = screen.icon;
+          return <button key={screen.id} className={active === index ? 'active' : ''} onClick={() => setActive(index)}><Icon size={18} /><b>{screen.label}</b><span>{index === 0 ? 'See your home.' : index === 1 ? 'Understand every detail.' : index === 2 ? 'AI that reasons.' : 'One tap. Done.'}</span></button>;
+        })}
+      </div>
+      <div className="screen-gallery">
+        {screens.map((screen, index) => <div className={active === index ? 'selected' : ''} key={screen.id}><AppScreen screen={screen} /></div>)}
+      </div>
+    </section>
+  );
+}
+
+function Architecture() {
+  return (
+    <section className="deep-section" id="architecture">
+      <div className="architecture-card">
+        <div>
+          <p className="eyebrow">Muhome architecture</p>
+          <h2>The foundation behind Lumen.</h2>
+          <p>Muhome is the local brain. It unifies devices, sensors, presence, routines, and room semantics into a single model your home can understand.</p>
+          <a href="#access">Learn more <ArrowRight size={15} /></a>
+        </div>
+        <div className="muhome-diagram">
+          <div className="cube">Muhome</div>
+          {architecture.map(([name, meta]) => <div className="node" key={name}><b>{name}</b><span>{meta}</span></div>)}
+        </div>
+        <div>
+          <p className="eyebrow">Technical stack</p>
+          <h2>Modern. Private. Built to last.</h2>
+          <div className="stack-list">{stack.map(([name, meta]) => <div key={name}><Sparkles size={15} /><span><b>{name}</b><small>{meta}</small></span></div>)}</div>
+        </div>
+      </div>
+    </section>
+  );
 }
 
 export function App() {
-  const marquee = useMemo(() => ['SwiftUI', 'SwiftData', 'HomeKit', 'Matter-ready', 'Capability graph', 'iCloud continuity', 'Local-first', 'Confirmation-first'], []);
-  return <main className="site-shell"><Style /><AmbientLighting /><nav className="nav"><a className="brand" href="#top" aria-label="Lumen home"><span className="brand-mark">L</span><span>Lumen</span></a><div className="nav-links"><a href="#story">Story</a><a href="#architecture">Architecture</a><a href="#stack">Stack</a><a className="nav-cta" href="#access">Early access</a></div></nav><section id="top" className="hero"><div className="hero-copy"><p className="eyebrow">Spatial intelligence for the home</p><h1>A calmer home, conducted by <em>Lumen.</em></h1><p className="lede">Lumen turns HomeKit, rooms, presence, scenes, sensors, and routines into one elegant iPhone experience. Muhome is the architecture underneath: local-first, capability-based, and designed to suggest before it acts.</p><div className="actions"><a className="button primary" href="#access">Request early access <ArrowRight size={16} /></a><a className="button secondary" href="#story">Explore the product</a></div><div className="trust-row"><span><CheckCircle2 size={16} /> Local-first</span><span><LockKeyhole size={16} /> Confirmation-first</span><span><RadioTower size={16} /> HomeKit bridge</span></div></div><DeviceMockup activeStep={2} /></section><div className="ribbon"><div className="ribbon-track">{[...marquee, ...marquee].map((item, index) => <span key={`${item}-${index}`}>{item}</span>)}</div></div><ProductStory /><section id="architecture" className="section paper"><div className="section-head"><p className="eyebrow">Muhome architecture</p><h2>Not another remote. A model of the home.</h2><p>Muhome separates interface, semantics, capabilities, bridges, persistence, sync, and intelligence so Lumen can feel simple while the system underneath remains durable.</p></div><div className="architecture">{architecture.map(([num, title, text]) => <article className="card" key={title}><span className="num">{num}</span><h3>{title}</h3><p>{text}</p></article>)}</div></section><section id="stack" className="section dark-panel"><div className="section-head"><p className="eyebrow">Technical stack</p><h2>A luxury surface over a serious system.</h2><p>Each layer has a distinct job: present, model, persist, sync, bridge, observe, suggest, and confirm.</p></div><div className="stack-grid">{stack.map(([k, v]) => <div className="stack-item" key={k}><b>{k}</b><span>{v}</span></div>)}</div></section><section className="section principles dark-panel"><blockquote>“A home app should feel like <em>a quiet collaborator</em> — present when needed, invisible when not.”</blockquote><div className="principle-list"><div className="principle"><Sparkles size={20} /><h3>Suggest, never seize control</h3><p>Automation should be explainable and reversible. Lumen can recommend actions, but Muhome keeps execution permissioned.</p></div><div className="principle"><Layers3 size={20} /><h3>Architecture before interface</h3><p>The interface is only as strong as the model beneath it. Rooms, devices, sensors, remotes, and routines need a shared semantic backbone.</p></div><div className="principle"><Moon size={20} /><h3>Device-agnostic by design</h3><p>The platform avoids becoming a list of brand integrations. Capability composition keeps the system flexible as hardware changes.</p></div></div></section><section id="access" className="section access"><div><p className="eyebrow">Early access</p><h2>Follow the Lumen build.</h2><p className="lede">This is the public preview surface while the iOS product and Muhome architecture mature. The form opens a prepared email so the waitlist can be handled manually until the backend is connected.</p></div><form className="signup" action="mailto:Muharafi@umich.edu" method="post" encType="text/plain"><label htmlFor="email">Email address</label><input id="email" name="email" type="email" placeholder="you@example.com" required /><label htmlFor="context">What are you building toward?</label><input id="context" name="context" type="text" placeholder="Apartment, house, dorm, test lab..." /><button type="submit">Join Early Access</button><p>No payment required. One update when Lumen is ready.</p></form></section><footer className="footer"><span>Lumen</span><span>Production app surface · Built on Muhome architecture</span></footer></main>;
+  const featureStrip = useMemo(() => [
+    ['Private by design', 'Your home. Your data.', LockKeyhole],
+    ['On-device intelligence', 'Fast, local, secure.', Microchip],
+    ['HomeKit native', 'Deep integration that works.', Home],
+    ['Future ready', 'Built to evolve with your home.', Infinity]
+  ], []);
+
+  return (
+    <main className="site-shell">
+      <style>{styles}</style>
+      <div className="grain" />
+      <nav className="nav">
+        <a className="logo" href="#top"><SunMedium size={25} /><span>LUMEN</span></a>
+        <div className="links"><a href="#product">Product</a><a href="#intelligence">Intelligence</a><a href="#architecture">Architecture</a><a href="#design">Design</a><a href="#access">Early Access</a></div>
+        <div className="nav-actions"><a href="#access">Join Waitlist</a><button><Menu size={19} /></button></div>
+      </nav>
+
+      <section className="hero" id="top">
+        <div className="hero-bg" />
+        <div className="hero-copy">
+          <div className="pill"><span /> Coming soon</div>
+          <h1>Your home, <em>understood.</em></h1>
+          <p>Lumen is a new kind of home intelligence. It understands presence, context, and intent so your home can respond beautifully.</p>
+          <div className="hero-chips"><span><LockKeyhole size={14} /> Private by design</span><span><Microchip size={14} /> On-device intelligence</span><span><Home size={14} /> Built for HomeKit</span></div>
+          <div className="hero-actions"><a className="primary" href="#access">Join Early Access <ArrowRight size={16} /></a><a href="#product">Watch film <span>▶</span></a></div>
+        </div>
+        <div className="hero-device"><AppScreen screen={screens[0]} featured /></div>
+        <div className="hero-points" id="intelligence">
+          <div><Waves /><b>Understands</b><span>Presence & context</span></div>
+          <div><Brain /><b>Thinks</b><span>On-device intelligence</span></div>
+          <div><Sparkles /><b>Acts</b><span>Beautifully, automatically</span></div>
+          <div><Shield /><b>Respects</b><span>Privacy always</span></div>
+        </div>
+      </section>
+
+      <section className="detail-band" id="design">
+        <div><p className="eyebrow">Every detail</p><h2>In every room.</h2><p>See what matters. Control what counts. Effortlessly.</p></div>
+        <AppScreen screen={screens[0]} />
+        <AppScreen screen={screens[1]} />
+        <AppScreen screen={screens[2]} />
+        <AppScreen screen={screens[3]} />
+        <div><p className="eyebrow">Intelligence</p><h2>Meets intention.</h2><p>Lumen explains, suggests, and acts with your approval.</p><a href="#product">Explore the experience <ArrowRight size={15} /></a></div>
+      </section>
+
+      <ProductGallery />
+      <div className="feature-strip">{featureStrip.map(([title, text, Icon]) => <div key={title}><Icon size={23} /><span><b>{title}</b><small>{text}</small></span></div>)}</div>
+      <Architecture />
+
+      <section className="access" id="access">
+        <div>
+          <p className="eyebrow">Private early access</p>
+          <h2>Be the first to bring intelligence home.</h2>
+          <p>Join the private waitlist and help shape the future of Lumen.</p>
+          <form action="mailto:Muharafi@umich.edu" method="post" encType="text/plain"><input name="email" type="email" placeholder="Your email address" required /><button>Join Early Access <ArrowRight size={16} /></button></form>
+          <div className="checks"><span>✓ No spam</span><span>✓ Private</span><span>✓ Invite only</span></div>
+        </div>
+        <div className="launch-card"><SunMedium size={36} /><b>Launching 2026</b><span>Built on Muhome · HomeKit native · Matter ready</span></div>
+      </section>
+    </main>
+  );
 }
 
-function Style() { return <style>{`body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",system-ui,sans-serif;background:#080504;color:#fff3dc}.site-shell{min-height:100vh;overflow:hidden;background:radial-gradient(circle at 18% 8%,rgba(217,183,111,.15),transparent 26%),linear-gradient(135deg,#080504,#140c08 46%,#070403)}a{color:inherit;text-decoration:none}button,input{font:inherit}.ambient{position:fixed;inset:0;pointer-events:none;z-index:0}.orb{position:absolute;border-radius:999px;filter:blur(30px);opacity:.45}.orb-one{width:420px;height:420px;left:-120px;top:80px;background:rgba(217,183,111,.22)}.orb-two{width:520px;height:520px;right:-160px;top:110px;background:rgba(169,109,67,.25)}.orb-three{width:360px;height:360px;left:42%;bottom:-180px;background:rgba(240,217,159,.12)}.nav{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;justify-content:space-between;align-items:center;padding:24px 5vw;background:rgba(8,5,4,.55);backdrop-filter:blur(18px);border-bottom:1px solid rgba(255,243,220,.08)}.brand,.nav-links{display:flex;align-items:center;gap:18px}.brand-mark{display:grid;place-items:center;width:30px;height:30px;border:1px solid rgba(255,243,220,.22);border-radius:50%}.nav-links a{font-size:13px;color:rgba(255,243,220,.74)}.nav-cta{border-bottom:1px solid rgba(255,243,220,.45);padding-bottom:3px}.hero,.section{position:relative;z-index:1;padding:140px 5vw 90px}.hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,520px);gap:64px;align-items:center;min-height:100vh}.eyebrow{text-transform:uppercase;letter-spacing:.22em;font-size:12px;color:#d9b76f}.hero h1,.section h2{font-size:clamp(3.2rem,8vw,7.5rem);line-height:.92;margin:18px 0;font-weight:500;letter-spacing:-.06em}.section h2{font-size:clamp(2.4rem,5vw,5rem)}em{font-family:Georgia,serif;font-weight:400}.lede,.section-head p,.card p,.principle p{color:#dfcdb0;line-height:1.8;font-size:18px;max-width:780px}.actions,.trust-row{display:flex;flex-wrap:wrap;gap:14px;margin-top:28px}.button{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:14px 18px;border:1px solid rgba(255,243,220,.18)}.primary{background:#fff3dc;color:#1a100a}.secondary{color:#fff3dc}.trust-row span{display:flex;gap:8px;color:#a99473;font-size:13px}.device-stage{position:relative;display:grid;place-items:center}.phone{width:min(330px,78vw);border-radius:46px;padding:12px;background:#120b08;border:1px solid rgba(255,243,220,.16);box-shadow:0 40px 110px rgba(0,0,0,.45)}.screen{min-height:650px;border-radius:36px;background:linear-gradient(180deg,#f8ebd2,#2b180f);color:#1a100a;padding:22px;overflow:hidden}.status,.scene-top,.metric-grid{display:flex;justify-content:space-between;gap:10px}.island{width:72px;height:22px;background:#140c08;border-radius:999px}.micro,.scene-top,.metric span{font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:#715842}.screen-copy h2{font-size:34px;line-height:1;margin:20px 0 10px}.scene-card{margin-top:24px;padding:18px;border-radius:28px;background:rgba(255,255,255,.62);backdrop-filter:blur(14px)}.glow-orb{width:82px;height:82px;margin:18px auto;border-radius:50%;display:grid;place-items:center;background:#fff3dc;color:#a96d43}.metric-grid{display:grid;grid-template-columns:repeat(2,1fr);margin-top:16px}.metric{padding:12px;border-top:1px solid rgba(26,16,10,.12)}.metric b{display:block}.confirm-button,.signup button{width:100%;border:0;border-radius:18px;padding:15px;margin-top:18px;background:#1a100a;color:#fff3dc}.ribbon{position:relative;z-index:1;overflow:hidden;border-block:1px solid rgba(255,243,220,.08);padding:18px 0}.ribbon-track{display:flex;gap:38px;white-space:nowrap;animation:marquee 24s linear infinite;color:#a99473;text-transform:uppercase;letter-spacing:.16em;font-size:12px}@keyframes marquee{to{transform:translateX(-50%)}}.section-head.centered{text-align:center;margin:auto}.story-grid{display:grid;grid-template-columns:minmax(280px,420px) 1fr;gap:48px;align-items:center}.story-tabs{display:grid;gap:12px}.story-tab{text-align:left;display:grid;grid-template-columns:auto auto 1fr;gap:14px;align-items:center;padding:16px;border:1px solid rgba(255,243,220,.12);border-radius:20px;background:rgba(255,243,220,.04);color:#fff3dc}.story-tab.active{background:rgba(255,243,220,.12)}.story-tab small{display:block;color:#a99473}.paper{background:#fbf4e8;color:#1a100a}.paper .eyebrow{color:#a96d43}.paper p{color:#715842}.architecture{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:38px}.card{border:1px solid rgba(26,16,10,.12);border-radius:24px;padding:22px;background:rgba(255,255,255,.42)}.num{color:#a96d43;font-size:12px}.dark-panel{background:rgba(255,243,220,.04);border-block:1px solid rgba(255,243,220,.08)}.stack-grid,.principle-list{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:36px}.stack-item,.principle{border:1px solid rgba(255,243,220,.1);border-radius:20px;padding:18px;background:rgba(255,243,220,.04)}.stack-item b,.stack-item span{display:block}.stack-item span{color:#a99473;margin-top:6px}.principles blockquote{font-size:clamp(2rem,5vw,5rem);line-height:1.05;margin:0}.principle-list{grid-template-columns:repeat(3,1fr)}.access{display:grid;grid-template-columns:1fr 420px;gap:48px}.signup{background:#fbf4e8;color:#1a100a;border-radius:28px;padding:26px}.signup label{display:block;margin:14px 0 8px;font-size:12px;text-transform:uppercase;letter-spacing:.14em;color:#715842}.signup input{width:100%;border:1px solid rgba(26,16,10,.12);border-radius:14px;padding:14px;background:white}.signup p{color:#715842;font-size:13px}.footer{position:relative;z-index:1;display:flex;justify-content:space-between;padding:28px 5vw;color:#a99473;border-top:1px solid rgba(255,243,220,.08)}@media(max-width:900px){.nav{position:absolute}.nav-links{gap:12px}.hero,.story-grid,.access{grid-template-columns:1fr}.architecture,.stack-grid,.principle-list{grid-template-columns:1fr}.screen{min-height:560px}.hero,.section{padding:110px 6vw 70px}.footer{display:grid;gap:8px}}`}</style>; }
+const styles = `
+  :root{--night:#050505;--ink:#0a0806;--cream:#fff3dc;--muted:#b8a995;--gold:#f0c987;--gold2:#f7dfae;--line:rgba(255,243,220,.14);--glass:rgba(255,255,255,.06)}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#050505;color:var(--cream);font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',Inter,system-ui,sans-serif}a{color:inherit;text-decoration:none}.site-shell{min-height:100vh;overflow:hidden;background:radial-gradient(circle at 58% 20%,rgba(222,153,70,.22),transparent 24%),radial-gradient(circle at 88% 38%,rgba(46,94,130,.16),transparent 28%),#050505}.grain{position:fixed;inset:0;pointer-events:none;opacity:.16;background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:76px 76px;mask-image:radial-gradient(circle,black,transparent 76%)}.nav{height:76px;padding:0 38px;display:flex;align-items:center;justify-content:space-between;position:fixed;inset:0 0 auto;z-index:20;background:rgba(5,5,5,.72);border-bottom:1px solid var(--line);backdrop-filter:blur(20px)}.logo,.links,.nav-actions,.hero-actions,.hero-chips,.feature-strip div,.stack-list div{display:flex;align-items:center}.logo{gap:15px;font-size:22px;letter-spacing:.28em}.logo svg{color:var(--gold)}.links{gap:42px;color:#d5c7b3;font-size:14px}.nav-actions{gap:16px}.nav-actions a,.nav-actions button{border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.05);color:var(--cream);padding:13px 21px}.nav-actions button{width:46px;height:46px;padding:0;justify-content:center}.hero{min-height:100vh;padding:120px 5vw 60px;display:grid;grid-template-columns:1fr 430px 360px;gap:50px;align-items:center;position:relative}.hero-bg{position:absolute;inset:76px 0 0;background:linear-gradient(90deg,rgba(0,0,0,.92),rgba(0,0,0,.28),rgba(0,0,0,.88)),radial-gradient(circle at 65% 44%,rgba(240,201,135,.22),transparent 26%),linear-gradient(135deg,#0a0705,#1f140d 45%,#071018);opacity:.95}.hero>*:not(.hero-bg){position:relative;z-index:1}.pill{display:inline-flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:999px;padding:10px 15px;color:var(--gold2);text-transform:uppercase;letter-spacing:.14em;font-size:12px;background:rgba(255,255,255,.04)}.pill span{width:7px;height:7px;border-radius:999px;background:var(--gold);box-shadow:0 0 16px var(--gold)}h1{font-family:Georgia,serif;font-weight:400;font-size:clamp(70px,8vw,140px);line-height:.88;letter-spacing:-.065em;margin:30px 0 24px}h1 em{display:block;color:var(--gold2)}.hero-copy p,.section-copy p,.access p,.deep-section p,.detail-band p{color:#d7c7b2;font-size:19px;line-height:1.65;max-width:620px}.hero-chips{gap:12px;flex-wrap:wrap;margin:28px 0}.hero-chips span{display:inline-flex;gap:8px;align-items:center;border:1px solid var(--line);border-radius:999px;padding:10px 14px;color:#d8cab8;background:rgba(255,255,255,.045)}.hero-actions{gap:22px}.hero-actions .primary,.access button{display:inline-flex;gap:10px;align-items:center;border:0;border-radius:999px;background:linear-gradient(135deg,#ffe2a7,#f0c987);color:#130d08;padding:17px 28px;font-weight:800}.hero-actions a:last-child{color:#e6d6c1}.hero-points{display:grid;gap:34px;border-left:1px solid var(--line);padding-left:34px}.hero-points div{display:grid;grid-template-columns:32px 1fr;column-gap:18px}.hero-points svg{color:var(--gold);grid-row:span 2}.hero-points b{text-transform:uppercase;letter-spacing:.14em;font-size:13px;color:var(--gold2)}.hero-points span{color:#d2c2ad}.phone{background:linear-gradient(145deg,#2d241e,#050505 54%,#8d633a);border:1px solid rgba(255,255,255,.28);border-radius:42px;padding:10px;box-shadow:0 34px 90px rgba(0,0,0,.55)}.phone-featured{width:390px;transform:rotate(-5deg)}.mini-phone{width:230px}.phone-screen{min-height:520px;border-radius:34px;padding:18px;background:radial-gradient(circle at 55% 18%,rgba(240,201,135,.16),transparent 30%),linear-gradient(180deg,#090b0f,#090706);overflow:hidden;border:1px solid rgba(255,255,255,.08)}.mini-phone .phone-screen{min-height:380px;border-radius:28px;padding:14px}.phone-status,.screen-header,.main-card-head,.presence-card,.tabbar{display:flex;align-items:center;justify-content:space-between}.dynamic-island{width:84px;height:24px;border-radius:999px;background:#000}.app-brand{letter-spacing:.42em;color:#e8d6bc;font-size:12px;margin:20px 0}.screen-kicker,.eyebrow{text-transform:uppercase;letter-spacing:.18em;color:var(--gold);font-size:12px}.screen-header h3{font-size:25px;line-height:1.05;margin:5px 0 4px}.screen-header p,.main-card small,.presence-card span{color:#b5a895;margin:0}.avatar-dot,.pulse-dot{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:rgba(240,201,135,.14);color:var(--gold)}.chip-row{display:flex;gap:7px;flex-wrap:wrap;margin:16px 0}.chip-row span{font-size:11px;padding:7px 10px;border-radius:999px;background:rgba(255,255,255,.08);color:#d7c7b2}.main-card,.presence-card{padding:14px;border-radius:18px;background:rgba(255,255,255,.065);border:1px solid rgba(255,255,255,.08);margin-top:12px}.room-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}.room-cell{min-height:70px;border-radius:14px;padding:11px;background:linear-gradient(135deg,rgba(240,201,135,.2),rgba(255,255,255,.045))}.room-cell span{display:block;font-size:13px}.tabbar{margin-top:18px;border-radius:18px;padding:9px;background:rgba(0,0,0,.32);font-size:11px;color:#a99982}.tabbar .active{color:var(--gold)}.detail-band{margin:0 3vw 20px;padding:34px;display:grid;grid-template-columns:1.1fr repeat(4,230px) 1.1fr;gap:24px;align-items:center;border:1px solid var(--line);border-radius:28px;background:rgba(255,255,255,.045);backdrop-filter:blur(18px)}.detail-band h2,.section-copy h2,.access h2,.deep-section h2{font-family:Georgia,serif;font-weight:400;font-size:44px;line-height:1;margin:12px 0}.detail-band a,.architecture-card a{display:inline-flex;align-items:center;gap:8px;color:var(--gold)}.section{padding:110px 5vw}.centered{text-align:center;margin:0 auto 45px}.story-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin:0 auto 40px;max-width:1120px}.story-steps button{text-align:left;border:1px solid var(--line);border-radius:22px;background:rgba(255,255,255,.04);color:var(--cream);padding:18px}.story-steps button.active{background:rgba(240,201,135,.13);border-color:rgba(240,201,135,.4)}.story-steps svg{color:var(--gold)}.story-steps b,.story-steps span{display:block}.story-steps b{margin:12px 0 7px}.story-steps span{color:#c8b7a2}.screen-gallery{display:flex;justify-content:center;gap:26px;flex-wrap:wrap}.screen-gallery>div{opacity:.58;transform:scale(.94);transition:.25s}.screen-gallery>.selected{opacity:1;transform:scale(1)}.feature-strip{padding:26px 5vw;display:grid;grid-template-columns:repeat(4,1fr);gap:24px;border-block:1px solid var(--line);background:rgba(255,255,255,.035)}.feature-strip div{gap:16px}.feature-strip svg{color:var(--gold)}.feature-strip b,.feature-strip small{display:block}.feature-strip small{color:#b9aa95}.deep-section{padding:60px 3vw}.architecture-card{display:grid;grid-template-columns:1fr 1.6fr 1fr;gap:46px;padding:40px;border-radius:28px;border:1px solid var(--line);background:rgba(255,255,255,.04)}.muhome-diagram{position:relative;min-height:330px;border:1px solid var(--line);border-radius:24px;background:radial-gradient(circle,rgba(240,201,135,.13),transparent 48%)}.cube{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:grid;place-items:center;width:120px;height:120px;border:1px solid rgba(240,201,135,.5);border-radius:28px;color:var(--gold2);box-shadow:0 0 70px rgba(240,201,135,.18)}.node{position:relative;display:inline-block;margin:18px;width:145px;padding:13px;border-radius:15px;background:rgba(255,255,255,.06)}.node b,.node span{display:block}.node span{color:#a99982;font-size:12px}.stack-list{display:grid;gap:13px}.stack-list div{gap:12px}.stack-list svg{color:var(--gold)}.stack-list b,.stack-list small{display:block}.stack-list small{color:#b9aa95}.access{margin:20px 3vw 50px;padding:44px;display:grid;grid-template-columns:1.2fr .8fr;gap:40px;border-radius:28px;border:1px solid var(--line);background:linear-gradient(135deg,rgba(255,255,255,.06),rgba(240,201,135,.08))}.access form{display:grid;grid-template-columns:1fr auto;gap:12px;max-width:620px}.access input{height:56px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.07);color:var(--cream);padding:0 18px}.checks{display:flex;gap:18px;flex-wrap:wrap;margin-top:16px;color:#c7b9a5}.launch-card{display:grid;place-content:center;gap:12px;text-align:center;border:1px solid var(--line);border-radius:24px;background:rgba(0,0,0,.22);padding:30px}.launch-card svg{color:var(--gold);margin:auto}.launch-card b{font-size:24px}.launch-card span{color:#c5b5a0}@media(max-width:1120px){.hero,.architecture-card,.access{grid-template-columns:1fr}.hero-points{border-left:0;padding-left:0}.detail-band{grid-template-columns:1fr 1fr}.feature-strip,.story-steps{grid-template-columns:1fr 1fr}.phone-featured{transform:none}}@media(max-width:720px){.links{display:none}.nav{padding:0 20px}.hero{padding-top:120px;grid-template-columns:1fr}h1{font-size:66px}.phone-featured,.mini-phone{width:min(100%,350px)}.detail-band,.feature-strip,.story-steps{grid-template-columns:1fr}.access form{grid-template-columns:1fr}.hero-actions{flex-direction:column;align-items:flex-start}}
+`;
