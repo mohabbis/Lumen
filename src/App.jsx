@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, Brain, CheckCircle2, Home, Infinity, Lightbulb, LockKeyhole, Menu, Microchip, Shield, Sparkles, SunMedium, Waves } from 'lucide-react';
+import { ArrowRight, Brain, CheckCircle2, Home, Infinity, Lightbulb, LockKeyhole, Menu, Microchip, RadioTower, Shield, Sparkles, SunMedium, Waves } from 'lucide-react';
 import './App.css';
 
 const screens = [
