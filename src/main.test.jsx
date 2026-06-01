@@ -1,38 +1,53 @@
 import { describe, expect, it } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { App } from './App.jsx';
 
-import { App } from './main.jsx';
-
-describe('Lumen public preview', () => {
-  it('renders the flagship hero and core product story', () => {
+describe('Lumen landing page', () => {
+  it('renders the hero heading', () => {
     render(<App />);
-
-    expect(screen.getByRole('heading', { name: /a calmer home, conducted by lumen/i })).toBeInTheDocument();
-    expect(screen.getByText(/spatial intelligence for the home/i)).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /request early access/i })).toHaveAttribute('href', '#access');
+    const h1 = screen.getByRole('heading', { level: 1 });
+    expect(h1).toHaveTextContent(/your home/i);
   });
 
-  it('exposes accessible navigation links', () => {
+  it('renders the coming soon pill', () => {
     render(<App />);
-
-    expect(screen.getByRole('link', { name: /story/i })).toHaveAttribute('href', '#story');
-    expect(screen.getByRole('link', { name: /architecture/i })).toHaveAttribute('href', '#architecture');
-    expect(screen.getByRole('link', { name: /stack/i })).toHaveAttribute('href', '#stack');
+    expect(screen.getByText(/coming soon/i)).toBeInTheDocument();
   });
 
-  it('supports the early access form fields', async () => {
+  it('renders core nav links', () => {
     render(<App />);
+    const nav = screen.getByRole('navigation');
+    expect(within(nav).getByRole('link', { name: /^product$/i })).toHaveAttribute('href', '#product');
+    expect(within(nav).getByRole('link', { name: /^architecture$/i })).toHaveAttribute('href', '#architecture');
+    expect(within(nav).getByRole('link', { name: /^privacy$/i })).toHaveAttribute('href', '/privacy');
+  });
 
+  it('renders the hero CTA pointing at the access section', () => {
+    render(<App />);
+    const ctas = screen.getAllByRole('link', { name: /join early access/i });
+    expect(ctas.length).toBeGreaterThan(0);
+    expect(ctas[0]).toHaveAttribute('href', '#access');
+  });
+
+  it('renders the waitlist email input', () => {
+    render(<App />);
+    const input = screen.getByPlaceholderText(/your email address/i);
+    expect(input).toBeInTheDocument();
+    expect(input).toHaveAttribute('type', 'email');
+    expect(input).toHaveAttribute('name', 'email');
+  });
+
+  it('accepts email input in the waitlist form', async () => {
+    render(<App />);
     const user = userEvent.setup();
-    const email = screen.getByLabelText(/email address/i);
-    const context = screen.getByLabelText(/what are you building toward/i);
+    const input = screen.getByPlaceholderText(/your email address/i);
+    await user.type(input, 'muha@example.com');
+    expect(input).toHaveValue('muha@example.com');
+  });
 
-    await user.type(email, 'muha@example.com');
-    await user.type(context, 'Apartment test setup');
-
-    expect(email).toHaveValue('muha@example.com');
-    expect(context).toHaveValue('Apartment test setup');
+  it('renders the waitlist submit button', () => {
+    render(<App />);
     expect(screen.getByRole('button', { name: /join early access/i })).toBeInTheDocument();
   });
 });

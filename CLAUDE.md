@@ -52,7 +52,17 @@ Design tokens (CSS custom properties) are not formally extracted — colours and
 2. `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY` — POST to `{url}/rest/v1/lumen_waitlist`
 3. Falls back to `mailto:m.rafiq2006@icloud.com`
 
-Supabase table requires RLS with an anon insert policy to accept submissions.
+**Supabase table** (`public.lumen_waitlist`, project ref `pjiazhdmbpqfrlrhbbfo`):
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | uuid | PK, auto-generated |
+| `email` | text | not null |
+| `source` | text | not null, default `'lumen-site'` |
+| `user_agent` | text | nullable |
+| `created_at` | timestamptz | auto |
+
+RLS is enabled. The anon INSERT policy checks `email is not null and email like '%@%'`. Anon cannot read rows. There is an unrelated `rls_auto_enable()` SECURITY DEFINER function flagged by the Supabase security advisor — leave it unless you know it's needed.
 
 ### Tests
 
