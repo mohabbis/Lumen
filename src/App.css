@@ -1428,4 +1428,12 @@ p {
   .feature-strip { grid-template-columns: 1fr; }
   .stack-list { grid-template-columns: 1fr; }
   .access form { flex-direction: column; }
+  .hero-device {
+    max-width: calc(100vw - 40px);
+    padding: 8px;
+    border-radius: 44px;
+  }
+  .phone-featured {
+    width: 100%;
+  }
 }
