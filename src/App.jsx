@@ -56,7 +56,8 @@ function Waitlist() {
       if (endpoint) {
         await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, source: 'lumen-site' }) });
       } else if (supabaseUrl && supabaseKey) {
-        await fetch(`${supabaseUrl}/rest/v1/lumen_waitlist`, { method: 'POST', headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}`, 'Content-Type': 'application/json', Prefer: 'return=minimal' }, body: JSON.stringify({ email, source: 'lumen-site', user_agent: navigator.userAgent }) });
+        const res = await fetch(`${supabaseUrl}/rest/v1/lumen_waitlist`, { method: 'POST', headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}`, 'Content-Type': 'application/json', Prefer: 'return=minimal' }, body: JSON.stringify({ email, source: 'lumen_access_page', user_agent: navigator.userAgent }) });
+        if (!res.ok) throw new Error(await res.text());
       } else {
         window.location.href = `mailto:m.rafiq2006@icloud.com?subject=Lumen%20Early%20Access&body=${encodeURIComponent(`Please add me to the Lumen waitlist: ${email}`)}`;
       }
