@@ -48,6 +48,6 @@ describe('Lumen landing page', () => {
 
   it('renders the waitlist submit button', () => {
     render(<App />);
-    expect(screen.getByRole('button', { name: /join early access/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /request access/i })).toBeInTheDocument();
   });
 });
