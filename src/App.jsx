@@ -58,7 +58,7 @@ function Waitlist() {
       } else if (supabaseUrl && supabaseKey) {
         await fetch(`${supabaseUrl}/rest/v1/lumen_waitlist`, { method: 'POST', headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}`, 'Content-Type': 'application/json', Prefer: 'return=minimal' }, body: JSON.stringify({ email, source: 'lumen-site' }) });
       } else {
-        window.location.href = `mailto:Muharafi@umich.edu?subject=Lumen%20Early%20Access&body=${encodeURIComponent(`Please add me to the Lumen waitlist: ${email}`)}`;
+        window.location.href = `mailto:m.rafiq2006@icloud.com?subject=Lumen%20Early%20Access&body=${encodeURIComponent(`Please add me to the Lumen waitlist: ${email}`)}`;
       }
       setStatus('success');
       form.reset();
