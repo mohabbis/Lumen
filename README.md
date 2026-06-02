@@ -2,111 +2,214 @@
 
 **Lumen** is a modern smart home platform designed to make intelligent home control simple, beautiful, and reliable.
 
-Lumen brings device control, automation, presence awareness, and home intelligence into one polished experience. It is built around the idea that smart home software should feel calm, fast, and useful instead of becoming another dashboard people have to babysit.
+Lumen combines device management, automation, presence awareness, environmental sensing, and home intelligence into a single experience. Instead of treating smart devices as isolated accessories, Lumen treats the home as a coordinated system.
+
+> Smart home software designed around people, not devices.
+
+---
 
 ## Vision
 
-Most smart homes are collections of disconnected devices, fragmented apps, and brittle automations.
+Most smart homes are a collection of apps, hubs, dashboards, and automations stitched together over time.
 
-Lumen aims to turn those pieces into a coordinated system that works naturally in the background. The long-term goal is a home that understands its environment, adapts to its occupants, and requires less attention from the people living in it.
+Lumen's goal is to create a unified platform that understands the home's state, adapts to its occupants, and quietly improves everyday life.
 
-> Smart home software designed around people, not devices.
+The long-term vision is a home that:
+
+- Understands occupancy automatically
+- Responds intelligently to context
+- Requires minimal manual intervention
+- Protects user privacy
+- Feels invisible when working correctly
+
+---
+
+## Current Platform Focus
+
+Lumen is currently being built around a real-world smart home environment consisting of:
+
+- Apple HomeKit
+- Matter devices
+- Thread devices
+- GE Cync lighting
+- Motion sensors
+- Smart dimmers
+- RGBIC lighting systems
+- Wi-Fi connected devices
+- Bluetooth Low Energy devices
+
+Development priorities are based on solving real smart-home problems rather than building isolated demo features.
+
+---
 
 ## Core Features
 
 ### Unified Device Control
 
-Manage smart home devices from one clean interface.
+Manage lights, sensors, switches, outlets, and accessories from one interface.
 
-- Lighting control
-- Sensors and occupancy monitoring
-- Smart switches and outlets
-- Room-based organization
-- Real-time device status
-- Fast device interactions
+Features include:
 
-### Intelligent Automation
+- Room organization
+- Device grouping
+- Real-time status monitoring
+- Scene activation
+- Quick controls
+- Cross-device interactions
 
-Create automations that respond to activity, time, and context.
+### Presence Intelligence
 
-- Motion-triggered actions
-- Time-based schedules
-- Presence-aware routines
-- Multi-device workflows
-- Custom automation rules
-- Adaptive home responses
+Lumen is being designed around understanding occupancy and activity.
 
-### Presence & Home Awareness
-
-Help the home understand what is happening around it.
+Planned capabilities include:
 
 - Occupancy detection
-- Arrival and departure events
-- Activity monitoring
-- Room-level awareness
-- Context-aware automation
+- Room awareness
+- Arrival and departure recognition
+- Motion-based state tracking
+- Multi-user support
+- Adaptive automation behavior
 
-### Modern Interface
+### Automation Engine
 
-Lumen prioritizes a refined user experience over cluttered control panels.
+The automation system serves as the foundation of the platform.
 
-- SwiftUI-native interface
-- Clean mobile-first design
-- Fast interactions
-- Real-time updates
-- Dark mode support
-- Simple navigation
+Supported and planned automation triggers include:
 
-### Privacy-First Direction
+- Motion events
+- Occupancy changes
+- Time schedules
+- Device state changes
+- Environmental conditions
+- Custom automation chains
 
-Home data should stay controlled by the people who live there.
+Example:
 
-- Local-first design principles
-- Secure device communication
-- Minimal data collection
-- User-controlled permissions
-- Privacy-conscious automation logic
+Motion detected → Room occupied → Lights adjust → Scene activates → Devices respond.
 
-## Technology
+### Smart Lighting
 
-Lumen is currently focused on Apple-first smart home development.
+Lighting is a primary focus area.
+
+Planned functionality includes:
+
+- HomeKit lighting control
+- GE Cync integration support
+- Adaptive brightness
+- Color management
+- Circadian lighting routines
+- Motion-based lighting
+- Room-specific scenes
+
+### Home Dashboard
+
+A central dashboard provides visibility into the home's current state.
+
+Areas under development include:
+
+- Room summaries
+- Device health monitoring
+- Occupancy overview
+- Automation status
+- Sensor activity
+- Home insights
+
+---
+
+## Technical Architecture
+
+### Frontend
 
 - SwiftUI
+- Native iOS development
+- Apple design system integration
+- Real-time state updates
+
+### Smart Home Protocols
+
 - HomeKit
 - Matter
 - Thread
 - Bluetooth Low Energy
 - Wi-Fi
-- Local Network Discovery
-- Real-time event processing
 
-## Current Development Focus
+### Core Systems
 
-Lumen is under active development. Current priorities include:
+- Device management layer
+- Automation engine
+- Presence engine
+- State synchronization
+- Local network discovery
+- Event processing pipeline
+
+---
+
+## Roadmap
+
+### Phase 1
+
+Foundation
 
 - Device onboarding
 - HomeKit integration
-- Automation engine development
-- Presence intelligence
-- Room and device organization
-- UI/UX refinement
-- Performance optimization
-- Local-first reliability
+- Room management
+- Scene management
+- Core UI
 
-## Project Status
+### Phase 2
 
-This repository represents the ongoing development of Lumen. The product is still evolving, and major components may change as the interface, automation model, and device logic are refined.
+Intelligence
+
+- Presence engine
+- Occupancy modeling
+- Advanced automations
+- Device relationships
+
+### Phase 3
+
+Adaptive Home
+
+- Context-aware automation
+- Behavioral learning
+- Energy optimization
+- Predictive routines
+
+### Phase 4
+
+Home Intelligence Platform
+
+- Cross-home support
+- Advanced analytics
+- Extended ecosystem integrations
+- Intelligent recommendations
+
+---
 
 ## Design Principles
 
-Lumen is guided by a few simple principles:
+1. The home should feel intelligent, not complicated.
+2. Controls should be fast, obvious, and reliable.
+3. Automation should reduce attention, not create more work.
+4. Privacy should be built into the platform from the beginning.
+5. Local-first operation should be preferred whenever possible.
+6. The interface should feel calm, modern, and intentional.
 
-1. **The home should feel intelligent, not complicated.**
-2. **Controls should be fast, obvious, and reliable.**
-3. **Automation should reduce attention, not demand more of it.**
-4. **Privacy should be built into the system from the start.**
-5. **The interface should feel polished enough to belong in the home it controls.**
+---
 
-## License
+## Project Status
 
-No license has been specified yet.
+Lumen is under active development.
+
+Current focus areas:
+
+- HomeKit architecture
+- Presence intelligence
+- Automation engine development
+- Device onboarding workflows
+- Lighting experiences
+- Performance optimization
+- UI refinement
+
+---
+
+Built with SwiftUI and HomeKit.
