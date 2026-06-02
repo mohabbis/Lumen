@@ -5,3 +5,9 @@ dist/
 .env.*.local
 *.local
 .DS_Store
+
+# Xcode
+*.xcuserstate
+xcuserdata/
+*.xcworkspace/xcuserdata/
+Lumen.xcodeproj/xcuserdata/
