@@ -2,72 +2,110 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Commands
+## Repository layout
+
+This repo contains two independent apps that ship together:
+
+| Path | What it is |
+|------|-----------|
+| `Lumen/` | Native iOS app (Swift / SwiftUI / SwiftData) |
+| `Lumen.xcodeproj/` | Xcode project for the iOS app |
+| `LumenTests/` | Xcode unit test target |
+| `src/` | React/Vite marketing landing page |
+| `public/` | Static assets for the web app |
+
+---
+
+## iOS app
+
+### Building & running
 
 ```bash
-npm run dev        # start dev server (0.0.0.0:5173)
-npm run build      # production build → dist/
-npm run preview    # serve dist/ at 0.0.0.0:4173
-npm run lint       # ESLint over src/
-npm run test       # vitest unit tests (single run)
-npm run test:watch # vitest in watch mode
-npm run e2e        # Playwright tests (requires preview server running on :4173)
-npm run ci         # lint + test + build (full gate)
+# Build to a connected device (replace the destination ID as needed)
+xcodebuild -project Lumen.xcodeproj -scheme Lumen -configuration Debug \
+  -destination 'id=<DEVICE_UDID>' -allowProvisioningUpdates build
+
+# List connected devices
+xcrun xctrace list devices
 ```
 
-To run a single test file: `npx vitest run src/main.test.jsx`
+The signing team is `CU67F9EY3Q`, bundle ID `com.muhome.app`. Code signing is set to Automatic — just open in Xcode and press **Cmd+R** with your phone connected.
 
-## Architecture
+**Note:** `xcodebuild` CLI builds fail with a "database is locked" error while Xcode is open. Close Xcode first or use Xcode directly.
 
-**Single-page React app** built with Vite. No router — all sections are anchor-scrolled on one page. The privacy policy is a fully standalone HTML file served as a static asset.
+### Architecture
 
-### Key files
+The app is a protocol-driven MVVM app using Swift Observation (`@Observable`) and SwiftData.
 
-| File | Role |
-|------|------|
-| `src/App.jsx` | Entire app — all components defined and rendered here |
-| `src/App.css` | All styles for the React app (dark luxury editorial theme) |
-| `public/privacy/index.html` | Self-contained privacy page (own CSS + JS, no React) |
-| `vercel.json` | Rewrites `/privacy` → `/privacy/index.html` for clean URL routing |
+#### Core abstractions (`Domain/`)
 
-### Component structure (all in `src/App.jsx`)
+- `SmartDevice` — protocol every device (real or preview) conforms to. Carries capabilities.
+- `DeviceCapability` — protocol hierarchy (`OnOffCapability`, `BrightnessCapability`, etc.). UI renders only capabilities the device actually reports.
+- `SmartHomeBridge` — `Actor` protocol. Bridges (e.g. `HomeKitBridge`) implement this to connect a hardware ecosystem. Bridges emit `DeviceStateChange` via `AsyncStream`.
 
-- `App` — shell, sticky nav with mobile menu state, all sections composed here
-- `ProductGallery` — tabbed phone mockup viewer driven by `screens[]` data array
-- `SensorVisualization` — live room sensor board + reasoning timeline
-- `Architecture` — Muhome architecture diagram + tech stack grid
-- `Waitlist` — email form with Supabase/endpoint/mailto fallback chain
-- `AppScreen` / `FadeIn` — shared primitives (phone mockup renderer, motion wrapper)
+#### Services (`Services/`)
 
-### Styling
+All services are `@Observable @MainActor` classes passed through the SwiftUI environment from `MuhomeApp`. They are the only places that touch `ModelContext`.
 
-All styles live in `src/App.css` (imported by `App.jsx`). `src/styles.css` is a legacy file — it is not imported anywhere and can be ignored. The privacy page is fully self-contained and does not share CSS with the React app.
+| Service | Owns |
+|---------|------|
+| `HomeService` | Home / Room CRUD |
+| `DeviceService` | PlannedDevice CRUD; routes `SceneActionSnapshot` to the right bridge |
+| `DeviceStateStore` | In-memory live state for all connected devices — rebuilt from bridges on each launch, never persisted |
+| `SceneService` | Scene CRUD, execution, geofence-triggered automation |
+| `LocationService` | CLLocationManager wrapper; publishes `GeofenceEvent` when the user crosses the home radius |
+| `NotificationService` | UNUserNotificationCenter wrapper; called by `SceneService` after automation fires |
+| `SensorObservationService` | Subscribes to motion/contact `AsyncStream`s from all capable devices |
 
-Design tokens (CSS custom properties) are not formally extracted — colours and spacing are inline in `App.css`. Core palette: `#080808` bg, `#e8e0d4` text, `#c8b89a` accent.
+#### Data flow for a scene execution
 
-### Waitlist form logic
+```
+SceneListView → SceneViewModel.execute()
+  → SceneService.execute(scene)
+    → scene.asSnapshots() → [SceneActionSnapshot]
+    → DeviceService.send(action:) per snapshot
+      → DeviceStateStore.applyLocalAction()   // optimistic local update
+      → bridge.executeAction()                // real hardware
+```
 
-`Waitlist` checks env vars in priority order:
+#### SwiftData persistence (`Services/Persistence/`)
+
+- Schema is versioned: `MuhomeSchemaV1` → `V2` → `V3`. `PersistenceCoordinator` always uses `MuhomeSchemaV3`.
+- CloudKit sync is **off** (`enableCloudKitSync = false`). Flip only after provisioning `iCloud.com.muhome.app` in the Apple Developer portal.
+- `MuhomeDataModels.swift` and `SceneModels.swift` contain **legacy structs** (`MuhaScene`, `MuhaSceneRecord`, etc.) from an older design. They compile but are not wired to any active schema or service — treat as dead code.
+
+#### Local preview mode
+
+When `AppState.enableLocalPreviewControls` is true, `DeviceStateStore` populates itself from `PlannedDevice` records via `LocalSmartDevice`. This lets the UI run without any real hardware. The `bridgeID == .localPreview` guard in `DeviceService.send()` short-circuits real bridge calls.
+
+#### Geofence automation
+
+`LocationService` detects home arrival/departure within a 100 m radius and publishes a `GeofenceEvent`. `SceneService.startMonitoringGeofenceEvents(from:)` polls this every 0.5 s and auto-executes scenes whose `geofenceTrigger` matches.
+
+---
+
+## Web app (`src/`)
+
+### Commands
+
+```bash
+npm run dev        # dev server on 0.0.0.0:5173
+npm run build      # production build → dist/
+npm run lint       # ESLint
+npm run test       # Vitest (single run)
+npm run ci         # lint + test + build
+npx vitest run src/main.test.jsx   # single test file
+```
+
+### Architecture
+
+Single-page React/Vite app — no router, anchor-scroll only. All components are co-located in `src/App.jsx`; all styles in `src/App.css`. `src/styles.css` is unused.
+
+**Waitlist form** (`Waitlist` component) resolves its endpoint in priority order:
 1. `VITE_WAITLIST_ENDPOINT` — POST to any custom endpoint
 2. `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY` — POST to `{url}/rest/v1/lumen_waitlist`
-3. Falls back to `mailto:m.rafiq2006@icloud.com`
+3. `mailto:m.rafiq2006@icloud.com` fallback
 
-**Supabase table** (`public.lumen_waitlist`, project ref `pjiazhdmbpqfrlrhbbfo`):
+`public/privacy/index.html` is fully self-contained (no React). The `vercel.json` rewrite maps `/privacy` → `/privacy/index.html`.
 
-| Column | Type | Notes |
-|--------|------|-------|
-| `id` | uuid | PK, auto-generated |
-| `email` | text | not null |
-| `source` | text | not null, default `'lumen-site'` |
-| `user_agent` | text | nullable |
-| `created_at` | timestamptz | auto |
-
-RLS is enabled. The anon INSERT policy checks `email is not null and email like '%@%'`. Anon cannot read rows. There is an unrelated `rls_auto_enable()` SECURITY DEFINER function flagged by the Supabase security advisor — leave it unless you know it's needed.
-
-### Tests
-
-`src/main.test.jsx` is **stale** — it references an older version of the app (different headings, nav links, and form fields). Running `npm test` will fail. Tests need to be rewritten against the current `App.jsx` before `npm run ci` can pass cleanly.
-
-### Deployment
-
-Deployed on Vercel. The `public/` directory is copied verbatim to the build output, so `public/privacy/index.html` is served at `/privacy/index.html`. The rewrite in `vercel.json` makes `/privacy` resolve to it.
+**Tests in `src/main.test.jsx` are stale** — they reference an older version of the app and will fail. Rewrite them against the current `App.jsx` before `npm run ci` can pass.
