@@ -56,25 +56,6 @@ enum MuhomeSchemaV3: VersionedSchema {
     ]
 }
 
-// MARK: - Versioned Schema V4
-
-enum MuhomeSchemaV4: VersionedSchema {
-    static var versionIdentifier = Schema.Version(4, 0, 0)
-
-    // Adds Home.latitude and Home.longitude (both optional Double) for location-awareness.
-    static var models: [any PersistentModel.Type] = [
-        Home.self,
-        Room.self,
-        Zone.self,
-        PlannedDevice.self,
-        Scene.self,
-        SceneAction.self,
-        RemoteProfile.self,
-        IRCommand.self,
-        ExecutionEvent.self,
-    ]
-}
-
 // MARK: - Migration Plan
 
 enum MuhomeSchemaMigrationPlan: SchemaMigrationPlan {
@@ -82,7 +63,6 @@ enum MuhomeSchemaMigrationPlan: SchemaMigrationPlan {
         MuhomeSchemaV1.self,
         MuhomeSchemaV2.self,
         MuhomeSchemaV3.self,
-        MuhomeSchemaV4.self,
     ]
 
     static var stages: [MigrationStage] = [
@@ -92,14 +72,12 @@ enum MuhomeSchemaMigrationPlan: SchemaMigrationPlan {
             toVersion:   MuhomeSchemaV2.self
         ),
         // V2 → V3: drop @Attribute(.unique) from all id fields for CloudKit compatibility.
+        // Note: Home.latitude and Home.longitude (optional Double, added later) are handled
+        // by SwiftData's inferred migration — nullable column additions don't require a
+        // new schema version.
         MigrationStage.lightweight(
             fromVersion: MuhomeSchemaV2.self,
             toVersion:   MuhomeSchemaV3.self
-        ),
-        // V3 → V4: add Home.latitude and Home.longitude (nullable, no data loss).
-        MigrationStage.lightweight(
-            fromVersion: MuhomeSchemaV3.self,
-            toVersion:   MuhomeSchemaV4.self
         ),
     ]
 }

@@ -241,10 +241,46 @@ struct HomeDashboardView: View {
                 LumenNoticedCard(
                     message: noticedMessage,
                     suggestion: noticedSuggestion,
-                    icon: "sparkles"
+                    icon: "sparkles",
+                    action: handleLumenSuggestion
                 )
             }
         }
+    }
+
+    // MARK: - Lumen Suggestion Handler
+
+    private func handleLumenSuggestion() {
+        switch timeOfDay {
+        case .dawn, .morning:
+            // Run morning scene if exists
+            if let morningScene = findScene(named: "Morning") {
+                Task {
+                    try? await viewModel.executeScene(morningScene)
+                }
+            }
+        case .afternoon:
+            // Navigate to rooms to adjust brightness
+            break // Tab selection handled by parent
+        case .evening:
+            // Run evening scene
+            if let eveningScene = findScene(named: "Evening") {
+                Task {
+                    try? await viewModel.executeScene(eveningScene)
+                }
+            }
+        case .night:
+            // Run sleep scene
+            if let sleepScene = findScene(named: "Sleep") {
+                Task {
+                    try? await viewModel.executeScene(sleepScene)
+                }
+            }
+        }
+    }
+
+    private func findScene(named name: String) -> Scene? {
+        scenes.first { $0.name.lowercased() == name.lowercased() }
     }
 
     private var noticedMessage: String {
@@ -262,57 +298,57 @@ struct HomeDashboardView: View {
         case .dawn:      return "Run Morning scene"
         case .morning:   return "Check room status"
         case .afternoon: return "Adjust brightness"
-        case .evening:   return "Run Evening Wind Down"
+        case .evening:   return "Run Evening scene"
         case .night:     return "Prepare night mode"
         }
     }
 }
 
-// MARK: - Lumen Noticed Card
-
 private struct LumenNoticedCard: View {
     let message: String
     let suggestion: String
     let icon: String
+    let action: () -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            HStack(spacing: 8) {
-                Image(systemName: icon)
-                    .font(.system(size: 12))
-                    .foregroundStyle(Color(hex: "#C49A6C"))
-                Text("Lumen noticed")
-                    .font(.system(size: 11, weight: .semibold))
-                    .tracking(1)
-                    .foregroundStyle(Color(hex: "#C49A6C"))
-            }
-
-            Text(message)
-                .font(.system(size: 14))
-                .foregroundStyle(Color.white.opacity(0.7))
-                .fixedSize(horizontal: false, vertical: true)
-
-            HStack(alignment: .bottom) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(suggestion)
-                        .font(.system(size: 13, weight: .medium))
-                        .foregroundStyle(Color.white.opacity(0.6))
-                    Text("Suggested by Lumen")
-                        .font(.system(size: 11))
-                        .foregroundStyle(Color.white.opacity(0.28))
+        Button(action: action) {
+            VStack(alignment: .leading, spacing: 14) {
+                HStack(spacing: 8) {
+                    Image(systemName: icon)
+                        .font(.system(size: 12))
+                        .foregroundStyle(Color(hex: "#C49A6C"))
+                    Text("Lumen noticed")
+                        .font(.system(size: 11, weight: .semibold))
+                        .tracking(1)
+                        .foregroundStyle(Color(hex: "#C49A6C"))
                 }
-                Spacer()
-                Toggle("", isOn: .constant(false))
-                    .tint(Color(hex: "#C49A6C"))
-                    .labelsHidden()
-                    .scaleEffect(0.75)
+
+                Text(message)
+                    .font(.system(size: 14))
+                    .foregroundStyle(Color.white.opacity(0.7))
+                    .fixedSize(horizontal: false, vertical: true)
+
+                HStack(alignment: .bottom) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(suggestion)
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundStyle(Color.white.opacity(0.6))
+                        Text("Suggested by Lumen")
+                            .font(.system(size: 11))
+                            .foregroundStyle(Color.white.opacity(0.28))
+                    }
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(Color(hex: "#C49A6C"))
+                }
             }
+            .padding(18)
+            .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 18))
+            .overlay(
+                RoundedRectangle(cornerRadius: 18)
+                    .strokeBorder(Color.white.opacity(0.06), lineWidth: 1)
+            )
         }
-        .padding(18)
-        .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 18))
-        .overlay(
-            RoundedRectangle(cornerRadius: 18)
-                .strokeBorder(Color.white.opacity(0.06), lineWidth: 1)
-        )
     }
 }

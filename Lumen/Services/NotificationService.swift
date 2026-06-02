@@ -1,5 +1,4 @@
 import Foundation
-import UIKit
 import UserNotifications
 
 @MainActor
@@ -40,8 +39,7 @@ final class NotificationService {
         }
         
         content.sound = .default
-        content.badge = NSNumber(value: UIApplication.shared.applicationIconBadgeNumber + 1)
-        
+
         // Add custom data
         content.userInfo = [
             "sceneName": sceneName,
@@ -68,8 +66,7 @@ final class NotificationService {
         content.subtitle = sceneName
         content.body = reason
         content.sound = .default
-        content.badge = NSNumber(value: UIApplication.shared.applicationIconBadgeNumber + 1)
-        
+
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
         let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
         
@@ -81,8 +78,8 @@ final class NotificationService {
     }
     
     // MARK: - Clear Notifications
-    
+
     func clearBadge() {
-        UIApplication.shared.applicationIconBadgeNumber = 0
+        Task { try? await UNUserNotificationCenter.current().setBadgeCount(0) }
     }
 }

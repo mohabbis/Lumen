@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import SwiftData
 
 // MARK: - Home View Model
 
@@ -10,15 +11,17 @@ final class HomeViewModel {
     private let homeService: HomeService
     private let deviceService: DeviceService
     private let stateStore: DeviceStateStore
+    private let sceneService: SceneService?
 
     var isShowingAddRoom = false
     var isShowingOnboarding = false
     var error: (any Error)?
 
-    init(homeService: HomeService, deviceService: DeviceService, stateStore: DeviceStateStore) {
+    init(homeService: HomeService, deviceService: DeviceService, stateStore: DeviceStateStore, sceneService: SceneService? = nil) {
         self.homeService = homeService
         self.deviceService = deviceService
         self.stateStore = stateStore
+        self.sceneService = sceneService
     }
 
     // MARK: - Derived State
@@ -67,6 +70,11 @@ final class HomeViewModel {
         } catch {
             self.error = error
         }
+    }
+
+    func executeScene(_ scene: Scene) async throws {
+        guard let sceneService = sceneService else { return }
+        try await sceneService.execute(scene)
     }
 
     func makeRoomViewModel() -> RoomViewModel {
