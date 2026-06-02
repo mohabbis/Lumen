@@ -13,6 +13,7 @@ struct RootView: View {
     @Environment(DeviceStateStore.self) private var stateStore
     @Environment(SceneService.self) private var sceneService
     @Environment(SensorObservationService.self) private var sensorService
+    @Environment(LocationService.self) private var locationService
     @Environment(\.modelContext)   private var modelContext
     @Environment(\.horizontalSizeClass) private var sizeClass
 
@@ -142,6 +143,10 @@ struct RootView: View {
             deviceService.syncLocalPreviewDevices(from: homeService.primaryHome)
         }
         try? sceneService.seedDefaultScenesIfNeeded()
+        
+        // Start geofence event monitoring
+        sceneService.startMonitoringGeofenceEvents(from: locationService)
+        
         if ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] == nil {
             let hkBridge = HomeKitBridge()
             deviceService.registerBridge(hkBridge)

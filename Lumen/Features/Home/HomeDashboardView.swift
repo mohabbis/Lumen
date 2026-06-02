@@ -3,12 +3,14 @@ import SwiftData
 
 // MARK: - Home Dashboard View
 // Matches the "Awareness" mode shown on lumen.muharafiq.com
+// Location-aware: shows "Welcome Home" when at home, "Away Mode" otherwise
 
 struct HomeDashboardView: View {
 
     @State var viewModel: HomeViewModel
     @Query private var scenes: [Scene]
     @Environment(\.horizontalSizeClass) private var sizeClass
+    @Environment(LocationService.self) private var locationService
     @State private var isRenamingHome = false
     @State private var renameText = ""
 
@@ -34,20 +36,41 @@ struct HomeDashboardView: View {
                 viewModel.addRoom(name: name, type: type, level: level)
             }
         }
-        .onAppear { viewModel.load() }
+        .onAppear {
+            viewModel.load()
+            locationService.requestLocationPermission()
+            locationService.startMonitoringLocation()
+            if let home = viewModel.home, let lat = home.latitude, let lon = home.longitude {
+                locationService.updateHomeCoordinates(latitude: lat, longitude: lon)
+            }
+        }
+        .onDisappear {
+            locationService.stopMonitoringLocation()
+        }
     }
 
     // MARK: - Ambient Background (time-of-day gradient)
 
     private var ambientBackground: some View {
         ZStack {
-            Color(hex: "#0E0819")
-            LinearGradient(
-                colors: [timeOfDay.backgroundColors.first ?? .clear, .clear],
-                startPoint: .top,
-                endPoint: .center
-            )
-            .opacity(0.6)
+            if locationService.isAtHome {
+                Color(hex: "#0E0819")
+                LinearGradient(
+                    colors: [timeOfDay.backgroundColors.first ?? .clear, .clear],
+                    startPoint: .top,
+                    endPoint: .center
+                )
+                .opacity(0.6)
+            } else {
+                // Away mode: darker, more muted background
+                Color(hex: "#0A0610")
+                LinearGradient(
+                    colors: [Color(hex: "#1A0F24"), .clear],
+                    startPoint: .top,
+                    endPoint: .center
+                )
+                .opacity(0.4)
+            }
         }
     }
 
@@ -80,13 +103,13 @@ struct HomeDashboardView: View {
                 .foregroundStyle(Color.white.opacity(0.35))
             Spacer()
             HStack(spacing: 6) {
-                Text("AWARENESS")
+                Text(locationService.isAtHome ? "HOME MODE" : "AWAY MODE")
                     .font(.system(size: 10, weight: .semibold))
                     .tracking(2)
-                    .foregroundStyle(Color.white.opacity(0.35))
-                Image(systemName: "house.fill")
+                    .foregroundStyle(locationService.isAtHome ? Color(hex: "#C49A6C") : Color.white.opacity(0.35))
+                Image(systemName: locationService.isAtHome ? "house.fill" : "location.fill")
                     .font(.system(size: 11))
-                    .foregroundStyle(Color.white.opacity(0.35))
+                    .foregroundStyle(locationService.isAtHome ? Color(hex: "#C49A6C") : Color.white.opacity(0.35))
             }
         }
         .padding(.top, 4)
@@ -97,9 +120,15 @@ struct HomeDashboardView: View {
     private var greeting: some View {
         VStack(alignment: .leading, spacing: 8) {
             VStack(alignment: .leading, spacing: 2) {
-                Text(timeOfDay.greeting + ",")
-                    .font(.system(size: 36, weight: .bold, design: .serif))
-                    .foregroundStyle(.white)
+                if locationService.isAtHome {
+                    Text("Welcome Home,")
+                        .font(.system(size: 36, weight: .bold, design: .serif))
+                        .foregroundStyle(.white)
+                } else {
+                    Text(timeOfDay.greeting + ",")
+                        .font(.system(size: 36, weight: .bold, design: .serif))
+                        .foregroundStyle(.white)
+                }
                 Text(viewModel.home?.name ?? "Home")
                     .font(.system(size: 36, weight: .bold, design: .serif))
                     .foregroundStyle(.white)
@@ -116,6 +145,14 @@ struct HomeDashboardView: View {
     }
 
     private var homeStatusSubtitle: String {
+        if !locationService.isAtHome {
+            if let distance = locationService.distanceToHome {
+                let km = distance / 1000
+                return String(format: "Away Mode — %.1f km from home", km)
+            }
+            return "Away Mode"
+        }
+        
         let rooms = viewModel.rooms.count
         let online = viewModel.reachableDeviceCount
         let total = viewModel.installedDeviceCount

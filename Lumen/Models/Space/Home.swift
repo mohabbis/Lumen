@@ -13,6 +13,8 @@ final class Home {
     var isPrimary: Bool
     var createdAt: Date
     var updatedAt: Date
+    var latitude: Double?
+    var longitude: Double?
 
     @Relationship(deleteRule: .cascade, inverse: \Room.home)
     var rooms: [Room]
@@ -28,7 +30,9 @@ final class Home {
         state: String? = nil,
         zipCode: String? = nil,
         country: String? = nil,
-        isPrimary: Bool = false
+        isPrimary: Bool = false,
+        latitude: Double? = nil,
+        longitude: Double? = nil
     ) {
         self.id = id
         self.name = name
@@ -38,6 +42,8 @@ final class Home {
         self.zipCode = zipCode
         self.country = country
         self.isPrimary = isPrimary
+        self.latitude = latitude
+        self.longitude = longitude
         self.createdAt = Date()
         self.updatedAt = Date()
         self.rooms = []

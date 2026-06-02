@@ -14,10 +14,53 @@ final class SceneService {
     private(set) var isExecuting = false
     private(set) var lastExecutedScene: Scene?
     private(set) var lastError: (any Error)?
+    private(set) var lastAutoExecutionEvent: (scene: Scene, event: GeofenceEvent)?
+    
+    private var locationServiceObserver: NSKeyValueObservation?
 
     init(modelContext: ModelContext, deviceService: DeviceService) {
         self.modelContext = modelContext
         self.deviceService = deviceService
+    }
+    
+    // MARK: - Geofence Monitoring
+    
+    func startMonitoringGeofenceEvents(from locationService: LocationService) {
+        // Monitor geofence events from location service
+        Task {
+            var previousEvent: GeofenceEvent?
+            while !Task.isCancelled {
+                try? await Task.sleep(nanoseconds: 500_000_000) // 0.5s check
+                
+                if let currentEvent = locationService.lastGeofenceEvent,
+                   previousEvent?.timestamp != currentEvent.timestamp {
+                    await handleGeofenceEvent(currentEvent)
+                    previousEvent = currentEvent
+                }
+            }
+        }
+    }
+    
+    private func handleGeofenceEvent(_ event: GeofenceEvent) async {
+        let descriptor = FetchDescriptor<Scene>()
+        guard let scenes = try? modelContext.fetch(descriptor) else { return }
+        
+        let targetTrigger: GeofenceTrigger
+        switch event.type {
+        case .arrival:
+            targetTrigger = .onArrival
+        case .departure:
+            targetTrigger = .onDeparture
+        }
+        
+        for scene in scenes where scene.geofenceTrigger == targetTrigger {
+            do {
+                try await execute(scene)
+                lastAutoExecutionEvent = (scene, event)
+            } catch {
+                print("Auto-execution failed for scene \(scene.name): \(error)")
+            }
+        }
     }
 
     // MARK: - Scene CRUD

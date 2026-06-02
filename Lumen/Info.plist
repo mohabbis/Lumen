@@ -24,6 +24,10 @@
 	<string>Lumen uses HomeKit to discover and control your smart home devices.</string>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>Lumen communicates directly with smart home devices on your local network — no cloud required.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Lumen uses your location to detect when you're home and show "Welcome Home" greeting.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Lumen uses your location to detect when you're home and provide location-aware automation.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>
