@@ -1,131 +1,146 @@
 # Lumen
 
-**Lumen** is a modern smart home platform designed to make intelligent home control simple, beautiful, and reliable.
+A smart home should not feel like a collection of devices.
 
-Lumen combines device management, automation, presence awareness, environmental sensing, and home intelligence into a single experience. Instead of treating smart devices as isolated accessories, Lumen treats the home as a coordinated system.
+It should feel like a living environment that understands what is happening, responds naturally, and quietly fades into the background.
 
-> Smart home software designed around people, not devices.
+**Lumen** is a smart home platform focused on presence, awareness, lighting, and automation. Instead of organizing a home around devices, Lumen organizes it around people, rooms, and activity.
 
----
+The goal is simple:
 
-## Vision
-
-Most smart homes are a collection of apps, hubs, dashboards, and automations stitched together over time.
-
-Lumen's goal is to create a unified platform that understands the home's state, adapts to its occupants, and quietly improves everyday life.
-
-The long-term vision is a home that:
-
-- Understands occupancy automatically
-- Responds intelligently to context
-- Requires minimal manual intervention
-- Protects user privacy
-- Feels invisible when working correctly
+> Build a home that understands its occupants without demanding their attention.
 
 ---
 
-## Current Platform Focus
+## The Problem
 
-Lumen is currently being built around a real-world smart home environment consisting of:
+Most smart homes begin with a few useful devices and eventually become a collection of disconnected apps, dashboards, automations, and workarounds.
+
+Lights know nothing about occupancy.
+Sensors know nothing about context.
+Automations know nothing about intent.
+
+The result is a home that is technically connected but rarely feels intelligent.
+
+Lumen exists to bridge those gaps.
+
+---
+
+## The Vision
+
+Lumen is being built around a different model.
+
+Instead of asking:
+
+**"What devices exist?"**
+
+Lumen asks:
+
+**"What is happening in the home right now?"**
+
+By understanding occupancy, movement, location, time, and environmental conditions, Lumen can make better decisions about how the home should respond.
+
+A room should know when it becomes occupied.
+Lights should understand context.
+Automations should adapt naturally.
+The home should require less interaction over time, not more.
+
+---
+
+## What Lumen Is Becoming
+
+### Presence Intelligence
+
+Presence is the foundation of the platform.
+
+Lumen is designed to understand:
+
+- Who is home
+- Which rooms are occupied
+- How people move through spaces
+- When rooms become active or inactive
+- How occupancy changes over time
+
+This becomes the foundation for every other intelligent behavior.
+
+### Intelligent Lighting
+
+Lighting is currently one of the primary focus areas.
+
+The objective is not simply turning lights on and off.
+
+The objective is creating lighting systems that react appropriately to context.
+
+Examples include:
+
+- Motion-based lighting
+- Occupancy-aware rooms
+- Adaptive brightness
+- Circadian lighting schedules
+- Room-specific scenes
+- Contextual lighting transitions
+
+### Automation Engine
+
+Lumen's automation system is being designed around events and state rather than isolated triggers.
+
+Example:
+
+Motion → Occupancy → Context Evaluation → Lighting Response → Scene Adjustment
+
+This allows automations to become more adaptive and less brittle than traditional smart-home workflows.
+
+### Home Awareness
+
+Over time Lumen aims to build a live understanding of the home's state.
+
+Including:
+
+- Occupancy
+- Device activity
+- Environmental conditions
+- Automation status
+- Room health
+- Home insights
+
+---
+
+## Current Ecosystem
+
+Lumen is currently being developed and tested against a real-world smart home environment including:
 
 - Apple HomeKit
 - Matter devices
 - Thread devices
 - GE Cync lighting
-- Motion sensors
 - Smart dimmers
+- Motion sensors
 - RGBIC lighting systems
-- Wi-Fi connected devices
+- Wi-Fi devices
 - Bluetooth Low Energy devices
 
-Development priorities are based on solving real smart-home problems rather than building isolated demo features.
+Development priorities come from solving actual daily smart-home problems rather than creating isolated demonstrations.
 
 ---
 
-## Core Features
+## Platform Architecture
 
-### Unified Device Control
-
-Manage lights, sensors, switches, outlets, and accessories from one interface.
-
-Features include:
-
-- Room organization
-- Device grouping
-- Real-time status monitoring
-- Scene activation
-- Quick controls
-- Cross-device interactions
-
-### Presence Intelligence
-
-Lumen is being designed around understanding occupancy and activity.
-
-Planned capabilities include:
-
-- Occupancy detection
-- Room awareness
-- Arrival and departure recognition
-- Motion-based state tracking
-- Multi-user support
-- Adaptive automation behavior
-
-### Automation Engine
-
-The automation system serves as the foundation of the platform.
-
-Supported and planned automation triggers include:
-
-- Motion events
-- Occupancy changes
-- Time schedules
-- Device state changes
-- Environmental conditions
-- Custom automation chains
-
-Example:
-
-Motion detected → Room occupied → Lights adjust → Scene activates → Devices respond.
-
-### Smart Lighting
-
-Lighting is a primary focus area.
-
-Planned functionality includes:
-
-- HomeKit lighting control
-- GE Cync integration support
-- Adaptive brightness
-- Color management
-- Circadian lighting routines
-- Motion-based lighting
-- Room-specific scenes
-
-### Home Dashboard
-
-A central dashboard provides visibility into the home's current state.
-
-Areas under development include:
-
-- Room summaries
-- Device health monitoring
-- Occupancy overview
-- Automation status
-- Sensor activity
-- Home insights
-
----
-
-## Technical Architecture
-
-### Frontend
+### Experience Layer
 
 - SwiftUI
-- Native iOS development
-- Apple design system integration
+- Native iOS application
 - Real-time state updates
+- Apple-first design language
 
-### Smart Home Protocols
+### Intelligence Layer
+
+- Presence engine
+- Occupancy modeling
+- Automation engine
+- State synchronization
+- Event processing
+
+### Connectivity Layer
 
 - HomeKit
 - Matter
@@ -133,83 +148,56 @@ Areas under development include:
 - Bluetooth Low Energy
 - Wi-Fi
 
-### Core Systems
-
-- Device management layer
-- Automation engine
-- Presence engine
-- State synchronization
-- Local network discovery
-- Event processing pipeline
-
 ---
 
 ## Roadmap
 
-### Phase 1
-
-Foundation
+### Foundation
 
 - Device onboarding
 - HomeKit integration
 - Room management
 - Scene management
-- Core UI
+- Core interface
 
-### Phase 2
-
-Intelligence
+### Intelligence
 
 - Presence engine
 - Occupancy modeling
 - Advanced automations
 - Device relationships
 
-### Phase 3
+### Adaptive Home
 
-Adaptive Home
-
-- Context-aware automation
+- Context-aware behavior
 - Behavioral learning
 - Energy optimization
 - Predictive routines
 
-### Phase 4
-
-Home Intelligence Platform
+### Home Intelligence Platform
 
 - Cross-home support
 - Advanced analytics
-- Extended ecosystem integrations
+- Expanded integrations
 - Intelligent recommendations
 
 ---
 
 ## Design Principles
 
-1. The home should feel intelligent, not complicated.
-2. Controls should be fast, obvious, and reliable.
+1. Technology should disappear into the background.
+2. The home should feel intelligent, not complicated.
 3. Automation should reduce attention, not create more work.
 4. Privacy should be built into the platform from the beginning.
 5. Local-first operation should be preferred whenever possible.
-6. The interface should feel calm, modern, and intentional.
+6. Every interaction should feel calm, fast, and intentional.
 
 ---
 
-## Project Status
+## Status
 
 Lumen is under active development.
 
-Current focus areas:
+Current work is focused on presence intelligence, HomeKit architecture, automation systems, onboarding workflows, and next-generation lighting experiences.
 
-- HomeKit architecture
-- Presence intelligence
-- Automation engine development
-- Device onboarding workflows
-- Lighting experiences
-- Performance optimization
-- UI refinement
-
----
-
-Built with SwiftUI and HomeKit.
+Built with SwiftUI.
