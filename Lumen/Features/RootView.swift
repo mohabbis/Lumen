@@ -144,6 +144,9 @@ struct RootView: View {
         }
         try? sceneService.seedDefaultScenesIfNeeded()
         
+        // Request notification permissions for automation alerts
+        await NotificationService.shared.requestNotificationPermissions()
+        
         // Start geofence event monitoring
         sceneService.startMonitoringGeofenceEvents(from: locationService)
         

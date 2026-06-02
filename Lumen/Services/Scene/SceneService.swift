@@ -46,19 +46,34 @@ final class SceneService {
         guard let scenes = try? modelContext.fetch(descriptor) else { return }
         
         let targetTrigger: GeofenceTrigger
+        var eventTypeString: String
         switch event.type {
         case .arrival:
             targetTrigger = .onArrival
+            eventTypeString = "arrival"
         case .departure:
             targetTrigger = .onDeparture
+            eventTypeString = "departure"
         }
         
         for scene in scenes where scene.geofenceTrigger == targetTrigger {
             do {
                 try await execute(scene)
                 lastAutoExecutionEvent = (scene, event)
+                
+                // Send notification
+                let deviceCount = scene.actions.count
+                NotificationService.shared.notifyAutomationExecuted(
+                    sceneName: scene.name,
+                    eventType: eventTypeString,
+                    deviceCount: deviceCount
+                )
             } catch {
                 print("Auto-execution failed for scene \(scene.name): \(error)")
+                NotificationService.shared.notifyAutomationFailed(
+                    sceneName: scene.name,
+                    reason: error.localizedDescription
+                )
             }
         }
     }
