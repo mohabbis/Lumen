@@ -4,199 +4,106 @@
 
 # Lumen
 
-### The home should understand you.
+### A smart home built for how your brain actually works.
 
-A smart home platform built around presence, awareness, lighting, and automation.
+A lighting and home control app for people with ADHD, autism, and sensory sensitivities.
 
-*Designed to disappear into the background.*
+*The right environment, without the overhead.*
 
 </div>
 
 ---
 
-## A Different Vision For The Smart Home
+## The Problem
 
-Most smart homes are built around devices.
+Most smart home apps are built for people who enjoy configuring things.
 
-Lumen is built around people.
+Lumen is built for people who need their environment to just work.
 
-Today, a typical smart home knows whether a light is on, whether a sensor was triggered, or whether a switch was pressed.
+For a lot of people — ADHD brains, autistic brains, sensory-sensitive brains — the home environment isn't neutral background. Harsh lighting causes overload. Unpredictable transitions cause stress. Decision fatigue around trivial things (which light, which setting, which app) compounds throughout the day.
 
-What it usually doesn't understand is what those events actually mean.
+The smart home was supposed to help with this.
 
-Lumen is an attempt to build a home that understands context.
+Instead, most smart home platforms add complexity. More apps. More rules to configure. More things to remember to do.
 
-Not just what happened.
-
-But what is happening.
-
-Who is home.
-Which rooms are active.
-Where people are moving.
-What the environment feels like.
-What should happen next.
-
-The long-term goal is simple:
-
-> Create a home that requires less attention every day.
+Lumen is the opposite.
 
 ---
 
-## Product Philosophy
+## What Lumen Is For
 
-The best technology disappears.
+**Lighting that doesn't hurt.**
+Warm, dim, and soft lighting on demand — without hunting through apps or juggling multiple ecosystems. Govee, GE Cync, HomeKit, Matter — controlled from one place. The right light for focus, for wind-down, for sensory overwhelm, set once and recalled instantly.
 
-You do not think about electricity.
-You do not think about plumbing.
-You should not have to think about your smart home.
+**Routines that run themselves.**
+ADHD makes task initiation hard. Lumen's automations handle the environmental scaffolding — morning light that comes up gently, evening scenes that signal wind-down without you remembering to set them. The home acts on time, presence, and motion so you don't have to.
 
-Lumen is guided by a single principle:
+**Scenes as sensory states.**
+"Focus," "Wind Down," "Low Stimulation," "Evening" — moments you define once and return to. Not a device panel. Not a settings screen. A name, a tap, an environment.
 
-**A home should feel responsive, not automated.**
+**Less to manage.**
+The app recedes. The goal is that you stop thinking about it.
 
-When it works correctly, it should feel less like software and more like an environment.
+---
+
+## Why Lighting Specifically
+
+Light is one of the most controllable sensory inputs in a home — and one of the most impactful for neurodivergent people.
+
+- Bright, cool light can trigger sensory overload for autistic people
+- Warm, dim environments support nervous system regulation
+- Consistent light cues support circadian rhythm, which ADHD brains often struggle to maintain
+- Color temperature affects mood, focus, and sleep — particularly for people with sensory processing differences
+
+Lumen starts with lighting because it's immediately actionable, immediately perceptible, and immediately meaningful.
 
 ---
 
 ## What Lumen Is Building
 
-### Presence
+### Lighting Control
 
-Presence is the foundation.
+Unified control across Govee, GE Cync, HomeKit, and Matter devices. Warm/cool, bright/dim, RGBIC color — all in one place, without switching apps.
 
-Every intelligent behavior begins with understanding occupancy.
+### Scenes
 
-Lumen is being designed to understand:
+Named environments. Set the mood once — "Reading," "Focus," "Wind Down," "Low Stimulation" — and return to it with one tap. Scenes adjust multiple devices together.
 
-- Who is home
-- Which rooms are occupied
-- Patterns of movement
-- Room activity
-- Occupancy transitions
+### Presence & Automations
 
-Presence becomes the input layer for the entire platform.
+Location-aware automations that trigger when you arrive or leave. Time-based and motion-based automations that handle the environmental routine without you managing it.
 
-### Lighting
+Motion → Presence → Context → Response
 
-Lighting is one of the first expressions of intelligence.
+### Sensory Profiles *(coming)*
 
-The goal is not controlling lights.
-
-The goal is creating environments that respond naturally to activity and context.
-
-- Motion-aware lighting
-- Occupancy-based activation
-- Adaptive brightness
-- Circadian schedules
-- Room scenes
-- Contextual transitions
-
-### Automation
-
-Traditional automations are fragile.
-
-Lumen is being designed around state, context, and events.
-
-Motion → Presence → Context → Decision → Response
-
-The objective is fewer automations that do more.
-
-### Home Awareness
-
-Over time the platform aims to build a live model of the home's current state.
-
-Including:
-
-- Occupancy
-- Device activity
-- Environmental conditions
-- Automation status
-- Room health
-- Home insights
+Predefined lighting environments for different sensory states — high focus, low stimulation, social, rest. Fast to switch, easy to customize.
 
 ---
 
 ## Platform
 
-### Experience Layer
+**Device support:** HomeKit, Matter, Thread, Govee, GE Cync, Bluetooth, Wi-Fi
 
-SwiftUI-native interface focused on clarity, speed, and calm interactions.
+**Intelligence:** On-device only. No cloud processing. No data leaves the home.
 
-### Intelligence Layer
-
-- Presence Engine
-- Occupancy Modeling
-- Automation Engine
-- Event Processing
-- State Synchronization
-
-### Connectivity Layer
-
-- HomeKit
-- Matter
-- Thread
-- Bluetooth Low Energy
-- Wi‑Fi
-
----
-
-## Current Environment
-
-Lumen is actively developed against a real smart-home environment including:
-
-- Apple HomeKit
-- GE Cync devices
-- Motion sensors
-- Smart dimmers
-- RGBIC lighting
-- Matter devices
-- Thread devices
-- Wi‑Fi devices
-- Bluetooth devices
-
-Every feature is expected to solve a real problem before it becomes part of the platform.
-
----
-
-## Roadmap
-
-**Foundation**
-
-Device onboarding, room management, scenes, and HomeKit integration.
-
-**Intelligence**
-
-Presence modeling, adaptive automations, and device relationships.
-
-**Adaptive Home**
-
-Context-aware behavior, energy optimization, and predictive routines.
-
-**Home Intelligence Platform**
-
-Cross-home systems, analytics, recommendations, and expanded integrations.
-
----
-
-## Screenshots
-
-Coming soon.
+**Interface:** SwiftUI native. Calm, minimal, fast.
 
 ---
 
 ## Status
 
-Under active development.
+Under active development. Built against a real home environment.
 
 Current focus:
-
 - Presence intelligence
-- HomeKit architecture
+- Lighting scenes and transitions
 - Automation systems
-- Lighting experiences
-- Onboarding workflows
-- Performance and reliability
+- Sensory-friendly UI patterns
+- HomeKit and Matter architecture
+
+TestFlight beta launching 2026.
 
 ---
 
-Built with SwiftUI.
+Built with SwiftUI. Developed by [@mohabbis](https://github.com/mohabbis).
