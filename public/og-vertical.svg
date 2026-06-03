@@ -1,118 +1,48 @@
 <svg width="1080" height="1350" viewBox="0 0 1080 1350" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%"   stop-color="#0f0d0a"/>
+      <stop offset="0%" stop-color="#0f0d0a"/>
       <stop offset="100%" stop-color="#070503"/>
     </linearGradient>
-    <radialGradient id="glow-amber" cx="50%" cy="42%" r="55%">
-      <stop offset="0%"   stop-color="#f5a623" stop-opacity="0.24"/>
+    <radialGradient id="glow-amber" cx="50%" cy="40%" r="58%">
+      <stop offset="0%" stop-color="#f5a623" stop-opacity="0.22"/>
       <stop offset="100%" stop-color="#f5a623" stop-opacity="0"/>
     </radialGradient>
-    <radialGradient id="glow-coral" cx="15%" cy="75%" r="45%">
-      <stop offset="0%"   stop-color="#e87860" stop-opacity="0.12"/>
+    <radialGradient id="glow-coral" cx="12%" cy="78%" r="44%">
+      <stop offset="0%" stop-color="#e87860" stop-opacity="0.10"/>
       <stop offset="100%" stop-color="#e87860" stop-opacity="0"/>
     </radialGradient>
-    <radialGradient id="glow-teal" cx="88%" cy="80%" r="38%">
-      <stop offset="0%"   stop-color="#6ec9c9" stop-opacity="0.09"/>
+    <radialGradient id="glow-teal" cx="90%" cy="82%" r="36%">
+      <stop offset="0%" stop-color="#6ec9c9" stop-opacity="0.08"/>
       <stop offset="100%" stop-color="#6ec9c9" stop-opacity="0"/>
     </radialGradient>
   </defs>
-
-  <!-- Background -->
   <rect width="1080" height="1350" fill="url(#bg)"/>
   <rect width="1080" height="1350" fill="url(#glow-amber)"/>
   <rect width="1080" height="1350" fill="url(#glow-coral)"/>
   <rect width="1080" height="1350" fill="url(#glow-teal)"/>
-
-  <!-- Border -->
-  <rect x="1" y="1" width="1078" height="1348" fill="none" stroke="#f5a623" stroke-opacity="0.08" stroke-width="1.5"/>
-
-  <!-- Top label -->
-  <text x="540" y="120"
-    font-family="-apple-system, 'Helvetica Neue', Arial, sans-serif"
-    font-size="18" font-weight="400"
-    fill="#f5a623" text-anchor="middle"
-    letter-spacing="7" opacity="0.45"
-  >CALM HOME COMPANION</text>
-
-  <!-- Sun icon — centered vertically in upper half -->
-  <!-- Outer glow ring -->
-  <circle cx="540" cy="440" r="120" fill="none" stroke="#f5a623" stroke-opacity="0.06" stroke-width="1"/>
-  <!-- Mid ring -->
-  <circle cx="540" cy="440" r="72"  fill="none" stroke="#f5a623" stroke-opacity="0.18" stroke-width="1.5"/>
-  <!-- Inner circle -->
-  <circle cx="540" cy="440" r="32"  fill="#f5a623" fill-opacity="0.12"/>
-  <!-- Core dot -->
-  <circle cx="540" cy="440" r="12"  fill="#f5a623" fill-opacity="0.75"/>
-
-  <!-- Cardinal rays -->
-  <line x1="540" y1="352" x2="540" y2="334" stroke="#f5a623" stroke-width="2.5" stroke-opacity="0.45" stroke-linecap="round"/>
-  <line x1="540" y1="528" x2="540" y2="546" stroke="#f5a623" stroke-width="2.5" stroke-opacity="0.45" stroke-linecap="round"/>
-  <line x1="452" y1="440" x2="434" y2="440" stroke="#f5a623" stroke-width="2.5" stroke-opacity="0.45" stroke-linecap="round"/>
-  <line x1="628" y1="440" x2="646" y2="440" stroke="#f5a623" stroke-width="2.5" stroke-opacity="0.45" stroke-linecap="round"/>
-  <!-- Diagonal rays -->
-  <line x1="478" y1="378" x2="465" y2="365" stroke="#f5a623" stroke-width="2" stroke-opacity="0.25" stroke-linecap="round"/>
-  <line x1="602" y1="502" x2="615" y2="515" stroke="#f5a623" stroke-width="2" stroke-opacity="0.25" stroke-linecap="round"/>
-  <line x1="602" y1="378" x2="615" y2="365" stroke="#f5a623" stroke-width="2" stroke-opacity="0.25" stroke-linecap="round"/>
-  <line x1="478" y1="502" x2="465" y2="515" stroke="#f5a623" stroke-width="2" stroke-opacity="0.25" stroke-linecap="round"/>
-
-  <!-- LUMEN wordmark -->
-  <text x="540" y="680"
-    font-family="Georgia, 'Times New Roman', serif"
-    font-size="112" font-weight="200"
-    fill="#f2ece4" text-anchor="middle"
-    letter-spacing="22" opacity="0.96"
-  >LUMEN</text>
-
-  <!-- Tagline -->
-  <text x="540" y="756"
-    font-family="Georgia, 'Times New Roman', serif"
-    font-size="32" font-weight="400" font-style="italic"
-    fill="#f5a623" text-anchor="middle"
-    opacity="0.80"
-  >Your home, understood.</text>
-
-  <!-- Dot divider -->
-  <circle cx="496" cy="810" r="2.5" fill="#f5a623" fill-opacity="0.28"/>
-  <circle cx="540" cy="810" r="2.5" fill="#f5a623" fill-opacity="0.28"/>
-  <circle cx="584" cy="810" r="2.5" fill="#f5a623" fill-opacity="0.28"/>
-
-  <!-- Description lines -->
-  <text x="540" y="878"
-    font-family="-apple-system, 'Helvetica Neue', Arial, sans-serif"
-    font-size="24" font-weight="300"
-    fill="#ede8e2" text-anchor="middle"
-    letter-spacing="1" opacity="0.48"
-  >Built for ADHD &amp; autism.</text>
-  <text x="540" y="916"
-    font-family="-apple-system, 'Helvetica Neue', Arial, sans-serif"
-    font-size="24" font-weight="300"
-    fill="#ede8e2" text-anchor="middle"
-    letter-spacing="1" opacity="0.48"
-  >Morning light. Evening wind-down.</text>
-  <text x="540" y="954"
-    font-family="-apple-system, 'Helvetica Neue', Arial, sans-serif"
-    font-size="24" font-weight="300"
-    fill="#ede8e2" text-anchor="middle"
-    letter-spacing="1" opacity="0.48"
-  >Works with HomeKit, Matter &amp; more.</text>
-
-  <!-- Horizontal rule -->
-  <line x1="320" y1="1030" x2="760" y2="1030" stroke="#f5a623" stroke-opacity="0.1" stroke-width="1"/>
-
-  <!-- URL -->
-  <text x="540" y="1075"
-    font-family="-apple-system, 'Helvetica Neue', Arial, sans-serif"
-    font-size="22" font-weight="400"
-    fill="#f5a623" text-anchor="middle"
-    letter-spacing="4" opacity="0.45"
-  >lumen.muharafiq.com</text>
-
-  <!-- Bottom badges -->
-  <text x="540" y="1290"
-    font-family="-apple-system, 'Helvetica Neue', Arial, sans-serif"
-    font-size="16" font-weight="300"
-    fill="#ede8e2" text-anchor="middle"
-    letter-spacing="3" opacity="0.18"
-  >iOS · HomeKit · Matter · On-device AI · Launching 2026</text>
+  <rect x="1" y="1" width="1078" height="1348" fill="none" stroke="#f5a623" stroke-opacity="0.07" stroke-width="1.5"/>
+  <circle cx="540" cy="430" r="110" fill="none" stroke="#f5a623" stroke-opacity="0.05" stroke-width="1"/>
+  <circle cx="540" cy="430" r="66" fill="none" stroke="#f5a623" stroke-opacity="0.15" stroke-width="1.5"/>
+  <circle cx="540" cy="430" r="30" fill="#f5a623" fill-opacity="0.10"/>
+  <circle cx="540" cy="430" r="11" fill="#f5a623" fill-opacity="0.72"/>
+  <line x1="540" y1="346" x2="540" y2="328" stroke="#f5a623" stroke-width="2.5" stroke-opacity="0.42" stroke-linecap="round"/>
+  <line x1="540" y1="514" x2="540" y2="532" stroke="#f5a623" stroke-width="2.5" stroke-opacity="0.42" stroke-linecap="round"/>
+  <line x1="456" y1="430" x2="438" y2="430" stroke="#f5a623" stroke-width="2.5" stroke-opacity="0.42" stroke-linecap="round"/>
+  <line x1="624" y1="430" x2="642" y2="430" stroke="#f5a623" stroke-width="2.5" stroke-opacity="0.42" stroke-linecap="round"/>
+  <line x1="481" y1="371" x2="468" y2="358" stroke="#f5a623" stroke-width="2" stroke-opacity="0.22" stroke-linecap="round"/>
+  <line x1="599" y1="489" x2="612" y2="502" stroke="#f5a623" stroke-width="2" stroke-opacity="0.22" stroke-linecap="round"/>
+  <line x1="599" y1="371" x2="612" y2="358" stroke="#f5a623" stroke-width="2" stroke-opacity="0.22" stroke-linecap="round"/>
+  <line x1="481" y1="489" x2="468" y2="502" stroke="#f5a623" stroke-width="2" stroke-opacity="0.22" stroke-linecap="round"/>
+  <text x="540" y="672" font-family="Georgia, 'Times New Roman', serif" font-size="108" font-weight="200" fill="#f2ece4" text-anchor="middle" letter-spacing="24" opacity="0.96">LUMEN</text>
+  <text x="540" y="744" font-family="Georgia, 'Times New Roman', serif" font-size="31" font-weight="400" font-style="italic" fill="#f5a623" text-anchor="middle" opacity="0.80">Your home, understood.</text>
+  <circle cx="496" cy="800" r="2.5" fill="#f5a623" fill-opacity="0.25"/>
+  <circle cx="540" cy="800" r="2.5" fill="#f5a623" fill-opacity="0.25"/>
+  <circle cx="584" cy="800" r="2.5" fill="#f5a623" fill-opacity="0.25"/>
+  <text x="540" y="872" font-family="Georgia, 'Times New Roman', serif" font-size="26" font-weight="200" font-style="italic" fill="#ede8e2" text-anchor="middle" opacity="0.40">Morning light.</text>
+  <text x="540" y="914" font-family="Georgia, 'Times New Roman', serif" font-size="26" font-weight="200" font-style="italic" fill="#ede8e2" text-anchor="middle" opacity="0.40">Evening quiet.</text>
+  <text x="540" y="956" font-family="Georgia, 'Times New Roman', serif" font-size="26" font-weight="200" font-style="italic" fill="#ede8e2" text-anchor="middle" opacity="0.40">A home that stays out of the way.</text>
+  <line x1="340" y1="1028" x2="740" y2="1028" stroke="#f5a623" stroke-opacity="0.09" stroke-width="1"/>
+  <text x="540" y="1072" font-family="-apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="400" fill="#f5a623" text-anchor="middle" letter-spacing="4" opacity="0.40">lumen.muharafiq.com</text>
+  <text x="540" y="1295" font-family="-apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="15" font-weight="300" fill="#ede8e2" text-anchor="middle" letter-spacing="3" opacity="0.15">iOS · HomeKit · Matter · On-device AI · Launching 2026</text>
 </svg>
