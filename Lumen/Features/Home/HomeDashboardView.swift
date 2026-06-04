@@ -13,6 +13,7 @@ struct HomeDashboardView: View {
     @Environment(LocationService.self) private var locationService
     @State private var isRenamingHome = false
     @State private var renameText = ""
+    @State private var isShowingReasoning = false
 
     private var timeOfDay: TimeOfDay { .current }
 
@@ -30,6 +31,11 @@ struct HomeDashboardView: View {
             TextField("Home name", text: $renameText)
             Button("Save") { viewModel.renameHome(to: renameText) }
             Button("Cancel", role: .cancel) { }
+        }
+        .alert("Something went wrong", isPresented: errorAlertBinding) {
+            Button("OK") { viewModel.error = nil }
+        } message: {
+            Text(viewModel.error?.localizedDescription ?? "Please try again.")
         }
         .sheet(isPresented: $viewModel.isShowingAddRoom) {
             AddRoomView { name, type, level in
@@ -82,6 +88,7 @@ struct HomeDashboardView: View {
                 topBar
                 greeting
                 compactStats
+                NowNextCard(now: timeOfDay)
                 if !viewModel.rooms.isEmpty {
                     favoriteRoomsSection
                 }
@@ -215,7 +222,7 @@ struct HomeDashboardView: View {
                 : [GridItem(.flexible()), GridItem(.flexible())]
 
             LazyVGrid(columns: columns, spacing: 10) {
-                ForEach(viewModel.rooms.prefix(4)) { room in
+                ForEach(viewModel.rooms.prefix(4), id: \.id) { room in
                     NavigationLink(destination: RoomDetailView(
                         room: room,
                         viewModel: viewModel.makeRoomViewModel()
@@ -242,7 +249,7 @@ struct HomeDashboardView: View {
                     message: noticedMessage,
                     suggestion: noticedSuggestion,
                     icon: "sparkles",
-                    action: handleLumenSuggestion
+                    action: { isShowingReasoning = true }
                 )
             }
         }
@@ -253,34 +260,53 @@ struct HomeDashboardView: View {
     private func handleLumenSuggestion() {
         switch timeOfDay {
         case .dawn, .morning:
-            // Run morning scene if exists
             if let morningScene = findScene(named: "Morning") {
-                Task {
-                    try? await viewModel.executeScene(morningScene)
-                }
+                Task { await viewModel.executeScene(morningScene) }
             }
         case .afternoon:
-            // Navigate to rooms to adjust brightness
-            break // Tab selection handled by parent
+            break // No automation suggested for afternoon; user navigates manually.
         case .evening:
-            // Run evening scene
             if let eveningScene = findScene(named: "Evening") {
-                Task {
-                    try? await viewModel.executeScene(eveningScene)
-                }
+                Task { await viewModel.executeScene(eveningScene) }
             }
         case .night:
-            // Run sleep scene
             if let sleepScene = findScene(named: "Sleep") {
-                Task {
-                    try? await viewModel.executeScene(sleepScene)
-                }
+                Task { await viewModel.executeScene(sleepScene) }
             }
         }
     }
 
     private func findScene(named name: String) -> Scene? {
         scenes.first { $0.name.lowercased() == name.lowercased() }
+    }
+
+    private var suggestedSceneName: String? {
+        let candidate: String?
+        switch timeOfDay {
+        case .dawn, .morning: candidate = "Morning"
+        case .afternoon:      candidate = nil
+        case .evening:        candidate = "Evening"
+        case .night:          candidate = "Sleep"
+        }
+        guard let name = candidate, let scene = findScene(named: name) else { return nil }
+        return scene.name
+    }
+
+    private var errorAlertBinding: Binding<Bool> {
+        Binding(
+            get: { viewModel.error != nil },
+            set: { if !$0 { viewModel.error = nil } }
+        )
+    }
+
+    private var reasoning: LumenReasoning {
+        ReasoningCalculator(
+            timeOfDay: timeOfDay,
+            isAtHome: locationService.isAtHome,
+            distanceToHome: locationService.distanceToHome,
+            reachableDevices: viewModel.reachableDeviceCount,
+            suggestedSceneName: suggestedSceneName
+        ).reasoning
     }
 
     private var noticedMessage: String {

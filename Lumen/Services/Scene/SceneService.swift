@@ -15,23 +15,24 @@ final class SceneService {
     private(set) var lastExecutedScene: Scene?
     private(set) var lastError: (any Error)?
     private(set) var lastAutoExecutionEvent: (scene: Scene, event: GeofenceEvent)?
-    
-    private var locationServiceObserver: NSKeyValueObservation?
+
+    private var monitoringTask: Task<Void, Never>?
 
     init(modelContext: ModelContext, deviceService: DeviceService) {
         self.modelContext = modelContext
         self.deviceService = deviceService
     }
-    
+
     // MARK: - Geofence Monitoring
-    
+
     func startMonitoringGeofenceEvents(from locationService: LocationService) {
-        // Monitor geofence events from location service
-        Task {
+        // Cancel any prior monitor so repeat calls don't fan out into N polling tasks.
+        monitoringTask?.cancel()
+        monitoringTask = Task {
             var previousEvent: GeofenceEvent?
             while !Task.isCancelled {
                 try? await Task.sleep(nanoseconds: 500_000_000) // 0.5s check
-                
+
                 if let currentEvent = locationService.lastGeofenceEvent,
                    previousEvent?.timestamp != currentEvent.timestamp {
                     await handleGeofenceEvent(currentEvent)
@@ -40,33 +41,27 @@ final class SceneService {
             }
         }
     }
+
+    func stopMonitoringGeofenceEvents() {
+        monitoringTask?.cancel()
+        monitoringTask = nil
+    }
     
     private func handleGeofenceEvent(_ event: GeofenceEvent) async {
         let descriptor = FetchDescriptor<Scene>()
         guard let scenes = try? modelContext.fetch(descriptor) else { return }
-        
-        let targetTrigger: GeofenceTrigger
-        var eventTypeString: String
-        switch event.type {
-        case .arrival:
-            targetTrigger = .onArrival
-            eventTypeString = "arrival"
-        case .departure:
-            targetTrigger = .onDeparture
-            eventTypeString = "departure"
-        }
-        
-        for scene in scenes where scene.geofenceTrigger == targetTrigger {
+
+        let matching = Self.scenesMatching(event: event, in: scenes)
+        let eventTypeString = Self.eventTypeString(for: event)
+
+        for scene in matching {
             do {
                 try await execute(scene)
                 lastAutoExecutionEvent = (scene, event)
-                
-                // Send notification
-                let deviceCount = scene.actions.count
                 NotificationService.shared.notifyAutomationExecuted(
                     sceneName: scene.name,
                     eventType: eventTypeString,
-                    deviceCount: deviceCount
+                    deviceCount: scene.actions.count
                 )
             } catch {
                 print("Auto-execution failed for scene \(scene.name): \(error)")
@@ -75,6 +70,25 @@ final class SceneService {
                     reason: error.localizedDescription
                 )
             }
+        }
+    }
+
+    // Pure routing: which scenes should fire for a given geofence event.
+    // Lifted from handleGeofenceEvent so it can be unit-tested without spinning
+    // up SwiftData or NotificationService.
+    static func scenesMatching(event: GeofenceEvent, in scenes: [Scene]) -> [Scene] {
+        let target: GeofenceTrigger
+        switch event.type {
+        case .arrival:   target = .onArrival
+        case .departure: target = .onDeparture
+        }
+        return scenes.filter { $0.geofenceTrigger == target }
+    }
+
+    static func eventTypeString(for event: GeofenceEvent) -> String {
+        switch event.type {
+        case .arrival:   return "arrival"
+        case .departure: return "departure"
         }
     }
 

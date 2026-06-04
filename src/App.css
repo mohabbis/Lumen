@@ -1293,40 +1293,6 @@ p {
   color: #c8b89a;
 }
 
-/* ===== ASSET SLOTS ===== */
-
-.asset-slots {
-  padding: 32px clamp(20px, 5%, 64px) 80px;
-}
-
-.asset-slots > div {
-  display: flex;
-  align-items: center;
-  gap: 22px;
-  padding: 28px 32px;
-  border: 1px dashed rgba(255,255,255,0.08);
-  border-radius: 16px;
-  background: rgba(255,255,255,0.008);
-}
-
-.asset-slots svg {
-  color: rgba(200,184,154,0.35);
-  flex-shrink: 0;
-}
-
-.asset-slots b {
-  display: block;
-  font-size: 13px;
-  font-weight: 400;
-  color: rgba(232,224,212,0.48);
-  margin-bottom: 5px;
-}
-
-.asset-slots span {
-  font-size: 12px;
-  color: rgba(232,224,212,0.28);
-  line-height: 1.5;
-}
 
 /* ===== WAITLIST / ACCESS ===== */
 

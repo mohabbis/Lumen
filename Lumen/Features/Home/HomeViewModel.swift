@@ -72,9 +72,13 @@ final class HomeViewModel {
         }
     }
 
-    func executeScene(_ scene: Scene) async throws {
+    func executeScene(_ scene: Scene) async {
         guard let sceneService = sceneService else { return }
-        try await sceneService.execute(scene)
+        do {
+            try await sceneService.execute(scene)
+        } catch {
+            self.error = error
+        }
     }
 
     func makeRoomViewModel() -> RoomViewModel {

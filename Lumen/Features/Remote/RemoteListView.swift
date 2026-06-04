@@ -40,7 +40,7 @@ struct RemoteListView: View {
 
     private var remoteList: some View {
         List {
-            ForEach(remotes) { remote in
+            ForEach(remotes, id: \.id) { remote in
                 HStack(spacing: 12) {
                     Image(systemName: remote.iconName)
                         .font(.body)

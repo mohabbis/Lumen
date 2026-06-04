@@ -26,6 +26,13 @@ struct SceneListView: View {
         .sheet(isPresented: $viewModel.isShowingAddScene) {
             addSceneSheet
         }
+        .sheet(item: $viewModel.pendingScene) { scene in
+            SceneApprovalSheet(
+                scene: scene,
+                onConfirm: { viewModel.confirmPending() },
+                onCancel: { viewModel.cancelPending() }
+            )
+        }
     }
 
     // MARK: - Scroll Content
@@ -40,7 +47,7 @@ struct SceneListView: View {
                         scene: active,
                         isExecuting: viewModel.executingSceneID == active.id
                     )
-                    .onTapGesture { viewModel.execute(active) }
+                    .onTapGesture { viewModel.requestApproval(active) }
                 }
 
                 allScenesSection
@@ -87,13 +94,13 @@ struct SceneListView: View {
 
             if isIPad {
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-                    ForEach(scenes) { scene in
+                    ForEach(scenes, id: \.id) { scene in
                         SceneDarkRow(scene: scene, viewModel: viewModel)
                     }
                 }
             } else {
                 VStack(spacing: 10) {
-                    ForEach(scenes) { scene in
+                    ForEach(scenes, id: \.id) { scene in
                         SceneDarkRow(scene: scene, viewModel: viewModel)
                     }
                 }
@@ -270,7 +277,7 @@ private struct SceneDarkRow: View {
         .padding(.vertical, 14)
         .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 16))
         .contentShape(RoundedRectangle(cornerRadius: 16))
-        .onTapGesture { viewModel.execute(scene) }
+        .onTapGesture { viewModel.requestApproval(scene) }
     }
 
     private var rowSubtitle: String {

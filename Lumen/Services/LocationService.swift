@@ -15,7 +15,11 @@ final class LocationService: NSObject, CLLocationManagerDelegate {
     var authorizationStatus: CLAuthorizationStatus = .notDetermined
     var distanceToHome: Double?
     var lastGeofenceEvent: GeofenceEvent?
-    
+
+    // Gates first-check event emission so launching at home doesn't fire a
+    // spurious "arrival" before the user has actually moved.
+    private var hasCompletedFirstCheck = false
+
     private let locationManager = CLLocationManager()
     private let homeRadiusMeter: Double = 100 // 100m radius around home
     
@@ -69,16 +73,18 @@ final class LocationService: NSObject, CLLocationManagerDelegate {
         let distance = calculateDistance(from: currentLoc, to: homeLoc)
         distanceToHome = distance
         let newIsAtHome = distance <= homeRadiusMeter
-        
-        // Detect geofence crossing
-        if wasAtHome && !newIsAtHome {
-            lastGeofenceEvent = GeofenceEvent(type: .departure, timestamp: Date())
-        } else if !wasAtHome && newIsAtHome {
-            lastGeofenceEvent = GeofenceEvent(type: .arrival, timestamp: Date())
+
+        if hasCompletedFirstCheck {
+            if wasAtHome && !newIsAtHome {
+                lastGeofenceEvent = GeofenceEvent(type: .departure, timestamp: Date())
+            } else if !wasAtHome && newIsAtHome {
+                lastGeofenceEvent = GeofenceEvent(type: .arrival, timestamp: Date())
+            }
         }
-        
+
         isAtHome = newIsAtHome
         wasAtHome = newIsAtHome
+        hasCompletedFirstCheck = true
     }
     
     private func calculateDistance(from: CLLocationCoordinate2D, to: CLLocationCoordinate2D) -> Double {
