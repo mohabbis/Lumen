@@ -61,7 +61,7 @@ const stack = [
 
 const shipped = [
   'Location awareness with arrival greeting',
-  'Geofence-triggered automations (arrival & departure)',
+  'Background geofence automations — arrival & departure, even with the app closed',
   'Scene execution across all HomeKit devices',
   'Local temperature and humidity sensor support',
   'HomeKit device discovery and control',

@@ -14,11 +14,19 @@ struct HomeDashboardView: View {
     @State private var isRenamingHome = false
     @State private var renameText = ""
     @State private var isShowingReasoning = false
+    @State private var statusOverlayID = UUID()
+    @State private var isStatusOverlayVisible = false
 
     private var timeOfDay: TimeOfDay { .current }
 
     var body: some View {
         ZStack {
+            if isStatusOverlayVisible {
+                StatusOverlay(isAtHome: locationService.isAtHome, id: statusOverlayID)
+                    .transition(.asymmetric(insertion: .move(edge: .top).combined(with: .opacity),
+                                          removal: .move(edge: .bottom).combined(with: .opacity)))
+                    .zIndex(2)
+            }
             ambientBackground.ignoresSafeArea()
             if viewModel.hasHome {
                 dashboardContent
@@ -48,6 +56,18 @@ struct HomeDashboardView: View {
             locationService.startMonitoringLocation()
             if let home = viewModel.home, let lat = home.latitude, let lon = home.longitude {
                 locationService.updateHomeCoordinates(latitude: lat, longitude: lon)
+            }
+            statusOverlayID = UUID()
+            isStatusOverlayVisible = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                withAnimation(.easeInOut(duration: 0.5)) { isStatusOverlayVisible = false }
+            }
+        }
+        .onChange(of: locationService.isAtHome) { _, _ in
+            statusOverlayID = UUID()
+            isStatusOverlayVisible = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                withAnimation(.easeInOut(duration: 0.5)) { isStatusOverlayVisible = false }
             }
         }
         .onDisappear {
@@ -327,6 +347,53 @@ struct HomeDashboardView: View {
         case .evening:   return "Run Evening scene"
         case .night:     return "Prepare night mode"
         }
+    }
+}
+
+private struct StatusOverlay: View {
+    let isAtHome: Bool
+    let id: UUID
+    @State private var animate = false
+    var body: some View {
+        VStack {
+            Spacer()
+            if isAtHome {
+                Text("🏠 Welcome Home!")
+                    .font(.system(size: 28, weight: .bold, design: .serif))
+                    .foregroundStyle(Color(hex: "#C49A6C"))
+                    .padding(.horizontal, 36)
+                    .padding(.vertical, 18)
+                    .background(
+                        RoundedRectangle(cornerRadius: 22)
+                            .fill(Color.white.opacity(0.12))
+                            .blur(radius: 0.5)
+                    )
+                    .shadow(color: .black.opacity(0.12), radius: 20, y: 4)
+                    .scaleEffect(animate ? 1 : 0.85)
+                    .opacity(animate ? 1 : 0.5)
+                    .onAppear { withAnimation(.spring(response: 0.7, dampingFraction: 0.8)) { animate = true } }
+            } else {
+                Text("🌙 Away Mode")
+                    .font(.system(size: 28, weight: .bold, design: .serif))
+                    .foregroundStyle(Color.white.opacity(0.85))
+                    .padding(.horizontal, 36)
+                    .padding(.vertical, 18)
+                    .background(
+                        RoundedRectangle(cornerRadius: 22)
+                            .fill(Color.white.opacity(0.09))
+                            .blur(radius: 0.5)
+                    )
+                    .shadow(color: .black.opacity(0.14), radius: 20, y: 4)
+                    .scaleEffect(animate ? 1 : 0.85)
+                    .opacity(animate ? 1 : 0.5)
+                    .onAppear { withAnimation(.spring(response: 0.7, dampingFraction: 0.8)) { animate = true } }
+            }
+            Spacer()
+        }
+        .id(id)
+        .transition(.move(edge: .top).combined(with: .opacity))
+        .animation(.easeInOut(duration: 0.7), value: isAtHome)
+        .ignoresSafeArea()
     }
 }
 
