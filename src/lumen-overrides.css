@@ -1,0 +1,11 @@
+/* Temporary visual cleanup.
+   Hide placeholder icon marks until the single real Lumen icon is ready to ship. */
+
+.logo svg,
+.hero-chips svg {
+  display: none;
+}
+
+.hero-chips span {
+  gap: 0;
+}
