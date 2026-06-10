@@ -11,3 +11,9 @@ dist/
 xcuserdata/
 *.xcworkspace/xcuserdata/
 Lumen.xcodeproj/xcuserdata/
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+!.env.example

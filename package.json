@@ -6,22 +6,24 @@
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "build": "vite build",
-    "preview": "vite preview --host 0.0.0.0",
+    "preview": "npm run build && wrangler dev",
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",
     "e2e": "playwright test",
-    "ci": "npm run lint && npm run test && npm run build"
+    "ci": "npm run lint && npm run test && npm run build",
+    "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",
-    "vite": "latest",
+    "framer-motion": "latest",
+    "lucide-react": "latest",
     "react": "latest",
     "react-dom": "latest",
-    "lucide-react": "latest",
-    "framer-motion": "latest"
+    "vite": "latest"
   },
   "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.40.1",
     "@playwright/test": "latest",
     "@testing-library/jest-dom": "latest",
     "@testing-library/react": "latest",
@@ -31,6 +33,7 @@
     "eslint-plugin-react-refresh": "latest",
     "jest-axe": "latest",
     "jsdom": "latest",
-    "vitest": "latest"
+    "vitest": "latest",
+    "wrangler": "^4.99.0"
   }
 }
