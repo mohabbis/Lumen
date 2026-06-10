@@ -9,9 +9,5 @@ import cloudflare from "@astrojs/cloudflare";
 export default defineConfig({
 	site: "https://carwashguys.us",
 	integrations: [mdx(), sitemap()],
-	adapter: cloudflare({
-		platformProxy: {
-			enabled: true,
-		},
-	}),
+	adapter: cloudflare(),
 });
