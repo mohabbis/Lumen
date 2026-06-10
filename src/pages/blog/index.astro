@@ -1,0 +1,38 @@
+---
+import BaseHead from '../../components/BaseHead.astro';
+import logoUrl from '../../../CarWashGuys-LOGO.svg?url';
+import { SITE_TITLE, SITE_DESCRIPTION } from '../../consts';
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title={`Updates | ${SITE_TITLE}`} description={SITE_DESCRIPTION} image={logoUrl} />
+	</head>
+	<body>
+		<div class="site-shell">
+			<header class="nav" aria-label="Primary navigation">
+				<a class="brand" href="/" aria-label="Car Wash Guys home">
+					<img src={logoUrl} alt="Car Wash Guys" />
+				</a>
+				<nav>
+					<a href="/#services">Services</a>
+					<a href="/#location">Location</a>
+					<a href="/#updates">Updates</a>
+				</nav>
+			</header>
+			<main>
+				<section class="hero">
+					<div class="hero-copy">
+						<p class="eyebrow">Updates</p>
+						<h1>Launch updates are coming soon.</h1>
+						<p class="hero-text">The starter blog has been replaced. Future posts can be used for opening updates, seasonal wash tips, local promotions, and membership announcements once the business is ready.</p>
+						<div class="hero-actions">
+							<a class="button primary" href="/">Back to home</a>
+						</div>
+					</div>
+				</section>
+			</main>
+		</div>
+	</body>
+</html>
