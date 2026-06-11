@@ -43,7 +43,7 @@ struct RoomListView: View {
                         : [GridItem(.flexible()), GridItem(.flexible())]
 
                     LazyVGrid(columns: columns, spacing: 12) {
-                        ForEach(viewModel.rooms) { room in
+                        ForEach(viewModel.rooms, id: \.id) { room in
                             NavigationLink(destination: RoomDetailView(room: room, viewModel: viewModel)) {
                                 RoomCard(room: room)
                             }

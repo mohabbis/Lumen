@@ -117,7 +117,7 @@ struct RoomDetailView: View {
                 .foregroundStyle(Color.white.opacity(0.35))
 
             VStack(spacing: 10) {
-                ForEach(planned) { device in
+                ForEach(planned, id: \.id) { device in
                     PlannedDeviceRow(device: device)
                 }
             }

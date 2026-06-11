@@ -18,14 +18,14 @@ describe('Lumen landing page', () => {
   it('renders core nav links', () => {
     render(<App />);
     const nav = screen.getByRole('navigation');
-    expect(within(nav).getByRole('link', { name: /^product$/i })).toHaveAttribute('href', '#product');
-    expect(within(nav).getByRole('link', { name: /^architecture$/i })).toHaveAttribute('href', '#architecture');
+    expect(within(nav).getByRole('link', { name: /^the app$/i })).toHaveAttribute('href', '#product');
+    expect(within(nav).getByRole('link', { name: /^approach$/i })).toHaveAttribute('href', '#approach');
     expect(within(nav).getByRole('link', { name: /^privacy$/i })).toHaveAttribute('href', '/privacy');
   });
 
   it('renders the hero CTA pointing at the access section', () => {
     render(<App />);
-    const ctas = screen.getAllByRole('link', { name: /join early access/i });
+    const ctas = screen.getAllByRole('link', { name: /request early access/i });
     expect(ctas.length).toBeGreaterThan(0);
     expect(ctas[0]).toHaveAttribute('href', '#access');
   });

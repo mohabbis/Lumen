@@ -11,3 +11,5 @@ dist/
 xcuserdata/
 *.xcworkspace/xcuserdata/
 Lumen.xcodeproj/xcuserdata/
+.vercel
+.env*

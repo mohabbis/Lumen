@@ -11,6 +11,7 @@ final class SceneViewModel {
 
     var isShowingAddScene = false
     var executingSceneID: UUID?
+    var pendingScene: Scene?
     var error: (any Error)?
 
     init(sceneService: SceneService) {
@@ -31,6 +32,22 @@ final class SceneViewModel {
         } catch {
             self.error = error
         }
+    }
+
+    // MARK: - Approval flow
+
+    func requestApproval(_ scene: Scene) {
+        pendingScene = scene
+    }
+
+    func cancelPending() {
+        pendingScene = nil
+    }
+
+    func confirmPending() {
+        guard let scene = pendingScene else { return }
+        pendingScene = nil
+        execute(scene)
     }
 
     func execute(_ scene: Scene) {
