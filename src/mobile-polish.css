@@ -1,0 +1,382 @@
+/* Mobile and current-markup polish for the Lumen landing page. */
+
+.status-section,
+.stack-section,
+.waitlist-section {
+  padding: 88px clamp(20px, 5vw, 72px);
+}
+
+.status-columns,
+.stack-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.status-columns {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.status-col,
+.stack-item {
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.025);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.status-col {
+  min-width: 0;
+  padding: 24px;
+  border-radius: 18px;
+}
+
+.status-col-head {
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  color: rgba(200, 184, 154, 0.8);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.status-col ul {
+  display: grid;
+  gap: 11px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.status-col li {
+  position: relative;
+  padding-left: 18px;
+  color: rgba(232, 224, 212, 0.58);
+  font-size: 14px;
+  line-height: 1.48;
+}
+
+.status-col li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.62em;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(200, 184, 154, 0.55);
+}
+
+.stack-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.stack-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  padding: 20px;
+  border-radius: 16px;
+}
+
+.stack-item b {
+  color: rgba(232, 224, 212, 0.84);
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+
+.stack-item span {
+  color: rgba(232, 224, 212, 0.42);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.waitlist-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 520px);
+  gap: clamp(32px, 7vw, 72px);
+  align-items: end;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: clamp(28px, 5vw, 56px);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.waitlist-copy {
+  margin: 0;
+}
+
+.waitlist-copy p:not(.eyebrow) {
+  max-width: 560px;
+  color: rgba(232, 224, 212, 0.52);
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+.waitlist-form-wrap {
+  width: 100%;
+}
+
+.waitlist-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  width: 100%;
+}
+
+.waitlist-form input,
+.waitlist-form button {
+  min-height: 48px;
+  border-radius: 999px;
+}
+
+.waitlist-form input {
+  min-width: 0;
+  width: 100%;
+  padding: 0 18px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.92);
+  color: #130f18;
+  font-size: 15px;
+  outline: none;
+}
+
+.waitlist-form input::placeholder {
+  color: rgba(19, 15, 24, 0.42);
+}
+
+.waitlist-form button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 24px;
+  border: 0;
+  background: #f2efe9;
+  color: #130f18;
+  font-size: 14px;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.waitlist-checks,
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+}
+
+.waitlist-checks {
+  margin-top: 14px;
+  color: rgba(232, 224, 212, 0.38);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.site-footer {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: center;
+  padding: 40px clamp(20px, 5vw, 72px) 56px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.site-footer p {
+  margin: 0;
+  color: rgba(232, 224, 212, 0.42);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.footer-links {
+  justify-content: flex-end;
+  color: rgba(232, 224, 212, 0.6);
+}
+
+@media (max-width: 900px) {
+  .status-columns,
+  .stack-grid,
+  .waitlist-inner,
+  .site-footer {
+    grid-template-columns: 1fr;
+  }
+
+  .status-section,
+  .stack-section,
+  .waitlist-section {
+    padding: 72px 20px;
+  }
+
+  .section-copy,
+  .reasoning-copy,
+  .challenge-header {
+    max-width: none;
+  }
+
+  .footer-links {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 600px) {
+  .site-shell {
+    overflow-x: hidden;
+  }
+
+  .nav {
+    padding: 14px 16px;
+  }
+
+  h1 {
+    font-size: clamp(54px, 15vw, 72px);
+    line-height: 0.95;
+  }
+
+  h2 {
+    font-size: clamp(36px, 11.5vw, 48px);
+    line-height: 1.02;
+  }
+
+  .hero {
+    padding: 96px 20px 56px;
+    gap: 36px;
+    overflow: hidden;
+  }
+
+  .hero-copy,
+  .section-copy,
+  .reasoning-copy,
+  .challenge-header,
+  .waitlist-copy {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .hero-device {
+    transform: none !important;
+    width: min(100%, 340px);
+    margin: 0 auto;
+  }
+
+  .section,
+  .gallery,
+  .challenge-section,
+  .reasoning-section,
+  .status-section,
+  .stack-section,
+  .waitlist-section {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .reasoning-inner {
+    display: grid;
+    gap: 28px;
+  }
+
+  .reasoning-steps {
+    display: grid;
+    gap: 12px;
+  }
+
+  .reasoning-step,
+  .status-col,
+  .stack-item {
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.026);
+  }
+
+  .reasoning-step {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr);
+    gap: 14px;
+    padding: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+  }
+
+  .step-number {
+    color: rgba(200, 184, 154, 0.52);
+    font-size: 12px;
+    letter-spacing: 0.16em;
+  }
+
+  .step-label {
+    display: block;
+    margin-bottom: 5px;
+    color: rgba(232, 224, 212, 0.78);
+    font-size: 14px;
+  }
+
+  .step-text {
+    margin: 0;
+    color: rgba(232, 224, 212, 0.46);
+    font-size: 13px;
+    line-height: 1.55;
+  }
+
+  .status-columns,
+  .stack-grid {
+    gap: 12px;
+  }
+
+  .status-col,
+  .stack-item {
+    padding: 18px;
+  }
+
+  .status-col li {
+    font-size: 13px;
+  }
+
+  .github-link {
+    text-align: left;
+  }
+
+  .github-link a {
+    width: 100%;
+    justify-content: center;
+    border-radius: 999px;
+  }
+
+  .waitlist-inner {
+    padding: 22px;
+    border-radius: 22px;
+    gap: 24px;
+  }
+
+  .waitlist-form {
+    grid-template-columns: 1fr;
+  }
+
+  .waitlist-form input,
+  .waitlist-form button {
+    width: 100%;
+  }
+
+  .waitlist-checks {
+    gap: 8px 12px;
+    font-size: 10px;
+    line-height: 1.4;
+  }
+
+  .site-footer {
+    padding: 32px 20px 44px;
+  }
+
+  .site-footer .logo,
+  .site-footer p,
+  .footer-links {
+    min-width: 0;
+  }
+
+  .footer-links a {
+    display: inline-flex;
+  }
+}
