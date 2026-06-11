@@ -10,9 +10,9 @@ describe('Lumen landing page', () => {
     expect(h1).toHaveTextContent(/your home/i);
   });
 
-  it('renders the coming soon pill', () => {
+  it('renders the hero beta pill', () => {
     render(<App />);
-    expect(screen.getByText(/coming soon/i)).toBeInTheDocument();
+    expect(screen.getByText(/coming soon — iOS private beta/i)).toBeInTheDocument();
   });
 
   it('renders core nav links', () => {
