@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 
 import { App } from './App.jsx';
 import './lumen-overrides.css';
+import './mobile-polish.css';
 
 const root = document.getElementById('root');
 
