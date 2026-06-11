@@ -18,6 +18,20 @@ struct HomeDashboardView: View {
     @State private var isStatusOverlayVisible = false
 
     private var timeOfDay: TimeOfDay { .current }
+    private var isRegularLayout: Bool { sizeClass == .regular }
+    private var dashboardMaxWidth: CGFloat { isRegularLayout ? 1120 : .infinity }
+    private var dashboardHorizontalPadding: CGFloat { isRegularLayout ? 44 : 20 }
+    private var dashboardTopPadding: CGFloat { isRegularLayout ? 28 : 8 }
+    private var greetingTitleSize: CGFloat { isRegularLayout ? 48 : 36 }
+    private var roomLimit: Int { isRegularLayout ? 6 : 4 }
+
+    private var roomGridColumns: [GridItem] {
+        if isRegularLayout {
+            [GridItem(.adaptive(minimum: 160, maximum: 220), spacing: 12)]
+        } else {
+            [GridItem(.flexible()), GridItem(.flexible())]
+        }
+    }
 
     var body: some View {
         ZStack {
@@ -104,19 +118,55 @@ struct HomeDashboardView: View {
 
     private var dashboardContent: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 28) {
-                topBar
-                greeting
-                compactStats
-                NowNextCard(now: timeOfDay)
-                if !viewModel.rooms.isEmpty {
-                    favoriteRoomsSection
+            Group {
+                if isRegularLayout {
+                    desktopDashboardContent
+                } else {
+                    phoneDashboardContent
                 }
-                lumenNoticedSection
             }
-            .padding(.horizontal, 20)
-            .padding(.top, 8)
-            .padding(.bottom, 48)
+            .frame(maxWidth: dashboardMaxWidth, alignment: .topLeading)
+            .frame(maxWidth: .infinity, alignment: .top)
+            .padding(.horizontal, dashboardHorizontalPadding)
+            .padding(.top, dashboardTopPadding)
+            .padding(.bottom, 56)
+        }
+        .scrollIndicators(.hidden)
+    }
+
+    private var phoneDashboardContent: some View {
+        VStack(alignment: .leading, spacing: 28) {
+            topBar
+            greeting
+            compactStats
+            NowNextCard(now: timeOfDay)
+            if !viewModel.rooms.isEmpty {
+                favoriteRoomsSection
+            }
+            lumenNoticedSection
+        }
+    }
+
+    private var desktopDashboardContent: some View {
+        VStack(alignment: .leading, spacing: 32) {
+            topBar
+
+            HStack(alignment: .top, spacing: 28) {
+                VStack(alignment: .leading, spacing: 28) {
+                    greeting
+                    compactStats
+                    NowNextCard(now: timeOfDay)
+                    if !viewModel.rooms.isEmpty {
+                        favoriteRoomsSection
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .topLeading)
+
+                VStack(alignment: .leading, spacing: 16) {
+                    lumenNoticedSection
+                }
+                .frame(width: 340, alignment: .topLeading)
+            }
         }
     }
 
@@ -145,20 +195,26 @@ struct HomeDashboardView: View {
     // MARK: - Greeting
 
     private var greeting: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 10) {
             VStack(alignment: .leading, spacing: 2) {
                 if locationService.isAtHome {
                     Text("Welcome Home,")
-                        .font(.system(size: 36, weight: .bold, design: .serif))
+                        .font(.system(size: greetingTitleSize, weight: .bold, design: .serif))
                         .foregroundStyle(.white)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.75)
                 } else {
                     Text(timeOfDay.greeting + ",")
-                        .font(.system(size: 36, weight: .bold, design: .serif))
+                        .font(.system(size: greetingTitleSize, weight: .bold, design: .serif))
                         .foregroundStyle(.white)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.75)
                 }
                 Text(viewModel.home?.name ?? "Home")
-                    .font(.system(size: 36, weight: .bold, design: .serif))
+                    .font(.system(size: greetingTitleSize, weight: .bold, design: .serif))
                     .foregroundStyle(.white)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
                     .onLongPressGesture {
                         renameText = viewModel.home?.name ?? ""
                         isRenamingHome = true
@@ -166,8 +222,9 @@ struct HomeDashboardView: View {
             }
 
             Text(homeStatusSubtitle)
-                .font(.system(size: 14))
+                .font(.system(size: isRegularLayout ? 15 : 14))
                 .foregroundStyle(Color.white.opacity(0.5))
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 
@@ -237,12 +294,8 @@ struct HomeDashboardView: View {
                 }
             }
 
-            let columns = sizeClass == .regular
-                ? [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())]
-                : [GridItem(.flexible()), GridItem(.flexible())]
-
-            LazyVGrid(columns: columns, spacing: 10) {
-                ForEach(viewModel.rooms.prefix(4), id: \.id) { room in
+            LazyVGrid(columns: roomGridColumns, spacing: isRegularLayout ? 12 : 10) {
+                ForEach(viewModel.rooms.prefix(roomLimit), id: \.id) { room in
                     NavigationLink(destination: RoomDetailView(
                         room: room,
                         viewModel: viewModel.makeRoomViewModel()
