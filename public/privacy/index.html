@@ -3,629 +3,215 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Privacy Policy for Lumen, a private HomeKit smart home control app." />
+  <meta name="description" content="Privacy Policy for Lumen, a private smart home control app." />
   <meta name="theme-color" content="#080808" />
-  <title>Privacy Policy — Lumen</title>
+  <title>Privacy Policy - Lumen</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,200;0,9..144,300;1,9..144,200;1,9..144,300&family=Archivo:wght@200;300;400&display=swap" rel="stylesheet" />
   <style>
-    /* ===== RESET ===== */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
       --bg: #080808;
       --text: #e8e0d4;
-      --text-dim: rgba(232,224,212,0.55);
+      --text-dim: rgba(232,224,212,0.58);
       --muted: rgba(232,224,212,0.28);
       --accent: #c8b89a;
-      --accent-dim: rgba(200,184,154,0.55);
-      --border: rgba(200,184,154,0.1);
-      --border-glow: rgba(200,184,154,0.22);
-      --surface: rgba(255,255,255,0.025);
+      --accent-dim: rgba(200,184,154,0.58);
+      --border: rgba(200,184,154,0.12);
+      --surface: rgba(255,255,255,0.028);
     }
-
-    html {
-      background: var(--bg);
-      scroll-behavior: smooth;
-    }
-
+    html { background: var(--bg); scroll-behavior: smooth; }
     body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Archivo', sans-serif;
-      font-weight: 300;
-      font-size: 15px;
-      line-height: 1.8;
       min-height: 100vh;
       overflow-x: hidden;
+      background: radial-gradient(circle at 18% 0%, rgba(200,184,154,0.12), transparent 34%), radial-gradient(circle at 88% 38%, rgba(120,90,180,0.10), transparent 38%), linear-gradient(180deg, #090909 0%, #07060a 100%);
+      color: var(--text);
+      font-family: 'Archivo', ui-sans-serif, sans-serif;
+      font-size: 15px;
+      font-weight: 300;
+      line-height: 1.8;
     }
-
-    /* ===== AMBIENT BACKGROUND ===== */
-
-    .bg {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      pointer-events: none;
-      overflow: hidden;
-    }
-
-    .bg-grain {
-      position: absolute;
-      inset: 0;
-      opacity: 0.03;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-      background-size: 256px 256px;
-    }
-
-    .orb {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(100px);
-      will-change: transform;
-    }
-
-    .orb-1 {
-      width: 1000px;
-      height: 1000px;
-      top: -300px;
-      left: -200px;
-      background: radial-gradient(circle, rgba(180,140,90,0.13) 0%, transparent 68%);
-      animation: float1 22s ease-in-out infinite;
-    }
-
-    .orb-2 {
-      width: 700px;
-      height: 700px;
-      bottom: 5%;
-      right: -200px;
-      background: radial-gradient(circle, rgba(110,80,160,0.07) 0%, transparent 68%);
-      animation: float2 28s ease-in-out infinite;
-    }
-
-    .orb-3 {
-      width: 500px;
-      height: 500px;
-      top: 50%;
-      left: 35%;
-      background: radial-gradient(circle, rgba(60,100,170,0.05) 0%, transparent 68%);
-      animation: float3 34s ease-in-out infinite;
-    }
-
-    @keyframes float1 {
-      0%,100% { transform: translate(0,0) scale(1); }
-      33%     { transform: translate(80px,70px) scale(1.04); }
-      66%     { transform: translate(-50px,110px) scale(0.97); }
-    }
-    @keyframes float2 {
-      0%,100% { transform: translate(0,0); }
-      40%     { transform: translate(-100px,-80px) scale(1.06); }
-      70%     { transform: translate(60px,-40px) scale(0.96); }
-    }
-    @keyframes float3 {
-      0%,100% { transform: translate(0,0); }
-      50%     { transform: translate(-70px,60px) scale(1.1); }
-    }
-
-    /* ===== SCROLL PROGRESS ===== */
-
-    .progress-bar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 1px;
-      z-index: 100;
-      transform-origin: left center;
-      transform: scaleX(0);
-      background: linear-gradient(90deg,
-        transparent 0%,
-        rgba(200,184,154,0.4) 20%,
-        rgba(200,184,154,0.8) 50%,
-        rgba(200,184,154,0.4) 80%,
-        transparent 100%
-      );
-    }
-
-    /* ===== FLOATING NAV ===== */
-
+    a { color: inherit; text-decoration: none; }
     .nav {
       position: fixed;
       top: 24px;
       left: 50%;
-      transform: translateX(-50%);
-      z-index: 50;
+      z-index: 10;
       display: flex;
       align-items: center;
-      gap: 0;
-      padding: 0;
-      background: rgba(8,8,8,0.75);
+      overflow: hidden;
       border: 1px solid var(--border);
-      border-radius: 99px;
+      border-radius: 999px;
+      background: rgba(8,8,8,0.72);
       backdrop-filter: blur(28px);
       -webkit-backdrop-filter: blur(28px);
-      overflow: hidden;
-      opacity: 0;
-      transform: translateX(-50%) translateY(-8px);
-      animation: navReveal 1s cubic-bezier(0.21,0.8,0.32,1) 0.2s forwards;
+      transform: translateX(-50%);
     }
-
-    @keyframes navReveal {
-      to { opacity: 1; transform: translateX(-50%) translateY(0); }
-    }
-
-    .nav-back {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      padding: 10px 18px;
-      color: var(--accent-dim);
-      font-size: 11px;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      text-decoration: none;
-      border-right: 1px solid var(--border);
-      transition: color 0.2s, background 0.2s;
-    }
-
-    .nav-back:hover {
-      color: var(--accent);
-      background: rgba(200,184,154,0.04);
-    }
-
-    .nav-back svg {
-      flex-shrink: 0;
-      transition: transform 0.2s;
-    }
-
-    .nav-back:hover svg {
-      transform: translateX(-2px);
-    }
-
-    .nav-label {
+    .nav a, .nav span {
       padding: 10px 18px;
       font-size: 11px;
-      letter-spacing: 0.18em;
-      color: var(--muted);
+      letter-spacing: 0.16em;
       text-transform: uppercase;
+      white-space: nowrap;
     }
-
-    /* ===== PAGE LAYOUT ===== */
-
+    .nav a { color: var(--accent-dim); border-right: 1px solid var(--border); }
+    .nav span { color: var(--muted); }
     .page {
       position: relative;
       z-index: 1;
-    }
-
-    .container {
-      max-width: 700px;
+      width: min(760px, calc(100% - 48px));
       margin: 0 auto;
-      padding: 0 28px;
+      padding: 156px 0 72px;
     }
-
-    /* ===== HERO ===== */
-
-    .hero {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-      padding-bottom: 80px;
-    }
-
-    .hero-line {
-      width: 1px;
-      height: 140px;
-      background: linear-gradient(to bottom, transparent, var(--accent-dim));
-      margin: 0 auto 52px;
-      opacity: 0;
-      transform: scaleY(0);
-      transform-origin: top;
-      animation: lineReveal 1.4s cubic-bezier(0.21,0.8,0.32,1) 0.4s forwards;
-    }
-
-    @keyframes lineReveal {
-      to { opacity: 1; transform: scaleY(1); }
-    }
-
-    .hero-kicker {
+    .hero { min-height: 52vh; display: flex; flex-direction: column; justify-content: flex-end; padding-bottom: 56px; }
+    .kicker {
+      margin-bottom: 18px;
+      color: var(--accent-dim);
       font-size: 10px;
       letter-spacing: 0.28em;
-      color: var(--accent-dim);
       text-transform: uppercase;
-      margin-bottom: 18px;
-      opacity: 0;
-      transform: translateY(14px);
-      animation: rise 0.9s cubic-bezier(0.21,0.8,0.32,1) 0.6s forwards;
     }
-
-    .hero-title {
-      font-family: 'Fraunces', serif;
-      font-size: clamp(80px, 15vw, 180px);
+    h1 {
+      margin-bottom: 28px;
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: clamp(68px, 15vw, 152px);
       font-weight: 200;
-      font-variation-settings: 'opsz' 144;
+      letter-spacing: -0.04em;
       line-height: 0.86;
-      letter-spacing: -0.03em;
-      color: var(--text);
-      margin-bottom: 36px;
-      opacity: 0;
-      transform: translateY(20px);
-      animation: rise 1s cubic-bezier(0.21,0.8,0.32,1) 0.72s forwards;
     }
-
-    .hero-title span {
-      display: block;
-    }
-
-    .hero-title .italic {
-      font-style: italic;
-      background: linear-gradient(135deg, var(--text) 20%, var(--accent) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .hero-desc {
-      font-size: 16px;
-      color: var(--text-dim);
-      max-width: 500px;
-      margin-bottom: 0;
-      line-height: 1.75;
-      opacity: 0;
-      transform: translateY(14px);
-      animation: rise 0.9s cubic-bezier(0.21,0.8,0.32,1) 0.88s forwards;
-    }
-
-    .hero-meta {
+    h1 em { display: block; font-style: italic; color: var(--accent); }
+    .hero p { max-width: 540px; color: rgba(232,224,212,0.68); font-size: 16px; }
+    .meta {
       display: flex;
-      align-items: center;
       flex-wrap: wrap;
-      gap: 0;
-      margin-top: 40px;
-      padding-top: 32px;
+      gap: 10px 18px;
+      margin-top: 32px;
+      padding-top: 26px;
       border-top: 1px solid var(--border);
-      opacity: 0;
-      animation: rise 0.9s cubic-bezier(0.21,0.8,0.32,1) 1.04s forwards;
-    }
-
-    .meta-item {
+      color: var(--muted);
       font-size: 10px;
       letter-spacing: 0.14em;
-      color: var(--muted);
       text-transform: uppercase;
     }
-
-    .meta-sep {
-      width: 1px;
-      height: 12px;
-      background: var(--border);
-      margin: 0 18px;
-    }
-
-    @keyframes rise {
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* ===== CONTENT ===== */
-
-    .content {
-      padding: 0 0 100px;
-    }
-
-    /* Section items */
+    .content { display: grid; gap: 12px; }
     .item {
       position: relative;
-      padding: 36px 44px;
-      margin-bottom: 10px;
+      padding: 34px 38px;
       border: 1px solid var(--border);
-      border-radius: 22px;
+      border-radius: 24px;
       background: var(--surface);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      transition: border-color 0.35s, box-shadow 0.35s, transform 0.35s;
-      opacity: 0;
-      transform: translateY(22px);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
     }
-
-    .item.revealed {
-      opacity: 1;
-      transform: translateY(0);
-      transition:
-        opacity 0.75s cubic-bezier(0.21,0.8,0.32,1),
-        transform 0.75s cubic-bezier(0.21,0.8,0.32,1),
-        border-color 0.35s,
-        box-shadow 0.35s;
-    }
-
-    .item:hover {
-      border-color: var(--border-glow);
-      box-shadow:
-        0 0 0 1px rgba(200,184,154,0.04),
-        0 0 50px rgba(200,184,154,0.05),
-        inset 0 0 40px rgba(200,184,154,0.02);
-      transform: translateY(-2px);
-    }
-
-    .item.item-intro {
-      background: rgba(200,184,154,0.035);
-      border-color: rgba(200,184,154,0.16);
-    }
-
-    .item-num {
-      position: absolute;
-      top: 36px;
-      right: 44px;
-      font-family: 'Fraunces', serif;
-      font-size: 12px;
-      font-weight: 300;
-      font-variation-settings: 'opsz' 12;
-      color: var(--muted);
-      letter-spacing: 0.06em;
-      user-select: none;
-    }
-
     .item h2 {
-      font-family: 'Fraunces', serif;
+      margin-bottom: 12px;
+      color: var(--accent);
+      font-family: 'Fraunces', Georgia, serif;
       font-size: 12px;
       font-weight: 300;
-      font-variation-settings: 'opsz' 12;
       letter-spacing: 0.22em;
       text-transform: uppercase;
-      color: var(--accent);
-      margin-bottom: 12px;
     }
-
-    .item p {
-      font-size: 14px;
-      font-weight: 300;
-      line-height: 1.88;
-      color: rgba(232,224,212,0.58);
-      margin: 0;
+    .item p { color: var(--text-dim); }
+    .item a { color: var(--accent); border-bottom: 1px solid rgba(200,184,154,0.28); }
+    .num {
+      position: absolute;
+      top: 32px;
+      right: 38px;
+      color: var(--muted);
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: 12px;
     }
-
-    .item-intro p {
-      font-size: 16px;
-      color: rgba(232,224,212,0.72);
-      line-height: 1.78;
-    }
-
-    .item a {
-      color: var(--accent);
-      text-decoration: none;
-      border-bottom: 1px solid rgba(200,184,154,0.25);
-      padding-bottom: 1px;
-      transition: border-color 0.2s;
-    }
-
-    .item a:hover {
-      border-color: var(--accent);
-    }
-
-    /* ===== DIVIDER ===== */
-
-    .divider {
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--border), transparent);
-      margin: 48px 0;
-      opacity: 0;
-      animation: fadeIn 1s ease 1.6s forwards;
-    }
-
-    @keyframes fadeIn {
-      to { opacity: 1; }
-    }
-
-    /* ===== FOOTER ===== */
-
-    .footer {
-      position: relative;
-      z-index: 1;
-      max-width: 700px;
-      margin: 0 auto;
-      padding: 40px 28px 72px;
+    footer {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 16px;
       flex-wrap: wrap;
-      gap: 14px;
+      margin-top: 52px;
+      padding-top: 32px;
       border-top: 1px solid var(--border);
-    }
-
-    .footer-wordmark {
-      font-family: 'Fraunces', serif;
-      font-size: 11px;
-      font-weight: 300;
-      font-variation-settings: 'opsz' 12;
-      letter-spacing: 0.24em;
       color: var(--muted);
-      text-transform: uppercase;
-    }
-
-    .footer-copy {
       font-size: 11px;
-      letter-spacing: 0.06em;
-      color: var(--muted);
+      letter-spacing: 0.08em;
     }
-
-    .footer a {
-      font-size: 11px;
-      letter-spacing: 0.1em;
-      color: var(--accent-dim);
-      text-decoration: none;
-      transition: color 0.2s;
-    }
-
-    .footer a:hover {
-      color: var(--accent);
-    }
-
-    /* ===== AMBIENT CURSOR GLOW (desktop) ===== */
-
-    .cursor-glow {
-      position: fixed;
-      width: 400px;
-      height: 400px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(200,184,154,0.04) 0%, transparent 70%);
-      pointer-events: none;
-      z-index: 0;
-      transition: transform 0.15s ease;
-      transform: translate(-200px, -200px);
-    }
-
-    /* ===== RESPONSIVE ===== */
-
+    footer a { color: var(--accent-dim); }
     @media (max-width: 640px) {
-      .hero-title { font-size: clamp(64px, 20vw, 110px); }
-      .item { padding: 28px 26px; }
-      .item-num { top: 28px; right: 26px; }
+      .page { width: min(100% - 32px, 760px); padding-top: 132px; }
       .nav { top: 14px; }
+      .nav a, .nav span { padding: 9px 13px; font-size: 10px; }
+      .item { padding: 28px 24px; }
+      .num { top: 26px; right: 24px; }
     }
   </style>
 </head>
 <body>
-
-  <!-- Ambient background layer -->
-  <div class="bg" aria-hidden="true">
-    <div class="bg-grain"></div>
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
-    <div class="orb orb-3"></div>
-  </div>
-
-  <!-- Cursor ambient glow (desktop) -->
-  <div class="cursor-glow" id="cursorGlow" aria-hidden="true"></div>
-
-  <!-- Scroll progress -->
-  <div class="progress-bar" id="progressBar" aria-hidden="true"></div>
-
-  <!-- Floating nav pill -->
   <nav class="nav" aria-label="Page navigation">
-    <a class="nav-back" href="/">
-      <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
-        <path d="M8.5 2L4 6.5L8.5 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      Lumen
-    </a>
-    <span class="nav-label">Privacy</span>
+    <a href="/">Lumen</a>
+    <span>Privacy</span>
   </nav>
 
-  <!-- Page content -->
-  <div class="page">
-    <div class="container">
-
-      <!-- Hero -->
-      <section class="hero" aria-labelledby="hero-title">
-        <div class="hero-line" aria-hidden="true"></div>
-        <p class="hero-kicker">Lumen — Legal</p>
-        <h1 class="hero-title" id="hero-title">
-          <span>Pri</span><span class="italic">vacy</span>
-        </h1>
-        <p class="hero-desc">How your home data stays yours. Everything Lumen knows about your home stays on your devices.</p>
-        <div class="hero-meta">
-          <span class="meta-item">Last updated May 31, 2026</span>
-          <span class="meta-sep" aria-hidden="true"></span>
-          <span class="meta-item">Lumen for HomeKit</span>
-          <span class="meta-sep" aria-hidden="true"></span>
-          <span class="meta-item">Version 1.0</span>
-        </div>
-      </section>
-
-      <!-- Divider -->
-      <div class="divider" aria-hidden="true"></div>
-
-      <!-- Content sections -->
-      <div class="content">
-
-        <div class="item item-intro" data-reveal>
-          <p>Lumen is a smart home control app built on Apple HomeKit. This policy explains how your data is handled — briefly, because there isn't much to say.</p>
-          <span class="item-num" aria-hidden="true">00</span>
-        </div>
-
-        <div class="item" data-reveal>
-          <h2>Data We Collect</h2>
-          <p>Lumen does not collect, store, or transmit personal data to external servers. Home data — including devices, scenes, automations, and usage — is handled locally on your device and through your personal iCloud account using Apple's HomeKit framework.</p>
-          <span class="item-num" aria-hidden="true">01</span>
-        </div>
-
-        <div class="item" data-reveal>
-          <h2>Permissions</h2>
-          <p>Lumen requests access to HomeKit only so you can view and control your HomeKit-enabled accessories, rooms, scenes, and automations within the app. This access is handled through Apple's HomeKit framework and remains local to your Apple devices and iCloud account.</p>
-          <span class="item-num" aria-hidden="true">02</span>
-        </div>
-
-        <div class="item" data-reveal>
-          <h2>HomeKit</h2>
-          <p>Lumen uses Apple's HomeKit framework to communicate with your smart home devices. HomeKit data is managed by Apple, encrypted end-to-end where supported, and associated with your personal Apple account. Lumen does not transmit your HomeKit data to external servers operated by us.</p>
-          <span class="item-num" aria-hidden="true">03</span>
-        </div>
-
-        <div class="item" data-reveal>
-          <h2>iCloud</h2>
-          <p>If you use iCloud, your HomeKit configuration may sync across your Apple devices through your personal iCloud account. This data is subject to Apple's iCloud privacy practices.</p>
-          <span class="item-num" aria-hidden="true">04</span>
-        </div>
-
-        <div class="item" data-reveal>
-          <h2>Third-Party Services</h2>
-          <p>Lumen does not integrate third-party analytics, advertising, or tracking SDKs. Your home is not a product.</p>
-          <span class="item-num" aria-hidden="true">05</span>
-        </div>
-
-        <div class="item" data-reveal>
-          <h2>Children's Privacy</h2>
-          <p>Lumen does not knowingly collect data from anyone, including children under 13.</p>
-          <span class="item-num" aria-hidden="true">06</span>
-        </div>
-
-        <div class="item" data-reveal>
-          <h2>Contact</h2>
-          <p>Questions? Reach us at <a href="mailto:m.rafiq2006@icloud.com">m.rafiq2006@icloud.com</a>.</p>
-          <span class="item-num" aria-hidden="true">07</span>
-        </div>
-
+  <main class="page">
+    <section class="hero" aria-labelledby="hero-title">
+      <p class="kicker">Lumen Legal</p>
+      <h1 id="hero-title">Pri<em>vacy</em></h1>
+      <p>How your home data stays yours. Lumen is designed around local control, clear permission prompts, and no advertising or tracking SDKs.</p>
+      <div class="meta">
+        <span>Last updated June 10, 2026</span>
+        <span>Lumen for iPhone</span>
+        <span>Version 1.0</span>
       </div>
-    </div>
+    </section>
 
-    <!-- Footer -->
-    <footer class="footer">
-      <span class="footer-wordmark">Lumen</span>
-      <span class="footer-copy">&copy; 2026 Lumen. All rights reserved.</span>
+    <section class="content" aria-label="Privacy policy sections">
+      <article class="item">
+        <h2>Overview</h2>
+        <p>Lumen is a smart home companion built to keep your home context private. It helps organize rooms, devices, scenes, and suggestions while keeping the experience local first.</p>
+        <span class="num" aria-hidden="true">00</span>
+      </article>
+      <article class="item">
+        <h2>Data We Collect</h2>
+        <p>Lumen does not collect, sell, or transmit personal home data to external servers operated by us. Home data, including rooms, devices, scenes, automations, and usage context, is handled locally on your device unless you choose to use platform sync features.</p>
+        <span class="num" aria-hidden="true">01</span>
+      </article>
+      <article class="item">
+        <h2>Permissions</h2>
+        <p>Lumen may request permission to access your smart-home configuration, location for presence features, and notifications for automation updates. These permissions are used only to provide app features you enable.</p>
+        <span class="num" aria-hidden="true">02</span>
+      </article>
+      <article class="item">
+        <h2>Smart Home Data</h2>
+        <p>Device and scene information is used so Lumen can show controls, explain suggestions, and preview actions before anything changes. Lumen does not send that data to advertising networks, analytics brokers, or external profiling services.</p>
+        <span class="num" aria-hidden="true">03</span>
+      </article>
+      <article class="item">
+        <h2>Sync</h2>
+        <p>If you enable platform sync features, some app data may be synchronized through your personal account with the operating-system provider. That synced data is governed by your account settings and the provider's privacy practices.</p>
+        <span class="num" aria-hidden="true">04</span>
+      </article>
+      <article class="item">
+        <h2>Third-Party Services</h2>
+        <p>Lumen does not include third-party advertising, tracking, or behavioral analytics SDKs.</p>
+        <span class="num" aria-hidden="true">05</span>
+      </article>
+      <article class="item">
+        <h2>Children's Privacy</h2>
+        <p>Lumen does not knowingly collect personal data from anyone, including children under 13.</p>
+        <span class="num" aria-hidden="true">06</span>
+      </article>
+      <article class="item">
+        <h2>Contact</h2>
+        <p>Questions? Reach us at <a href="mailto:m.rafiq2006@icloud.com">m.rafiq2006@icloud.com</a>.</p>
+        <span class="num" aria-hidden="true">07</span>
+      </article>
+    </section>
+
+    <footer>
+      <span>Lumen</span>
+      <span>&copy; 2026 Lumen. All rights reserved.</span>
       <a href="/">Back to home</a>
     </footer>
-  </div>
-
-  <script>
-    /* ── Scroll progress ── */
-    const bar = document.getElementById('progressBar');
-    function updateProgress() {
-      const max = document.documentElement.scrollHeight - window.innerHeight;
-      bar.style.transform = `scaleX(${max > 0 ? window.scrollY / max : 0})`;
-    }
-    window.addEventListener('scroll', updateProgress, { passive: true });
-
-    /* ── Reveal on scroll ── */
-    const items = document.querySelectorAll('[data-reveal]');
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach((entry, i) => {
-        if (entry.isIntersecting) {
-          setTimeout(() => entry.target.classList.add('revealed'), i * 55);
-          io.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.07, rootMargin: '0px 0px -32px 0px' });
-    items.forEach(el => io.observe(el));
-
-    /* ── Cursor ambient glow (desktop only) ── */
-    const glow = document.getElementById('cursorGlow');
-    if (window.matchMedia('(pointer: fine)').matches) {
-      document.addEventListener('mousemove', (e) => {
-        glow.style.transform = `translate(${e.clientX - 200}px, ${e.clientY - 200}px)`;
-      }, { passive: true });
-    } else {
-      glow.style.display = 'none';
-    }
-  </script>
+  </main>
 </body>
 </html>
