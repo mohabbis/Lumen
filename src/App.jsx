@@ -1,82 +1,64 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import React, { useEffect, useRef, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
-  ArrowRight, CheckCircle2, Home, Lightbulb, Menu, MessageCircle,
-  Send, SunMedium, Thermometer, Wifi, X, Zap,
+  ArrowRight, BedDouble, ChevronRight, DoorOpen, Home, Laptop, Lightbulb,
+  Lock, Menu, MessageCircle, Moon, MoonStar, Plus, Popcorn, Send, Settings,
+  Sofa, Sparkle, Sparkles, SunMedium, Sunrise, Thermometer, Utensils, X, Zap,
 } from 'lucide-react';
 import './App.css';
 
-// Data
+// Data — faithful to the real Lumen app
 
-const screens = [
-  {
-    id: 'awareness',
-    label: 'Arrive',
-    title: 'Welcome back',
-    subtitle: 'Presence detected. Evening routine is ready.',
-    card: 'Today',
-    icon: Home,
-    rows: ['Bedroom calm', 'Desk lamp ready', 'Kitchen off', 'Hallway quiet'],
-    insight: 'Lumen noticed you arrived and prepared a soft evening setup.',
-    action: 'Review setup',
-  },
-  {
-    id: 'control',
-    label: 'Tune',
-    title: 'Living Room',
-    subtitle: 'Comfortable light. Manual controls nearby.',
-    card: 'Room state',
-    icon: Lightbulb,
-    rows: ['Lights 70%', 'Shades open', 'Temp steady', 'Air clear'],
-    insight: 'The room is bright for this time of day. Warmer light may feel better.',
-    action: 'Tune room',
-  },
-  {
-    id: 'action',
-    label: 'Approve',
-    title: 'Evening Comfort',
-    subtitle: 'Ready to apply. Nothing runs silently.',
-    card: 'Scene preview',
-    icon: CheckCircle2,
-    rows: ['Lights soften', 'Temp lowers', 'Shades adjust', 'Scene editable'],
-    insight: 'One clear confirmation applies the scene. You stay in control.',
-    action: 'Apply scene',
-  },
-  {
-    id: 'explain',
-    label: 'Signals',
-    title: 'Why this?',
-    subtitle: 'Presence, time, and room state moved together.',
-    card: 'Signals',
-    icon: SunMedium,
-    rows: ['Presence confirmed', 'Sunset window', 'Room active', 'High confidence'],
-    insight: 'Every suggestion shows its signals before anything changes.',
-    action: 'Review logic',
-  },
+const tabs = [
+  { label: 'Home', icon: Home },
+  { label: 'Rooms', icon: DoorOpen },
+  { label: 'Intel', icon: Sparkle },
+  { label: 'Scenes', icon: Sparkles },
+  { label: 'Settings', icon: Settings },
 ];
 
-const deviceCards = [
-  { icon: Lightbulb, name: 'Bedroom', state: 'Dimmed 35%', type: 'light', brightness: 35 },
-  { icon: Lightbulb, name: 'Living Room', state: 'Warm 70%', type: 'light', brightness: 70 },
-  { icon: Lightbulb, name: 'Desk Lamp', state: 'Full 100%', type: 'light', brightness: 100 },
-  { icon: Lightbulb, name: 'Hallway', state: 'Off', type: 'light', brightness: 0 },
-  { icon: Home, name: 'Home', state: "You're here", type: 'presence' },
-  { icon: Thermometer, name: 'Living Room', state: '21°C', type: 'temp' },
-  { icon: Wifi, name: 'Network', state: '12 active', type: 'network' },
-  { icon: SunMedium, name: 'Evening Scene', state: 'Ready', type: 'scene' },
+const favoriteRooms = [
+  { name: 'Living Room', icon: Sofa, count: '3 active' },
+  { name: 'Bedroom', icon: BedDouble, count: '2 active' },
+  { name: 'Kitchen', icon: Utensils, count: '1 active' },
+  { name: 'Office', icon: Laptop, count: 'No devices' },
+];
+
+const scenes = [
+  { name: 'Morning', icon: Sunrise, devices: '4 devices', mood: 'Bright & energising' },
+  { name: 'Evening', icon: MoonStar, devices: '3 devices', mood: 'Warm & dim' },
+  { name: 'Movie Night', icon: Popcorn, devices: '5 devices', mood: 'Dim & ambient' },
+  { name: 'Sleep', icon: Moon, devices: '6 devices', mood: 'All lights off' },
+];
+
+const reasoningSignals = [
+  { label: 'Time of day', value: 'Evening', weight: 'high' },
+  { label: 'Presence', value: 'At home', weight: 'high' },
+  { label: 'Reachable devices', value: '7', weight: 'medium' },
+  { label: 'Matching scene', value: 'Evening', weight: 'high' },
+];
+
+const devices = [
+  { name: 'Ceiling Light', room: 'Living Room', icon: Lightbulb, online: true },
+  { name: 'Desk Lamp', room: 'Office', icon: Lightbulb, online: true },
+  { name: 'Thermostat', room: 'Hallway', icon: Thermometer, online: true },
+  { name: 'Front Door', room: 'Entryway', icon: Lock, online: false },
 ];
 
 const aiCallouts = [
   { icon: Zap, label: 'Instant', sub: 'Commands sent live' },
   { icon: MessageCircle, label: 'Conversational', sub: 'Plain language control' },
-  { icon: CheckCircle2, label: 'Your call', sub: 'Always one tap to apply' },
+  { icon: Sparkles, label: 'Suggests scenes', sub: 'Recommends, you approve' },
 ];
 
-const flowSteps = [
-  { screen: screens[0], label: 'Arrives home' },
-  { screen: screens[1], label: 'Lumen notices' },
-  { screen: screens[2], label: 'One tap to apply' },
+const chapters = [
+  'Arrives home',
+  'Lumen explains why',
+  'One tap applies',
+  'Scene is live',
 ];
+
+const STEP_DURATIONS = [1900, 3300, 3500, 3000];
 
 // Primitives
 
@@ -94,91 +76,380 @@ function FadeIn({ children, delay = 0, className = '' }) {
   );
 }
 
-function AppScreen({ screen, featured = false }) {
-  const Icon = screen.icon;
+function StatusBar() {
   return (
-    <div className={featured ? 'phone phone-featured' : 'phone mini-phone'}>
-      <div className="phone-screen">
-        <div className="phone-status">
-          <span>9:41</span>
-          <span className="dynamic-island" />
-          <span>5G</span>
-        </div>
-        <div className="app-brand">LUMEN</div>
-        <div className="screen-header">
+    <div className="phone-status">
+      <span>9:41</span>
+      <span className="dynamic-island" />
+      <span>5G</span>
+    </div>
+  );
+}
+
+function TabBar({ active }) {
+  return (
+    <div className="app-tabbar">
+      {tabs.map(({ label, icon: Icon }) => (
+        <span key={label} className={active === label ? 'active' : ''}>
+          <Icon size={15} strokeWidth={active === label ? 2.2 : 1.7} />
+          {label}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+// Real-app screen recreations
+
+function DashboardScreen({ showWelcome = false, highlight = false, dimmed = false }) {
+  return (
+    <div className={dimmed ? 'app-screen dimmed' : 'app-screen'}>
+      <div className="app-topbar">
+        <span className="app-wordmark">LUMEN</span>
+        <span className="app-mode">
+          <Home size={9} /> HOME MODE
+        </span>
+      </div>
+
+      <h4 className="app-greeting">Good evening, Home</h4>
+      <p className="app-subtitle">7 of 8 devices online — all looking good.</p>
+
+      <div className="app-stats">
+        <span><b>4</b> rooms · <b>8</b> devices · <b>5</b> automations</span>
+        <span className="app-plus"><Plus size={11} /></span>
+      </div>
+
+      <div className="nownext-card">
+        <p className="app-label">Rhythm</p>
+        <div className="nownext-now">
+          <span className="nownext-tag now">Now</span>
           <div>
-            <p className="screen-kicker">{screen.label}</p>
-            <h3>{screen.title}</h3>
-            <p>{screen.subtitle}</p>
-          </div>
-          <div className="avatar-dot"><Icon size={16} /></div>
-        </div>
-        <div className="chip-row">
-          <span>4 rooms</span><span>12 devices</span><span>Private</span>
-        </div>
-        <div className="main-card">
-          <div className="main-card-head"><b>{screen.card}</b><ArrowRight size={13} /></div>
-          <div className="room-grid">
-            {screen.rows.map((row, i) => (
-              <div className="room-cell" key={row}>
-                <span>{row}</span>
-                <small>{i % 2 === 0 ? 'Active' : 'Ready'}</small>
-              </div>
-            ))}
+            <b>Evening</b>
+            <span>Winding down softly.</span>
           </div>
         </div>
-        <div className="reason-card">
-          <b>Lumen noticed</b>
-          <span>{screen.insight}</span>
+        <div className="nownext-bar"><span style={{ width: '68%' }} /></div>
+        <div className="nownext-next">
+          <span className="nownext-tag next">Next</span>
+          <b>Night</b>
+          <span>at 9:00 PM</span>
         </div>
-        <div className="presence-card">
+      </div>
+
+      <div className="app-section-head">
+        <p className="app-label">Favorite Rooms</p>
+        <ChevronRight size={12} />
+      </div>
+      <div className="fav-rooms-grid">
+        {favoriteRooms.map(({ name, icon: Icon, count }) => (
+          <div className="fav-room-card" key={name}>
+            <div className="fav-room-icon"><Icon size={15} /></div>
+            <b>{name}</b>
+            <span>{count}</span>
+          </div>
+        ))}
+      </div>
+
+      <div className={highlight ? 'noticed-card highlight' : 'noticed-card'}>
+        <div className="noticed-head">
+          <Sparkles size={11} /> Lumen noticed
+        </div>
+        <p className="noticed-msg">Sunset detected. Warm lighting mode is available.</p>
+        <div className="noticed-action">
           <div>
-            <b>{screen.action}</b>
-            <span>{screen.id === 'action' ? 'Confirm changes' : 'Suggested'}</span>
+            <b>Run Evening scene</b>
+            <span>Suggested by Lumen</span>
           </div>
-          <div className="pulse-dot" />
+          <ChevronRight size={13} />
         </div>
-        <div className="tabbar">
-          <span className="active">Home</span>
-          <span>Rooms</span>
-          <span>Scenes</span>
-          <span>Chat</span>
+        {highlight && <span className="tap-ripple noticed-ripple" />}
+      </div>
+
+      {showWelcome && (
+        <motion.div
+          className="welcome-overlay"
+          initial={{ opacity: 0, scale: 0.85 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ type: 'spring', stiffness: 220, damping: 22 }}
+        >
+          🏠 Welcome Home!
+        </motion.div>
+      )}
+    </div>
+  );
+}
+
+function ReasoningSheet() {
+  return (
+    <motion.div
+      className="reason-sheet"
+      initial={{ y: '100%' }}
+      animate={{ y: 0 }}
+      exit={{ y: '100%' }}
+      transition={{ type: 'spring', stiffness: 320, damping: 34 }}
+    >
+      <span className="sheet-handle" />
+      <div className="sheet-icon"><Sparkles size={22} /></div>
+      <p className="sheet-kicker">Why Lumen noticed</p>
+      <h4 className="sheet-title">Sunset is moving<br />across your home.</h4>
+
+      <p className="app-label sheet-signals-label">Signals</p>
+      <div className="signal-list">
+        {reasoningSignals.map(({ label, value, weight }) => (
+          <div className="signal-row" key={label}>
+            <span className={`signal-dot ${weight}`} />
+            <span className="signal-label">{label}</span>
+            <span className="signal-value">{value}</span>
+          </div>
+        ))}
+      </div>
+
+      <button className="sheet-apply">
+        Apply Evening
+        <span className="tap-ripple apply-ripple" />
+      </button>
+      <button className="sheet-dismiss">Not now</button>
+    </motion.div>
+  );
+}
+
+function ScenesScreen() {
+  return (
+    <div className="app-screen">
+      <div className="app-topbar">
+        <span className="app-wordmark">LUMEN</span>
+      </div>
+      <h4 className="app-greeting small">Scenes</h4>
+
+      <div className="active-scene-card">
+        <div className="active-scene-badge">
+          <span className="active-pulse" /> ACTIVE NOW
+        </div>
+        <b>Evening</b>
+        <span>3 devices · Warm &amp; dim</span>
+      </div>
+
+      <p className="app-label">All Scenes</p>
+      <div className="scene-list">
+        {scenes.map(({ name, icon: Icon, devices: d, mood }) => (
+          <div className={name === 'Evening' ? 'scene-row active' : 'scene-row'} key={name}>
+            <div className="scene-icon"><Icon size={16} /></div>
+            <div className="scene-meta">
+              <b>{name}</b>
+              <span>{d} · {mood}</span>
+            </div>
+            <ChevronRight size={13} />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// The live demo — auto-playing recreation of the real app
+
+function LiveDemo() {
+  const [step, setStep] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const reducedRef = useRef(false);
+
+  useEffect(() => {
+    reducedRef.current =
+      typeof window !== 'undefined' &&
+      window.matchMedia &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reducedRef.current) setStep(1);
+  }, []);
+
+  useEffect(() => {
+    if (paused || reducedRef.current) return undefined;
+    const id = setTimeout(
+      () => setStep(s => (s + 1) % STEP_DURATIONS.length),
+      STEP_DURATIONS[step],
+    );
+    return () => clearTimeout(id);
+  }, [step, paused]);
+
+  const onHome = step !== 3;
+  const activeTab = step === 3 ? 'Scenes' : 'Home';
+
+  return (
+    <div className="live-demo">
+      <div
+        className="phone phone-featured phone-app"
+        onMouseEnter={() => setPaused(true)}
+        onMouseLeave={() => setPaused(false)}
+      >
+        <div className="phone-screen">
+          <StatusBar />
+          <div className="app-stage">
+            {onHome ? (
+              <DashboardScreen
+                showWelcome={step === 0}
+                highlight={step === 1}
+                dimmed={step === 2}
+              />
+            ) : (
+              <ScenesScreen />
+            )}
+            <AnimatePresence>
+              {step === 2 && <ReasoningSheet key="sheet" />}
+            </AnimatePresence>
+          </div>
+          <TabBar active={activeTab} />
+        </div>
+      </div>
+
+      <div className="demo-chapters">
+        <span className="demo-live"><span className="demo-live-dot" />Auto-playing</span>
+        <div className="chapter-strip">
+          {chapters.map((label, i) => (
+            <button
+              key={label}
+              className={step === i ? 'active' : ''}
+              onClick={() => { setStep(i); setPaused(false); }}
+            >
+              <span className="chapter-num">0{i + 1}</span>
+              {label}
+            </button>
+          ))}
         </div>
       </div>
     </div>
   );
 }
 
-// Components
+// App tour — real screens beyond the demo flow
 
-function DeviceCard({ icon: Icon, name, state, type, brightness }) {
+function RoomsTourScreen() {
   return (
-    <div className="device-card">
-      <div className="device-card-icon"><Icon size={18} /></div>
-      <div className="device-card-name">{name}</div>
-      {type === 'light' && (
-        <div className="device-brightness-bar">
-          <div className="device-brightness-fill" style={{ width: `${brightness}%` }} />
+    <div className="phone mini-phone tour-phone">
+      <div className="phone-screen">
+        <StatusBar />
+        <div className="app-screen">
+          <div className="app-topbar"><span className="app-wordmark">LUMEN</span></div>
+          <h4 className="app-greeting small">Rooms</h4>
+          <p className="app-label">All Rooms</p>
+          <div className="fav-rooms-grid">
+            {favoriteRooms.map(({ name, icon: Icon, count }) => (
+              <div className="fav-room-card" key={name}>
+                <div className="fav-room-icon"><Icon size={15} /></div>
+                <b>{name}</b>
+                <span>{count}</span>
+              </div>
+            ))}
+          </div>
         </div>
-      )}
-      {type === 'presence' && <div className="pulse-dot" />}
-      {type === 'scene' && <div className="scene-ready-dot" />}
-      <div className="device-card-state">{state}</div>
+        <TabBar active="Rooms" />
+      </div>
     </div>
   );
 }
 
-function DeviceShowcaseSection() {
+function IntelTourScreen() {
   return (
-    <section className="device-showcase-section" id="showcase">
+    <div className="phone mini-phone tour-phone">
+      <div className="phone-screen">
+        <StatusBar />
+        <div className="app-screen">
+          <div className="app-topbar"><span className="app-wordmark">LUMEN</span></div>
+          <h4 className="app-greeting small">Intel</h4>
+          <div className="intel-banner">
+            <span className="online-dot" /> HomeKit · 8 devices · 7 online
+          </div>
+          <div className="device-list">
+            {devices.map(({ name, room, icon: Icon, online }) => (
+              <div className="device-row" key={name}>
+                <div className="device-icon"><Icon size={15} /></div>
+                <div className="device-meta">
+                  <b>{name}</b>
+                  <span>{room}</span>
+                </div>
+                <span className={online ? 'online-dot' : 'offline-dot'} />
+              </div>
+            ))}
+          </div>
+        </div>
+        <TabBar active="Intel" />
+      </div>
+    </div>
+  );
+}
+
+function RoomDetailTourScreen() {
+  return (
+    <div className="phone mini-phone tour-phone">
+      <div className="phone-screen">
+        <StatusBar />
+        <div className="app-screen">
+          <div className="app-topbar"><span className="app-wordmark">LIVING ROOM</span></div>
+          <h4 className="app-greeting small">Living Room</h4>
+          <p className="app-label">Ceiling Light</p>
+          <div className="control-card">
+            <div className="control-row">
+              <span>Power</span>
+              <span className="toggle on"><span /></span>
+            </div>
+            <div className="control-slider">
+              <SunMedium size={11} className="dim" />
+              <div className="slider-track"><span style={{ width: '62%' }} /><i style={{ left: '62%' }} /></div>
+              <SunMedium size={13} />
+              <small>62%</small>
+            </div>
+            <div className="control-slider">
+              <span className="warm">Warm</span>
+              <div className="slider-track"><span style={{ width: '40%' }} /><i style={{ left: '40%' }} /></div>
+              <span className="cool">Cool</span>
+              <small>3200K</small>
+            </div>
+          </div>
+        </div>
+        <TabBar active="Rooms" />
+      </div>
+    </div>
+  );
+}
+
+function AppTourSection() {
+  const tour = [
+    { screen: <RoomsTourScreen />, label: 'Rooms' },
+    { screen: <IntelTourScreen />, label: 'Devices' },
+    { screen: <RoomDetailTourScreen />, label: 'Controls' },
+  ];
+  return (
+    <section className="app-tour-section" id="product">
+      <FadeIn className="section-copy centered">
+        <p className="eyebrow">The whole app</p>
+        <h2>More than<br />a dashboard.</h2>
+      </FadeIn>
+      <div className="tour-row">
+        {tour.map(({ screen, label }, i) => (
+          <FadeIn key={label} delay={i * 0.1} className="tour-item">
+            {screen}
+            <div className="tour-label">{label}</div>
+          </FadeIn>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function RoomShowcaseSection() {
+  return (
+    <section className="room-show-section" id="showcase">
       <FadeIn className="section-copy centered">
         <p className="eyebrow">Your home at a glance</p>
-        <h2>Every room,<br /><em>one place.</em></h2>
+        <h2>Every room,<br /><em>one glance.</em></h2>
       </FadeIn>
-      <div className="device-card-grid">
-        {deviceCards.map((card, i) => (
-          <FadeIn key={card.name + card.type} delay={i * 0.06}>
-            <DeviceCard {...card} />
+      <div className="room-show-grid">
+        {favoriteRooms.map(({ name, icon: Icon, count }, i) => (
+          <FadeIn key={name} delay={i * 0.06}>
+            <div className="room-show-card">
+              <div className="room-show-icon"><Icon size={18} /></div>
+              <b>{name}</b>
+              <span>{count}</span>
+            </div>
           </FadeIn>
         ))}
       </div>
@@ -188,20 +459,16 @@ function DeviceShowcaseSection() {
 
 function AIChatScreen() {
   return (
-    <div className="phone phone-featured">
+    <div className="phone phone-featured phone-app">
       <div className="phone-screen">
-        <div className="phone-status">
-          <span>9:41</span>
-          <span className="dynamic-island" />
-          <span>5G</span>
-        </div>
-        <div className="app-brand">LUMEN</div>
+        <StatusBar />
         <div className="chat-header">
           <div className="chat-avatar"><MessageCircle size={14} /></div>
           <div>
             <b>Lumen</b>
             <small>AI assistant</small>
           </div>
+          <span className="coming-pill">Soon</span>
         </div>
         <div className="chat-thread">
           <div className="chat-msg user">Make the bedroom cozy</div>
@@ -224,12 +491,7 @@ function AIChatScreen() {
           <span className="chat-input-placeholder">Ask Lumen...</span>
           <button className="chat-send-btn"><Send size={12} /></button>
         </div>
-        <div className="tabbar">
-          <span>Home</span>
-          <span className="active">Chat</span>
-          <span>Rooms</span>
-          <span>Scenes</span>
-        </div>
+        <TabBar active="Home" />
       </div>
     </div>
   );
@@ -243,8 +505,12 @@ function AIChatSection() {
           <AIChatScreen />
         </FadeIn>
         <FadeIn delay={0.1} className="ai-chat-copy">
-          <p className="eyebrow">Built-in AI</p>
+          <p className="eyebrow">Coming soon · Built-in AI</p>
           <h2>Just say it.<br /><em>Lumen handles it.</em></h2>
+          <p className="ai-chat-lede">
+            A conversational layer is on the way — describe what you want and
+            Lumen recommends the scene, then sends it once you approve.
+          </p>
           <div className="ai-callouts">
             {aiCallouts.map(({ icon: Icon, label, sub }) => (
               <div className="ai-callout" key={label}>
@@ -257,28 +523,6 @@ function AIChatSection() {
             ))}
           </div>
         </FadeIn>
-      </div>
-    </section>
-  );
-}
-
-function AppFlowSection() {
-  return (
-    <section className="app-flow-section" id="product">
-      <FadeIn className="section-copy centered">
-        <p className="eyebrow">The flow</p>
-        <h2>From arrival<br />to comfort.</h2>
-      </FadeIn>
-      <div className="flow-phones">
-        {flowSteps.map(({ screen, label }, i) => (
-          <FadeIn key={label} delay={i * 0.1} className="flow-step">
-            <AppScreen screen={screen} />
-            <div className="flow-step-label">
-              <span className="flow-step-num">0{i + 1}</span>
-              <span>{label}</span>
-            </div>
-          </FadeIn>
-        ))}
       </div>
     </section>
   );
@@ -422,55 +666,33 @@ export function App() {
           </div>
           <h1>Your home,<br /><em>understood.</em></h1>
           <p>
-            Calm smart-home control that shows its work<br />before anything changes.
+            Watch it work — Lumen notices the moment, explains why,<br />
+            and waits for your tap before anything changes.
           </p>
           <div className="hero-actions">
             <a className="primary" href="#access">
               Request Early Access <ArrowRight size={15} />
             </a>
-            <a className="ghost" href="#product">See how it works</a>
+            <a className="ghost" href="#product">See the whole app</a>
           </div>
         </FadeIn>
 
-        <div className="hero-phones">
+        <div className="hero-demo">
           <div className="hero-glow" />
-          <motion.div
-            className="hero-phone-side"
-            initial={{ opacity: 0, rotate: -12, x: -24, y: 32 }}
-            animate={{ opacity: 0.55, rotate: -6, x: 0, y: 0 }}
-            transition={{ duration: 1.0, delay: 0.25, ease: [0.21, 0.8, 0.32, 1] }}
-          >
-            <AppScreen screen={screens[0]} />
-          </motion.div>
-          <motion.div
-            className="hero-phone-center"
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1.0, delay: 0.1, ease: [0.21, 0.8, 0.32, 1] }}
-          >
-            <AppScreen screen={screens[3]} featured />
-          </motion.div>
-          <motion.div
-            className="hero-phone-side"
-            initial={{ opacity: 0, rotate: 12, x: 24, y: 32 }}
-            animate={{ opacity: 0.55, rotate: 6, x: 0, y: 0 }}
-            transition={{ duration: 1.0, delay: 0.25, ease: [0.21, 0.8, 0.32, 1] }}
-          >
-            <AppScreen screen={screens[1]} />
-          </motion.div>
+          <LiveDemo />
         </div>
       </section>
 
-      <DeviceShowcaseSection />
+      <AppTourSection />
+      <RoomShowcaseSection />
       <AIChatSection />
-      <AppFlowSection />
       <Waitlist />
 
       <footer className="site-footer">
         <a className="logo" href="#top">
           <SunMedium size={17} /><span>LUMEN</span>
         </a>
-        <p>Native iOS · On-device reasoning · AI assistant · Private beta</p>
+        <p>Native iOS · On-device reasoning · AI assistant soon · Private beta</p>
         <div className="footer-links">
           <a href="/privacy">Privacy</a>
           <a
