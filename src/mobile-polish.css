@@ -1,199 +1,7 @@
-/* Mobile and current-markup polish for the Lumen landing page. */
+/* Mobile and layout polish for the Lumen landing page. */
 
-.challenge-section,
-.status-section,
-.stack-section,
 .waitlist-section {
   padding: 88px clamp(20px, 5vw, 72px);
-}
-
-.challenge-section {
-  position: relative;
-}
-
-.challenge-header {
-  max-width: 900px;
-  margin-bottom: clamp(32px, 6vw, 64px);
-}
-
-.impact-modules {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
-  max-width: 1180px;
-  margin: 0 auto;
-}
-
-.impact-module {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  padding: 26px;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 22px;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.015)),
-    rgba(255, 255, 255, 0.018);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-}
-
-.impact-module::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  background: radial-gradient(circle at 18% 0%, rgba(200, 184, 154, 0.10), transparent 38%);
-  opacity: 0.75;
-}
-
-.impact-module > * {
-  position: relative;
-  z-index: 1;
-}
-
-.module-label {
-  margin: 0 0 18px;
-  color: rgba(200, 184, 154, 0.58);
-  font-size: 11px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-
-.module-title {
-  margin: 0 0 14px;
-  color: rgba(242, 236, 226, 0.94);
-  font-size: clamp(20px, 2.4vw, 28px);
-  line-height: 1.12;
-  letter-spacing: -0.02em;
-}
-
-.module-body {
-  margin: 0;
-  color: rgba(232, 224, 212, 0.54);
-  font-size: 14px;
-  line-height: 1.65;
-}
-
-.module-stat {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: 10px;
-  align-items: center;
-  margin-top: auto;
-  padding-top: 22px;
-}
-
-.stat-value {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 54px;
-  min-height: 38px;
-  padding: 0 12px;
-  border: 1px solid rgba(200, 184, 154, 0.18);
-  border-radius: 999px;
-  background: rgba(200, 184, 154, 0.055);
-  color: rgba(242, 236, 226, 0.88);
-  font-size: 13px;
-  font-weight: 400;
-  white-space: nowrap;
-}
-
-.stat-label {
-  color: rgba(232, 224, 212, 0.38);
-  font-size: 12px;
-  line-height: 1.35;
-}
-
-.status-columns,
-.stack-grid {
-  display: grid;
-  gap: 16px;
-}
-
-.status-columns {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.status-col,
-.stack-item {
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  background: rgba(255, 255, 255, 0.025);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-}
-
-.status-col {
-  min-width: 0;
-  padding: 24px;
-  border-radius: 18px;
-}
-
-.status-col-head {
-  margin-bottom: 18px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  color: rgba(200, 184, 154, 0.8);
-  font-size: 12px;
-  font-weight: 400;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.status-col ul {
-  display: grid;
-  gap: 11px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.status-col li {
-  position: relative;
-  padding-left: 18px;
-  color: rgba(232, 224, 212, 0.58);
-  font-size: 14px;
-  line-height: 1.48;
-}
-
-.status-col li::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0.62em;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: rgba(200, 184, 154, 0.55);
-}
-
-.stack-grid {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.stack-item {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  min-width: 0;
-  padding: 20px;
-  border-radius: 16px;
-}
-
-.stack-item b {
-  color: rgba(232, 224, 212, 0.84);
-  font-size: 14px;
-  font-weight: 400;
-  letter-spacing: 0.02em;
-}
-
-.stack-item span {
-  color: rgba(232, 224, 212, 0.42);
-  font-size: 13px;
-  line-height: 1.45;
 }
 
 .waitlist-inner {
@@ -264,6 +72,12 @@
   font-size: 14px;
   font-weight: 400;
   white-space: nowrap;
+  cursor: pointer;
+}
+
+.waitlist-form button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .waitlist-checks,
@@ -303,24 +117,16 @@
 }
 
 @media (max-width: 900px) {
-  .impact-modules,
-  .status-columns,
-  .stack-grid,
   .waitlist-inner,
   .site-footer {
     grid-template-columns: 1fr;
   }
 
-  .challenge-section,
-  .status-section,
-  .stack-section,
   .waitlist-section {
     padding: 72px 20px;
   }
 
-  .section-copy,
-  .reasoning-copy,
-  .challenge-header {
+  .section-copy {
     max-width: none;
   }
 
@@ -346,158 +152,6 @@
   h2 {
     font-size: clamp(34px, 10.4vw, 44px);
     line-height: 1.04;
-  }
-
-  .challenge-header h2 {
-    max-width: 11ch;
-    font-size: clamp(42px, 13vw, 56px);
-    line-height: 0.98;
-  }
-
-  .challenge-header {
-    margin-bottom: 26px;
-  }
-
-  .hero {
-    padding: 96px 20px 56px;
-    gap: 36px;
-    overflow: hidden;
-  }
-
-  .hero-copy,
-  .section-copy,
-  .reasoning-copy,
-  .challenge-header,
-  .waitlist-copy {
-    align-items: flex-start;
-    text-align: left;
-  }
-
-  .hero-device {
-    transform: none !important;
-    width: min(100%, 340px);
-    margin: 0 auto;
-  }
-
-  .section,
-  .gallery,
-  .challenge-section,
-  .reasoning-section,
-  .status-section,
-  .stack-section,
-  .waitlist-section {
-    padding-left: 20px;
-    padding-right: 20px;
-  }
-
-  .impact-modules {
-    gap: 14px;
-  }
-
-  .impact-module {
-    padding: 20px;
-    border-radius: 18px;
-  }
-
-  .module-label {
-    margin-bottom: 14px;
-    font-size: 10px;
-  }
-
-  .module-title {
-    font-size: 22px;
-    line-height: 1.12;
-  }
-
-  .module-body {
-    font-size: 13.5px;
-    line-height: 1.62;
-  }
-
-  .module-stat {
-    grid-template-columns: 1fr;
-    gap: 8px;
-    padding-top: 18px;
-  }
-
-  .stat-value {
-    justify-self: start;
-    min-width: 0;
-    min-height: 34px;
-    font-size: 12px;
-  }
-
-  .stat-label {
-    font-size: 12px;
-  }
-
-  .reasoning-inner {
-    display: grid;
-    gap: 28px;
-  }
-
-  .reasoning-steps {
-    display: grid;
-    gap: 12px;
-  }
-
-  .reasoning-step,
-  .status-col,
-  .stack-item {
-    border-radius: 16px;
-    background: rgba(255, 255, 255, 0.026);
-  }
-
-  .reasoning-step {
-    display: grid;
-    grid-template-columns: 44px minmax(0, 1fr);
-    gap: 14px;
-    padding: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.07);
-  }
-
-  .step-number {
-    color: rgba(200, 184, 154, 0.52);
-    font-size: 12px;
-    letter-spacing: 0.16em;
-  }
-
-  .step-label {
-    display: block;
-    margin-bottom: 5px;
-    color: rgba(232, 224, 212, 0.78);
-    font-size: 14px;
-  }
-
-  .step-text {
-    margin: 0;
-    color: rgba(232, 224, 212, 0.46);
-    font-size: 13px;
-    line-height: 1.55;
-  }
-
-  .status-columns,
-  .stack-grid {
-    gap: 12px;
-  }
-
-  .status-col,
-  .stack-item {
-    padding: 18px;
-  }
-
-  .status-col li {
-    font-size: 13px;
-  }
-
-  .github-link {
-    text-align: left;
-  }
-
-  .github-link a {
-    width: 100%;
-    justify-content: center;
-    border-radius: 999px;
   }
 
   .waitlist-inner {

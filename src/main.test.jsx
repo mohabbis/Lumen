@@ -19,7 +19,7 @@ describe('Lumen landing page', () => {
     render(<App />);
     const nav = screen.getByRole('navigation');
     expect(within(nav).getByRole('link', { name: /^the app$/i })).toHaveAttribute('href', '#product');
-    expect(within(nav).getByRole('link', { name: /^approach$/i })).toHaveAttribute('href', '#approach');
+    expect(within(nav).getByRole('link', { name: /^ai$/i })).toHaveAttribute('href', '#ai');
     expect(within(nav).getByRole('link', { name: /^privacy$/i })).toHaveAttribute('href', '/privacy');
   });
 
