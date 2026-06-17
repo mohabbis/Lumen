@@ -52,13 +52,15 @@ const aiCallouts = [
 ];
 
 const chapters = [
+  'Try the lights',
   'Arrives home',
   'Lumen explains why',
   'One tap applies',
   'Scene is live',
 ];
 
-const STEP_DURATIONS = [1900, 3300, 3500, 3000];
+const STEP_DURATIONS = [6000, 1900, 3300, 3500, 3000];
+const IDLE_ADVANCE_MS = 2500;
 
 // Primitives
 
@@ -247,23 +249,143 @@ function ScenesScreen() {
   );
 }
 
+function DragSlider({ value, onChange, onInteractStart, onInteractEnd, children }) {
+  const trackRef = useRef(null);
+  const [dragging, setDragging] = useState(false);
+
+  const updateFromEvent = e => {
+    const rect = trackRef.current.getBoundingClientRect();
+    const pct = Math.min(100, Math.max(0, ((e.clientX - rect.left) / rect.width) * 100));
+    onChange(Math.round(pct));
+  };
+
+  const handleDown = e => {
+    e.currentTarget.setPointerCapture(e.pointerId);
+    setDragging(true);
+    onInteractStart();
+    updateFromEvent(e);
+  };
+  const handleMove = e => { if (dragging) updateFromEvent(e); };
+  const handleUp = () => { setDragging(false); onInteractEnd(); };
+
+  return (
+    <div
+      ref={trackRef}
+      className={dragging ? 'slider-track dragging' : 'slider-track'}
+      onPointerDown={handleDown}
+      onPointerMove={handleMove}
+      onPointerUp={handleUp}
+      onPointerCancel={handleUp}
+    >
+      <span style={{ width: `${value}%` }} />
+      <i style={{ left: `${value}%` }} />
+      {children}
+    </div>
+  );
+}
+
+function InteractiveRoomScreen({
+  lightOn, onToggle, brightness, onBrightness, colorTemp, onColorTemp,
+  onInteractStart, onInteractEnd,
+}) {
+  const warm = [212, 130, 90];
+  const cool = [120, 170, 230];
+  const t = colorTemp / 100;
+  const rgb = warm.map((w, i) => Math.round(w + (cool[i] - w) * t));
+  const glowOpacity = lightOn ? 0.15 + (brightness / 100) * 0.55 : 0.04;
+
+  return (
+    <div className="app-screen">
+      <div
+        className="room-glow"
+        style={{
+          background: `radial-gradient(ellipse at 50% 0%, rgba(${rgb.join(',')}, ${glowOpacity}) 0%, transparent 70%)`,
+        }}
+      />
+      <div className="app-topbar">
+        <span className="app-wordmark">LIVING ROOM</span>
+        <span className="try-it-pill">Try it</span>
+      </div>
+      <h4 className="app-greeting small">Living Room</h4>
+      <p className="app-label">Ceiling Light</p>
+
+      <div className="control-card">
+        <div className="control-row">
+          <span>Power</span>
+          <span
+            className={lightOn ? 'toggle on' : 'toggle'}
+            onClick={() => { onInteractStart(); onToggle(); onInteractEnd(); }}
+          >
+            <span />
+          </span>
+        </div>
+
+        <div className="control-slider">
+          <SunMedium size={11} className="dim" />
+          <DragSlider
+            value={brightness}
+            onChange={onBrightness}
+            onInteractStart={onInteractStart}
+            onInteractEnd={onInteractEnd}
+          />
+          <SunMedium size={13} />
+          <small>{brightness}%</small>
+        </div>
+
+        <div className="control-slider">
+          <span className="warm">Warm</span>
+          <DragSlider
+            value={colorTemp}
+            onChange={onColorTemp}
+            onInteractStart={onInteractStart}
+            onInteractEnd={onInteractEnd}
+          />
+          <span className="cool">Cool</span>
+          <small>{Math.round(1800 + (colorTemp / 100) * 4700)}K</small>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // The live demo — auto-playing recreation of the real app
 
 function LiveDemo() {
   const [step, setStep] = useState(0);
   const [paused, setPaused] = useState(false);
   const reducedRef = useRef(false);
+  const lastInteractionRef = useRef(Date.now());
+  const stepStartRef = useRef(Date.now());
+
+  const [lightOn, setLightOn] = useState(true);
+  const [brightness, setBrightness] = useState(62);
+  const [colorTemp, setColorTemp] = useState(40);
+
+  const markInteraction = () => { lastInteractionRef.current = Date.now(); };
 
   useEffect(() => {
     reducedRef.current =
       typeof window !== 'undefined' &&
       window.matchMedia &&
       window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reducedRef.current) setStep(1);
   }, []);
 
   useEffect(() => {
+    stepStartRef.current = Date.now();
+  }, [step]);
+
+  useEffect(() => {
     if (paused || reducedRef.current) return undefined;
+
+    if (step === 0) {
+      const id = setInterval(() => {
+        const idleEnough = Date.now() - lastInteractionRef.current >= IDLE_ADVANCE_MS;
+        const dwelledEnough = Date.now() - stepStartRef.current >= STEP_DURATIONS[0];
+        if (idleEnough && dwelledEnough) setStep(1);
+      }, 250);
+      return () => clearInterval(id);
+    }
+
     const id = setTimeout(
       () => setStep(s => (s + 1) % STEP_DURATIONS.length),
       STEP_DURATIONS[step],
@@ -271,8 +393,7 @@ function LiveDemo() {
     return () => clearTimeout(id);
   }, [step, paused]);
 
-  const onHome = step !== 3;
-  const activeTab = step === 3 ? 'Scenes' : 'Home';
+  const activeTab = step === 4 ? 'Scenes' : 'Home';
 
   return (
     <div className="live-demo">
@@ -284,17 +405,28 @@ function LiveDemo() {
         <div className="phone-screen">
           <StatusBar />
           <div className="app-stage">
-            {onHome ? (
+            {step === 0 ? (
+              <InteractiveRoomScreen
+                lightOn={lightOn}
+                onToggle={() => setLightOn(o => !o)}
+                brightness={brightness}
+                onBrightness={setBrightness}
+                colorTemp={colorTemp}
+                onColorTemp={setColorTemp}
+                onInteractStart={markInteraction}
+                onInteractEnd={markInteraction}
+              />
+            ) : step <= 3 ? (
               <DashboardScreen
-                showWelcome={step === 0}
-                highlight={step === 1}
-                dimmed={step === 2}
+                showWelcome={step === 1}
+                highlight={step === 2}
+                dimmed={step === 3}
               />
             ) : (
               <ScenesScreen />
             )}
             <AnimatePresence>
-              {step === 2 && <ReasoningSheet key="sheet" />}
+              {step === 3 && <ReasoningSheet key="sheet" />}
             </AnimatePresence>
           </div>
           <TabBar active={activeTab} />
