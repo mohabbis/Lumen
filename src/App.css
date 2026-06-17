@@ -2043,6 +2043,8 @@ p {
   display: flex;
   flex-direction: column;
   gap: 7px;
+  position: relative;
+  z-index: 1;
 }
 
 .control-row {
@@ -2060,6 +2062,7 @@ p {
   background: rgba(255,255,255,0.09);
   position: relative;
   flex-shrink: 0;
+  cursor: pointer;
 }
 
 .toggle span {
@@ -2114,6 +2117,8 @@ p {
   border-radius: 99px;
   background: rgba(255,255,255,0.06);
   position: relative;
+  touch-action: none;
+  cursor: pointer;
 }
 
 .slider-track span {
@@ -2133,6 +2138,37 @@ p {
   background: #C49A6C;
   border: 1.5px solid rgba(14,8,25,0.75);
   font-style: normal;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.slider-track.dragging i {
+  transform: translate(-50%, -50%) scale(1.35);
+  box-shadow: 0 0 0 5px rgba(196,154,108,0.18);
+}
+
+/* ===== INTERACTIVE ROOM ===== */
+
+.room-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.try-it-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 99px;
+  background: rgba(196,154,108,0.16);
+  border: 1px solid rgba(196,154,108,0.32);
+  color: #C49A6C;
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-left: auto;
+  flex-shrink: 0;
+  animation: pulseGlow 2.2s ease-in-out infinite;
 }
 
 /* ===== COMING PILL ===== */
