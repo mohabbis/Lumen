@@ -1555,6 +1555,7 @@ p {
   position: absolute;
   inset: 0;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   font-size: 14px;
@@ -1566,6 +1567,19 @@ p {
   z-index: 10;
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
+}
+
+.welcome-caption {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+  font-size: 8px;
+  font-family: 'Archivo', sans-serif;
+  font-variation-settings: 'opsz' normal;
+  color: rgba(232,224,212,0.4);
+  text-transform: none;
+  letter-spacing: 0;
 }
 
 /* ===== TAP RIPPLE ===== */
