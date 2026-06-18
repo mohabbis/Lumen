@@ -2,9 +2,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   Activity, ArrowRight, BedDouble, Blinds, ChevronRight, DoorClosed, DoorOpen,
-  Droplets, Home, Laptop, Lightbulb, Lock, Menu, MessageCircle, Moon, MoonStar,
-  Plus, Popcorn, Send, Settings, Sofa, Sparkle, Sparkles, SunMedium, Sunrise,
-  Thermometer, Utensils, X, Zap,
+  Droplets, Home, Laptop, Lightbulb, Lock, MapPin, Menu, MessageCircle, Moon,
+  MoonStar, Plus, Popcorn, Send, Settings, Sofa, Sparkle, Sparkles, SunMedium,
+  Sunrise, Thermometer, Utensils, X, Zap,
 } from 'lucide-react';
 import './App.css';
 
@@ -272,6 +272,9 @@ function DashboardScreen({ showWelcome = false, highlight = false, dimmed = fals
           transition={{ type: 'spring', stiffness: 220, damping: 22 }}
         >
           🏠 Welcome Home!
+          <span className="welcome-caption">
+            <MapPin size={9} /> Detected automatically — no tap needed
+          </span>
         </motion.div>
       )}
     </div>
