@@ -25,10 +25,38 @@ const favoriteRooms = [
 ];
 
 const scenes = [
-  { name: 'Morning', icon: Sunrise, devices: '4 devices', mood: 'Bright & energising' },
-  { name: 'Evening', icon: MoonStar, devices: '3 devices', mood: 'Warm & dim' },
-  { name: 'Movie Night', icon: Popcorn, devices: '5 devices', mood: 'Dim & ambient' },
-  { name: 'Sleep', icon: Moon, devices: '6 devices', mood: 'All lights off' },
+  {
+    name: 'Morning', icon: Sunrise, devices: '4 devices', mood: 'Bright & energising',
+    actions: [
+      { capability: 'Power', detail: 'On' },
+      { capability: 'Brightness', detail: '90%' },
+      { capability: 'Temperature', detail: '5000K' },
+    ],
+  },
+  {
+    name: 'Evening', icon: MoonStar, devices: '3 devices', mood: 'Warm & dim',
+    actions: [
+      { capability: 'Power', detail: 'On' },
+      { capability: 'Brightness', detail: '40%' },
+      { capability: 'Temperature', detail: '2700K' },
+    ],
+  },
+  {
+    name: 'Movie Night', icon: Popcorn, devices: '5 devices', mood: 'Dim & ambient',
+    actions: [
+      { capability: 'Brightness', detail: '12%' },
+      { capability: 'Color', detail: 'Custom color' },
+      { capability: 'Lock', detail: 'Locked' },
+    ],
+  },
+  {
+    name: 'Sleep', icon: Moon, devices: '6 devices', mood: 'All lights off',
+    actions: [
+      { capability: 'Power', detail: 'Off' },
+      { capability: 'Lock', detail: 'Locked' },
+      { capability: 'Mode', detail: 'Away' },
+    ],
+  },
 ];
 
 const reasoningSignals = [
@@ -275,7 +303,40 @@ function ReasoningSheet() {
   );
 }
 
-function ScenesScreen() {
+function SceneApprovalSheet({ scene, onApply, onCancel }) {
+  return (
+    <motion.div
+      className="reason-sheet"
+      initial={{ y: '100%' }}
+      animate={{ y: 0 }}
+      exit={{ y: '100%' }}
+      transition={{ type: 'spring', stiffness: 320, damping: 34 }}
+    >
+      <span className="sheet-handle" />
+      <div className="sheet-icon"><scene.icon size={22} /></div>
+      <p className="sheet-kicker">Apply scene</p>
+      <h4 className="sheet-title">{scene.name}</h4>
+
+      <p className="app-label sheet-signals-label">Lumen will</p>
+      <div className="signal-list">
+        {scene.actions.map(({ capability, detail }) => (
+          <div className="approval-action-row" key={capability}>
+            <span className="approval-action-capability">{capability}</span>
+            <span className="approval-action-detail">{detail}</span>
+          </div>
+        ))}
+      </div>
+
+      <button className="sheet-apply" onClick={onApply}>
+        Apply {scene.name}
+        <span className="tap-ripple apply-ripple" />
+      </button>
+      <button className="sheet-dismiss" onClick={onCancel}>Cancel</button>
+    </motion.div>
+  );
+}
+
+function ScenesScreen({ onSelectScene }) {
   return (
     <div className="app-screen">
       <div className="app-topbar">
@@ -293,16 +354,23 @@ function ScenesScreen() {
 
       <p className="app-label">All Scenes</p>
       <div className="scene-list">
-        {scenes.map(({ name, icon: Icon, devices: d, mood }) => (
-          <div className={name === 'Evening' ? 'scene-row active' : 'scene-row'} key={name}>
-            <div className="scene-icon"><Icon size={16} /></div>
-            <div className="scene-meta">
-              <b>{name}</b>
-              <span>{d} · {mood}</span>
+        {scenes.map(scene => {
+          const { name, icon: Icon, devices: d, mood } = scene;
+          return (
+            <div
+              className={name === 'Evening' ? 'scene-row active' : 'scene-row'}
+              key={name}
+              onClick={() => onSelectScene(scene)}
+            >
+              <div className="scene-icon"><Icon size={16} /></div>
+              <div className="scene-meta">
+                <b>{name}</b>
+                <span>{d} · {mood}</span>
+              </div>
+              <ChevronRight size={13} />
             </div>
-            <ChevronRight size={13} />
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
@@ -419,8 +487,14 @@ function LiveDemo() {
   const [lightOn, setLightOn] = useState(true);
   const [brightness, setBrightness] = useState(62);
   const [colorTemp, setColorTemp] = useState(40);
+  const [selectedScene, setSelectedScene] = useState(null);
 
   const markInteraction = () => { lastInteractionRef.current = Date.now(); };
+
+  const closeApproval = () => {
+    setSelectedScene(null);
+    markInteraction();
+  };
 
   useEffect(() => {
     reducedRef.current =
@@ -434,7 +508,7 @@ function LiveDemo() {
   }, [step]);
 
   useEffect(() => {
-    if (paused || reducedRef.current) return undefined;
+    if (paused || reducedRef.current || selectedScene) return undefined;
 
     if (step === 0) {
       const id = setInterval(() => {
@@ -450,7 +524,7 @@ function LiveDemo() {
       STEP_DURATIONS[step],
     );
     return () => clearTimeout(id);
-  }, [step, paused]);
+  }, [step, paused, selectedScene]);
 
   const activeTab = step === 4 ? 'Scenes' : 'Home';
 
@@ -482,10 +556,18 @@ function LiveDemo() {
                 dimmed={step === 3}
               />
             ) : (
-              <ScenesScreen />
+              <ScenesScreen onSelectScene={setSelectedScene} />
             )}
             <AnimatePresence>
               {step === 3 && <ReasoningSheet key="sheet" />}
+              {selectedScene && (
+                <SceneApprovalSheet
+                  key="approval"
+                  scene={selectedScene}
+                  onApply={closeApproval}
+                  onCancel={closeApproval}
+                />
+              )}
             </AnimatePresence>
           </div>
           <TabBar active={activeTab} />
