@@ -62,6 +62,48 @@ const chapters = [
 const STEP_DURATIONS = [6000, 1900, 3300, 3500, 3000];
 const IDLE_ADVANCE_MS = 2500;
 
+// Rhythm card — mirrors the real app's TimeOfDay enum + RhythmTiming math
+// (Lumen/Models/TimeOfDay.swift, Lumen/Components/NowNextCard.swift)
+
+const RHYTHM_BLOCKS = [
+  { name: 'Dawn', description: 'Your home is waking up.', accent: '#D4825A', startHour: 5, endHour: 7, greeting: 'Good morning' },
+  { name: 'Morning', description: 'Settling into the day.', accent: '#C4956A', startHour: 7, endHour: 12, greeting: 'Good morning' },
+  { name: 'Afternoon', description: 'Steady, bright, alert.', accent: '#B8A08A', startHour: 12, endHour: 17, greeting: 'Good afternoon' },
+  { name: 'Evening', description: 'Winding down softly.', accent: '#D4825A', startHour: 17, endHour: 21, greeting: 'Good evening' },
+  { name: 'Night', description: 'Quiet and resting.', accent: '#8B5E3C', startHour: 21, endHour: 5, greeting: 'Good night' },
+];
+
+function hexToRgb(hex) {
+  const v = parseInt(hex.slice(1), 16);
+  return [(v >> 16) & 255, (v >> 8) & 255, v & 255];
+}
+
+function getRhythmTiming(date) {
+  const fractional = date.getHours() + date.getMinutes() / 60;
+  const index = RHYTHM_BLOCKS.findIndex(({ startHour, endHour }) =>
+    startHour < endHour
+      ? fractional >= startHour && fractional < endHour
+      : fractional >= startHour || fractional < endHour,
+  );
+  const block = RHYTHM_BLOCKS[index];
+  const next = RHYTHM_BLOCKS[(index + 1) % RHYTHM_BLOCKS.length];
+
+  const span = block.startHour > block.endHour
+    ? (24 - block.startHour) + block.endHour
+    : block.endHour - block.startHour;
+  const into = fractional >= block.startHour
+    ? fractional - block.startHour
+    : (24 - block.startHour) + fractional;
+  const progress = Math.min(1, Math.max(0, into / span));
+
+  const nextStart = new Date(date);
+  nextStart.setHours(next.startHour, 0, 0, 0);
+  if (nextStart <= date) nextStart.setDate(nextStart.getDate() + 1);
+  const nextStartFormatted = nextStart.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+
+  return { block, next, progress, nextStartFormatted };
+}
+
 // Primitives
 
 function FadeIn({ children, delay = 0, className = '' }) {
@@ -104,6 +146,16 @@ function TabBar({ active }) {
 // Real-app screen recreations
 
 function DashboardScreen({ showWelcome = false, highlight = false, dimmed = false }) {
+  const [now, setNow] = useState(() => new Date());
+
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 30000);
+    return () => clearInterval(id);
+  }, []);
+
+  const { block, next, progress, nextStartFormatted } = getRhythmTiming(now);
+  const [r, g, b] = hexToRgb(block.accent);
+
   return (
     <div className={dimmed ? 'app-screen dimmed' : 'app-screen'}>
       <div className="app-topbar">
@@ -113,7 +165,7 @@ function DashboardScreen({ showWelcome = false, highlight = false, dimmed = fals
         </span>
       </div>
 
-      <h4 className="app-greeting">Good evening, Home</h4>
+      <h4 className="app-greeting">{block.greeting}, Home</h4>
       <p className="app-subtitle">7 of 8 devices online — all looking good.</p>
 
       <div className="app-stats">
@@ -124,17 +176,24 @@ function DashboardScreen({ showWelcome = false, highlight = false, dimmed = fals
       <div className="nownext-card">
         <p className="app-label">Rhythm</p>
         <div className="nownext-now">
-          <span className="nownext-tag now">Now</span>
+          <span
+            className="nownext-tag now"
+            style={{ color: block.accent, background: `rgba(${r},${g},${b},0.16)`, borderColor: `rgba(${r},${g},${b},0.22)` }}
+          >
+            Now
+          </span>
           <div>
-            <b>Evening</b>
-            <span>Winding down softly.</span>
+            <b>{block.name}</b>
+            <span>{block.description}</span>
           </div>
         </div>
-        <div className="nownext-bar"><span style={{ width: '68%' }} /></div>
+        <div className="nownext-bar">
+          <span style={{ width: `${Math.max(4, progress * 100)}%`, background: `linear-gradient(90deg, ${block.accent}, rgba(${r},${g},${b},0.45))` }} />
+        </div>
         <div className="nownext-next">
           <span className="nownext-tag next">Next</span>
-          <b>Night</b>
-          <span>at 9:00 PM</span>
+          <b>{next.name}</b>
+          <span>at {nextStartFormatted}</span>
         </div>
       </div>
 
