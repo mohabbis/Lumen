@@ -1920,6 +1920,37 @@ p {
   text-transform: uppercase;
 }
 
+.capability-chips-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 56px;
+}
+
+.capability-chips-wrap .eyebrow {
+  margin-bottom: 16px;
+}
+
+.capability-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  max-width: 560px;
+}
+
+.capability-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 9px;
+  border-radius: 99px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  font-size: 9px;
+  color: rgba(232,224,212,0.45);
+}
+
 /* ===== ROOM SHOWCASE SECTION ===== */
 
 .room-show-section {
