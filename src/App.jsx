@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
-  ArrowRight, BedDouble, ChevronRight, DoorOpen, Home, Laptop, Lightbulb,
-  Lock, Menu, MessageCircle, Moon, MoonStar, Plus, Popcorn, Send, Settings,
-  Sofa, Sparkle, Sparkles, SunMedium, Sunrise, Thermometer, Utensils, X, Zap,
+  Activity, ArrowRight, BedDouble, Blinds, ChevronRight, DoorClosed, DoorOpen,
+  Droplets, Home, Laptop, Lightbulb, Lock, Menu, MessageCircle, Moon, MoonStar,
+  Plus, Popcorn, Send, Settings, Sofa, Sparkle, Sparkles, SunMedium, Sunrise,
+  Thermometer, Utensils, X, Zap,
 } from 'lucide-react';
 import './App.css';
 
@@ -77,6 +78,14 @@ const aiCallouts = [
   { icon: Zap, label: 'Instant', sub: 'Commands sent live' },
   { icon: MessageCircle, label: 'Conversational', sub: 'Plain language control' },
   { icon: Sparkles, label: 'Suggests scenes', sub: 'Recommends, you approve' },
+];
+
+const otherCapabilities = [
+  { label: 'Window blinds', icon: Blinds },
+  { label: 'Door locks', icon: Lock },
+  { label: 'Motion sensors', icon: Activity },
+  { label: 'Door sensors', icon: DoorClosed },
+  { label: 'Humidity', icon: Droplets },
 ];
 
 const chapters = [
@@ -704,6 +713,17 @@ function AppTourSection() {
           </FadeIn>
         ))}
       </div>
+      <FadeIn className="capability-chips-wrap">
+        <p className="eyebrow">Also speaks to</p>
+        <div className="capability-chips">
+          {otherCapabilities.map(({ label, icon: Icon }) => (
+            <span className="capability-chip" key={label}>
+              <Icon size={11} />
+              {label}
+            </span>
+          ))}
+        </div>
+      </FadeIn>
     </section>
   );
 }
@@ -714,6 +734,7 @@ function RoomShowcaseSection() {
       <FadeIn className="section-copy centered">
         <p className="eyebrow">Your home at a glance</p>
         <h2>Every room,<br /><em>one glance.</em></h2>
+        <p className="section-note">Works the moment you open it — no smart hardware required.</p>
       </FadeIn>
       <div className="room-show-grid">
         {favoriteRooms.map(({ name, icon: Icon, count }, i) => (
