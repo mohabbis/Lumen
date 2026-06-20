@@ -3,8 +3,8 @@ import { AnimatePresence, motion } from 'framer-motion';
 import {
   Activity, ArrowRight, BedDouble, Blinds, ChevronRight, DoorClosed, DoorOpen,
   Droplets, Home, Laptop, Lightbulb, Lock, MapPin, Menu, MessageCircle, Moon,
-  MoonStar, Plus, Popcorn, Send, Settings, Sofa, Sparkle, Sparkles, SunMedium,
-  Sunrise, Thermometer, Utensils, X, Zap,
+  MoonStar, Plus, Popcorn, Repeat, Send, Settings, Sofa, Sparkle, Sparkles,
+  SunMedium, Sunrise, Thermometer, Utensils, X, Zap,
 } from 'lucide-react';
 import './App.css';
 
@@ -98,6 +98,35 @@ const chapters = [
 
 const STEP_DURATIONS = [6000, 1900, 3300, 3500, 3000];
 const IDLE_ADVANCE_MS = 2500;
+
+const actionFlowModes = [
+  {
+    tag: 'Awareness',
+    icon: Activity,
+    headline: 'Notices the moment',
+    description: 'Time of day, who is home, and which devices are reachable, read continuously in the background.',
+  },
+  {
+    tag: 'Reason',
+    icon: Sparkle,
+    headline: 'Explains the why',
+    description: 'Signals turn into a plain language explanation you can read, question, or dismiss.',
+  },
+  {
+    tag: 'Execution',
+    icon: Zap,
+    headline: 'Waits for your tap',
+    description: 'One tap applies the scene. Nothing changes on a screen until you approve it.',
+  },
+  {
+    tag: 'Flow',
+    icon: Repeat,
+    headline: 'Keeps the rhythm going',
+    description: 'The outcome feeds back into awareness, so the next suggestion fits the moment instead of repeating the last one.',
+  },
+];
+
+const FLOW_ADVANCE_MS = 3200;
 
 // Rhythm card — mirrors the real app's TimeOfDay enum + RhythmTiming math
 // (Lumen/Models/TimeOfDay.swift, Lumen/Components/NowNextCard.swift)
@@ -755,6 +784,60 @@ function RoomShowcaseSection() {
   );
 }
 
+function ActionFlowSection() {
+  const [active, setActive] = useState(0);
+  const [paused, setPaused] = useState(false);
+
+  useEffect(() => {
+    if (paused) return undefined;
+    const id = setInterval(() => {
+      setActive(a => (a + 1) % actionFlowModes.length);
+    }, FLOW_ADVANCE_MS);
+    return () => clearInterval(id);
+  }, [paused]);
+
+  return (
+    <section
+      className="action-flow-section"
+      id="flow"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+    >
+      <FadeIn className="section-copy centered">
+        <p className="eyebrow">How Lumen thinks</p>
+        <h2>One loop,<br /><em>four modes.</em></h2>
+        <p className="section-note">Every suggestion moves through the same loop, in order, every time.</p>
+      </FadeIn>
+
+      <div className="flow-row">
+        {actionFlowModes.map(({ tag, icon: Icon, headline, description }, i) => (
+          <FadeIn key={tag} delay={i * 0.06}>
+            <button
+              type="button"
+              className={`flow-card ${active === i ? 'active' : ''}`}
+              onClick={() => setActive(i)}
+            >
+              <div className="flow-card-top">
+                <span className="flow-num">0{i + 1}</span>
+                <Icon size={16} />
+              </div>
+              <b className="flow-tag">{tag}</b>
+              <span className="flow-headline">{headline}</span>
+              <p className="flow-description">{description}</p>
+            </button>
+          </FadeIn>
+        ))}
+      </div>
+
+      <div className="flow-progress">
+        {actionFlowModes.map((_, i) => (
+          <span key={i} className={active === i ? 'active' : ''} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function AIChatScreen() {
   return (
     <div className="phone phone-featured phone-app">
@@ -990,6 +1073,7 @@ export function App() {
 
       <AppTourSection />
       <RoomShowcaseSection />
+      <ActionFlowSection />
       <AIChatSection />
       <Waitlist />
 
