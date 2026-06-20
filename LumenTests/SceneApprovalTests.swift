@@ -134,4 +134,15 @@ final class SceneApprovalTests: XCTestCase {
         let desc = SceneActionDescription(action: action)
         XCTAssertEqual(desc.capability, "CustomThing")
     }
+
+    func testDescriptionForLockStateRendersLocked() {
+        let action = SceneAction(
+            deviceID: UUID(),
+            capabilityID: CapabilityID("lockState"),
+            payload: .lockState(LockState.allCases[0])
+        )
+        let desc = SceneActionDescription(action: action)
+        XCTAssertEqual(desc.capability, "Lock")
+        XCTAssertEqual(desc.detail, "Locked")
+    }
 }

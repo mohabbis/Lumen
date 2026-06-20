@@ -14,6 +14,7 @@ struct HomeDashboardView: View {
     @State private var isRenamingHome = false
     @State private var renameText = ""
     @State private var isShowingReasoning = false
+    @State private var isShowingAction = false
     @State private var statusOverlayID = UUID()
     @State private var isStatusOverlayVisible = false
 
@@ -62,6 +63,40 @@ struct HomeDashboardView: View {
         .sheet(isPresented: $viewModel.isShowingAddRoom) {
             AddRoomView { name, type, level in
                 viewModel.addRoom(name: name, type: type, level: level)
+            }
+        }
+        .sheet(isPresented: $isShowingReasoning) {
+            LumenReasoningView(
+                reasoning: reasoning,
+                onApply: { isShowingAction = true },
+                onDismiss: { isShowingReasoning = false }
+            )
+        }
+        .sheet(isPresented: $isShowingAction) {
+            if let sceneName = suggestedSceneName, let scene = findScene(named: sceneName) {
+                LumenActionView(
+                    scene: scene,
+                    onConfirm: { handleLumenSuggestion() },
+                    onCancel: { isShowingAction = false }
+                )
+            } else {
+                // Fallback if the suggested scene becomes unavailable mid-flow.
+                VStack(spacing: 12) {
+                    Text("Scene not available")
+                        .font(.title2)
+                        .foregroundStyle(.white)
+                    Button("Done") {
+                        isShowingAction = false
+                        isShowingReasoning = false
+                    }
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+                    .background(Color(hex: "#C49A6C"), in: RoundedRectangle(cornerRadius: 18))
+                }
+                .padding(24)
+                .background(Color(hex: "#0E0819").ignoresSafeArea())
             }
         }
         .onAppear {
@@ -331,21 +366,12 @@ struct HomeDashboardView: View {
     // MARK: - Lumen Suggestion Handler
 
     private func handleLumenSuggestion() {
-        switch timeOfDay {
-        case .dawn, .morning:
-            if let morningScene = findScene(named: "Morning") {
-                Task { await viewModel.executeScene(morningScene) }
-            }
-        case .afternoon:
-            break // No automation suggested for afternoon; user navigates manually.
-        case .evening:
-            if let eveningScene = findScene(named: "Evening") {
-                Task { await viewModel.executeScene(eveningScene) }
-            }
-        case .night:
-            if let sleepScene = findScene(named: "Sleep") {
-                Task { await viewModel.executeScene(sleepScene) }
-            }
+        isShowingAction = false
+        isShowingReasoning = false
+
+        // Execute the same scene the Action sheet displayed — single source of truth.
+        if let sceneName = suggestedSceneName, let scene = findScene(named: sceneName) {
+            Task { await viewModel.executeScene(scene) }
         }
     }
 
