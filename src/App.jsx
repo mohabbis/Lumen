@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import {
   Activity, ArrowRight, BedDouble, Blinds, ChevronRight, DoorClosed, DoorOpen,
   Droplets, Home, Laptop, Lightbulb, Lock, MapPin, Menu, MessageCircle, Moon,
-  MoonStar, Plus, Popcorn, Repeat, Send, Settings, Sofa, Sparkle, Sparkles,
+  MoonStar, Plus, Popcorn, Send, Settings, Sofa, Sparkle, Sparkles,
   SunMedium, Sunrise, Thermometer, Utensils, X, Zap,
 } from 'lucide-react';
 import './App.css';
@@ -107,7 +107,7 @@ const actionFlowModes = [
     description: 'Time of day, who is home, and which devices are reachable, read continuously in the background.',
   },
   {
-    tag: 'Reason',
+    tag: 'Reasoning',
     icon: Sparkle,
     headline: 'Explains the why',
     description: 'Signals turn into a plain language explanation you can read, question, or dismiss.',
@@ -116,13 +116,13 @@ const actionFlowModes = [
     tag: 'Execution',
     icon: Zap,
     headline: 'Waits for your tap',
-    description: 'One tap applies the scene. Nothing changes on a screen until you approve it.',
+    description: 'One tap approves the scene. Nothing changes on a screen until you say so.',
   },
   {
-    tag: 'Flow',
-    icon: Repeat,
-    headline: 'Keeps the rhythm going',
-    description: 'The outcome feeds back into awareness, so the next suggestion fits the moment instead of repeating the last one.',
+    tag: 'Action',
+    icon: Lightbulb,
+    headline: 'Reaches the devices',
+    description: 'Lights, locks, and thermostats update to match what you approved, then awareness picks up again.',
   },
 ];
 
