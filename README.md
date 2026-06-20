@@ -33,6 +33,20 @@ Native SwiftUI / SwiftData app, iPhone + iPad. Local-first; CloudKit sync is pro
 
 ---
 
+## Roadmap to launch
+
+Lumen is on a deliberately gradual path from "Not yet" to public release:
+
+1. **Close remaining gaps** — on-device reasoning engine, conversational AI assistant, CloudKit sync hardening.
+2. **TestFlight beta** — internal, then external via the marketing site waitlist.
+3. **App Store submission** — after beta feedback is incorporated.
+4. **Public launch** — iOS App Store, with site copy updated accordingly.
+5. **Post-launch** — multi-home support, Matter integration, continued reasoning-quality improvements.
+
+Full month-by-month detail, including a note on how Lumen's roadmap relates to the broader smart-home AI landscape, lives in [`ROADMAP.md`](ROADMAP.md).
+
+---
+
 ## Repository layout
 
 ```
