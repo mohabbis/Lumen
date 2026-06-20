@@ -6,7 +6,7 @@ Guidance for Claude Code when working in this repository.
 
 A calm home companion for iOS. Lumen builds a local model of a home — rooms, devices, presence, time of day — and surfaces gentle, explainable suggestions instead of silent automations. It controls HomeKit devices when they're present and stays useful when they aren't (rhythm/awareness layer works without any smart hardware).
 
-**Audience and tone:** calm, low cognitive load, neurodivergent-friendly. Design references are Apple Design Award–tier apps like Tiimo. Not a power-user HomeKit dashboard, not a tinkerer tool.
+**Audience and tone:** calm, low cognitive load, neurodivergent-friendly. Design references are Apple Design Award–tier apps built for ADHD/autistic and sensory-sensitive users. Not a power-user HomeKit dashboard, not a tinkerer tool.
 
 **Consent before action** is a core principle: nothing fires from a tap without a confirmation surface (`SceneApprovalSheet` for direct scene runs, `LumenReasoningView` for ambient suggestions).
 
@@ -87,7 +87,7 @@ All services are `@Observable @MainActor` classes passed through the SwiftUI env
 
 These are the views that distinguish Lumen from a generic HomeKit controller:
 
-- **`Lumen/Components/NowNextCard.swift`** — Tiimo-style daily rhythm card on the dashboard. Shows current time block (e.g. "Evening") with a progress bar and the next transition ("Night at 9:00 PM"). Math lives in `RhythmTiming` (calendar-injectable, unit-tested).
+- **`Lumen/Components/NowNextCard.swift`** — Calm daily rhythm card on the dashboard. Shows current time block (e.g. "Evening") with a progress bar and the next transition ("Night at 9:00 PM"). Math lives in `RhythmTiming` (calendar-injectable, unit-tested).
 - **`Lumen/Features/Scenes/SceneApprovalSheet.swift`** — Sheet that opens when a scene row is tapped. Shows scene name + humanized action list (e.g. "Power · On", "Brightness · 40%"). Confirm or cancel. Humanization lives in `SceneActionDescription` (pure, unit-tested).
 - **`Lumen/Features/Home/LumenReasoningView.swift`** — Sheet that opens when the "Lumen noticed" dashboard card is tapped. Shows the signals (time of day, presence, reachable devices, matching scene) behind the current suggestion, with an explicit Apply button. Logic lives in `ReasoningCalculator` (pure, unit-tested).
 
