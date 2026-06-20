@@ -12,7 +12,7 @@ describe('Lumen landing page', () => {
 
   it('renders the hero beta pill', () => {
     render(<App />);
-    expect(screen.getByText(/coming soon — iOS private beta/i)).toBeInTheDocument();
+    expect(screen.getByText(/coming soon · iOS private beta/i)).toBeInTheDocument();
   });
 
   it('renders core nav links', () => {

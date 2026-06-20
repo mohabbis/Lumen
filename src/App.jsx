@@ -203,7 +203,7 @@ function DashboardScreen({ showWelcome = false, highlight = false, dimmed = fals
       </div>
 
       <h4 className="app-greeting">{block.greeting}, Home</h4>
-      <p className="app-subtitle">7 of 8 devices online — all looking good.</p>
+      <p className="app-subtitle">7 of 8 devices online. All looking good.</p>
 
       <div className="app-stats">
         <span><b>4</b> rooms · <b>8</b> devices · <b>5</b> automations</span>
@@ -273,7 +273,7 @@ function DashboardScreen({ showWelcome = false, highlight = false, dimmed = fals
         >
           🏠 Welcome Home!
           <span className="welcome-caption">
-            <MapPin size={9} /> Detected automatically — no tap needed
+            <MapPin size={9} /> Detected automatically, no tap needed
           </span>
         </motion.div>
       )}
@@ -707,7 +707,7 @@ function AppTourSection() {
       <FadeIn className="section-copy centered">
         <p className="eyebrow">The whole app</p>
         <h2>More than<br />a dashboard.</h2>
-        <p className="section-note">Built for low cognitive load — fewer decisions, less noise, one clear next step.</p>
+        <p className="section-note">Built for low cognitive load: fewer decisions, less noise, one clear next step.</p>
       </FadeIn>
       <div className="tour-row">
         {tour.map(({ screen, label }, i) => (
@@ -738,7 +738,7 @@ function RoomShowcaseSection() {
       <FadeIn className="section-copy centered">
         <p className="eyebrow">Your home at a glance</p>
         <h2>Every room,<br /><em>one glance.</em></h2>
-        <p className="section-note">Works the moment you open it — no smart hardware required.</p>
+        <p className="section-note">Works the moment you open it. No smart hardware required.</p>
       </FadeIn>
       <div className="room-show-grid">
         {favoriteRooms.map(({ name, icon: Icon, count }, i) => (
@@ -806,13 +806,13 @@ function AIChatSection() {
           <p className="eyebrow">Coming soon · Built-in AI</p>
           <h2>Describe it.<br /><em>You approve it.</em></h2>
           <p className="ai-chat-lede">
-            A conversational layer is on the way — describe what you want in
+            A conversational layer is on the way. Describe what you want in
             plain language, and Lumen proposes the scene, shows its
             reasoning, and waits for your tap. No silent automation, ever.
           </p>
           <p className="ai-chat-contrast">
             Other smart-home apps are racing toward fully automatic AI. Lumen
-            is built the other way — calm, explainable, and never a surprise.
+            is built the other way: calm, explainable, and never a surprise.
             Inspired by apps like Tiimo, designed for ADHD and autistic
             minds, and just as useful if that's not you.
           </p>
@@ -967,12 +967,11 @@ export function App() {
         <FadeIn className="hero-copy">
           <div className="pill">
             <span />
-            Coming soon — iOS private beta
+            Coming soon · iOS private beta
           </div>
-          <p className="hero-kicker">Designed calm-first. Built with neurodivergent minds in mind.</p>
           <h1>Your home,<br /><em>understood.</em></h1>
           <p>
-            A calm layer over your smart home — Lumen notices the moment,<br />
+            A calm layer over your smart home. Lumen notices the moment,<br />
             explains why, and waits for your tap before anything changes.
           </p>
           <div className="hero-actions">
