@@ -396,6 +396,15 @@ p {
   text-align: center;
 }
 
+.hero-kicker {
+  font-family: 'Archivo', sans-serif;
+  font-size: 13px;
+  font-weight: 300;
+  color: rgba(200,184,154,0.7);
+  margin-bottom: 18px;
+  text-align: center;
+}
+
 .hero-actions {
   display: flex;
   flex-wrap: wrap;
@@ -852,6 +861,13 @@ p {
   max-width: 420px;
 }
 
+.ai-chat-contrast {
+  font-size: 13px;
+  line-height: 1.65;
+  color: rgba(232,224,212,0.4);
+  margin-top: 16px;
+}
+
 .ai-callouts {
   display: flex;
   flex-direction: column;
@@ -1120,6 +1136,10 @@ p {
   .section-copy,
   .waitlist-copy {
     align-items: flex-start;
+    text-align: left;
+  }
+
+  .hero-kicker {
     text-align: left;
   }
 

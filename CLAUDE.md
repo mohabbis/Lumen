@@ -10,6 +10,18 @@ A calm home companion for iOS. Lumen builds a local model of a home — rooms, d
 
 **Consent before action** is a core principle: nothing fires from a tap without a confirmation surface (`SceneApprovalSheet` for direct scene runs, `LumenReasoningView` for ambient suggestions).
 
+## Competitive positioning
+
+The smart-home market (other HomeKit-focused apps, and platform-level AI expected in upcoming iOS releases) is converging on fully automatic AI — agents that act on a user's behalf with minimal or no per-action confirmation. Do not chase that. Lumen's differentiation is structural, not cosmetic: explainability (`LumenReasoningView`, `ReasoningCalculator`) and mandatory consent (`SceneApprovalSheet`) are the product, not placeholder UX waiting to be automated away.
+
+When extending AI/automation features in this repo:
+
+- Do not add an "auto-apply without confirmation" mode or setting, even as an opt-in power-user toggle, without explicit discussion — it undermines the core positioning.
+- New suggestion/automation surfaces should extend the reasoning + approval pattern (signals shown, explicit Apply action), not bypass it.
+- Do not name specific competitor products in code, comments, copy, or docs — describe the competitive landscape generically (e.g., "other HomeKit apps moving toward fully-automatic AI").
+
+See [`ROADMAP.md`](ROADMAP.md) for the "Competitive watch" section with more detail.
+
 ---
 
 ## Repository layout

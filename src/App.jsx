@@ -75,9 +75,9 @@ const devices = [
 ];
 
 const aiCallouts = [
-  { icon: Zap, label: 'Instant', sub: 'Commands sent live' },
-  { icon: MessageCircle, label: 'Conversational', sub: 'Plain language control' },
-  { icon: Sparkles, label: 'Suggests scenes', sub: 'Recommends, you approve' },
+  { icon: MessageCircle, label: 'Plain language', sub: 'Say it your way' },
+  { icon: Sparkles, label: 'Lumen proposes', sub: 'Never acts on its own' },
+  { icon: Zap, label: 'You decide', sub: 'One tap to approve' },
 ];
 
 const otherCapabilities = [
@@ -707,6 +707,7 @@ function AppTourSection() {
       <FadeIn className="section-copy centered">
         <p className="eyebrow">The whole app</p>
         <h2>More than<br />a dashboard.</h2>
+        <p className="section-note">Built for low cognitive load — fewer decisions, less noise, one clear next step.</p>
       </FadeIn>
       <div className="tour-row">
         {tour.map(({ screen, label }, i) => (
@@ -803,10 +804,17 @@ function AIChatSection() {
         </FadeIn>
         <FadeIn delay={0.1} className="ai-chat-copy">
           <p className="eyebrow">Coming soon · Built-in AI</p>
-          <h2>Just say it.<br /><em>Lumen handles it.</em></h2>
+          <h2>Describe it.<br /><em>You approve it.</em></h2>
           <p className="ai-chat-lede">
-            A conversational layer is on the way — describe what you want and
-            Lumen recommends the scene, then sends it once you approve.
+            A conversational layer is on the way — describe what you want in
+            plain language, and Lumen proposes the scene, shows its
+            reasoning, and waits for your tap. No silent automation, ever.
+          </p>
+          <p className="ai-chat-contrast">
+            Other smart-home apps are racing toward fully automatic AI. Lumen
+            is built the other way — calm, explainable, and never a surprise.
+            Inspired by apps like Tiimo, designed for ADHD and autistic
+            minds, and just as useful if that's not you.
           </p>
           <div className="ai-callouts">
             {aiCallouts.map(({ icon: Icon, label, sub }) => (
@@ -961,10 +969,11 @@ export function App() {
             <span />
             Coming soon — iOS private beta
           </div>
+          <p className="hero-kicker">Designed calm-first. Built with neurodivergent minds in mind.</p>
           <h1>Your home,<br /><em>understood.</em></h1>
           <p>
-            Watch it work — Lumen notices the moment, explains why,<br />
-            and waits for your tap before anything changes.
+            A calm layer over your smart home — Lumen notices the moment,<br />
+            explains why, and waits for your tap before anything changes.
           </p>
           <div className="hero-actions">
             <a className="primary" href="#access">
@@ -989,7 +998,7 @@ export function App() {
         <a className="logo" href="#top">
           <SunMedium size={17} /><span>LUMEN</span>
         </a>
-        <p>Native iOS · On-device reasoning · AI assistant soon · Private beta</p>
+        <p>Native iOS · Calm by design · Explainable AI · Private beta</p>
         <div className="footer-links">
           <a href="/privacy">Privacy</a>
           <a
