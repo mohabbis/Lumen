@@ -396,15 +396,6 @@ p {
   text-align: center;
 }
 
-.hero-kicker {
-  font-family: 'Archivo', sans-serif;
-  font-size: 13px;
-  font-weight: 300;
-  color: rgba(200,184,154,0.7);
-  margin-bottom: 18px;
-  text-align: center;
-}
-
 .hero-actions {
   display: flex;
   flex-wrap: wrap;
@@ -1136,10 +1127,6 @@ p {
   .section-copy,
   .waitlist-copy {
     align-items: flex-start;
-    text-align: left;
-  }
-
-  .hero-kicker {
     text-align: left;
   }
 
