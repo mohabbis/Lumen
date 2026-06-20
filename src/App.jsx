@@ -813,8 +813,8 @@ function AIChatSection() {
           <p className="ai-chat-contrast">
             Other smart-home apps are racing toward fully automatic AI. Lumen
             is built the other way: calm, explainable, and never a surprise.
-            Inspired by apps like Tiimo, designed for ADHD and autistic
-            minds, and just as useful if that's not you.
+            Designed for ADHD and autistic minds, and just as useful if
+            that's not you.
           </p>
           <div className="ai-callouts">
             {aiCallouts.map(({ icon: Icon, label, sub }) => (
@@ -999,6 +999,9 @@ export function App() {
         </a>
         <p>Native iOS · Calm by design · Explainable AI · Private beta</p>
         <div className="footer-links">
+          <a href="#access" className="footer-cta">
+            Request Early Access <ArrowRight size={13} />
+          </a>
           <a href="/privacy">Privacy</a>
           <a
             href="https://github.com/mohabbis/lumen"
