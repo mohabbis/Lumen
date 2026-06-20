@@ -1,7 +1,7 @@
 import SwiftUI
 
 // MARK: - Now / Next Rhythm Card
-// Tiimo-style daily rhythm cue: current time block + next transition.
+// Calm daily rhythm cue: current time block + next transition.
 // Renders without any smart-home devices — gives the app value to users
 // who have not connected HomeKit.
 

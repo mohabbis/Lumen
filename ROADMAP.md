@@ -26,7 +26,7 @@ Lumen is a solo/small-team indie iOS project (team `CU67F9EY3Q`, bundle ID `com.
 
 - Public App Store availability.
 - Marketing site updates: swap "Coming soon — iOS private beta" pill and waitlist CTA for "Download on the App Store."
-- Light outreach to neurodivergent communities, ADHD/autism productivity spaces, and Tiimo-adjacent audiences — rather than broad tech press. Matches the niche positioning, not a mass-market launch.
+- Light outreach to neurodivergent communities and ADHD/autism productivity spaces — rather than broad tech press. Matches the niche positioning, not a mass-market launch.
 
 ## Phase 5 — Post-launch iteration (ongoing)
 

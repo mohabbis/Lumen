@@ -4,7 +4,7 @@ A calm home companion for iOS.
 
 Lumen builds a local model of your home — rooms, devices, presence, time of day — and surfaces gentle, explainable suggestions instead of silent automations. It controls HomeKit devices when they're present and stays useful when they aren't.
 
-Design references are Apple Design Award–tier apps like Tiimo: low cognitive load, neurodivergent-friendly, explainable. Nothing fires from a tap without a confirmation surface.
+Design references are Apple Design Award–tier apps built for ADHD/autistic and sensory-sensitive users: low cognitive load, neurodivergent-friendly, explainable. Nothing fires from a tap without a confirmation surface.
 
 ---
 
@@ -16,7 +16,7 @@ Native SwiftUI / SwiftData app, iPhone + iPad. Local-first; CloudKit sync is pro
 
 - Location-aware dashboard ("Welcome Home" / Away Mode with distance)
 - Time-of-day ambient palette + "Lumen noticed" contextual cards
-- **Now / Next** rhythm card (Tiimo-style daily structure, works without smart devices)
+- **Now / Next** rhythm card (calm daily-rhythm structure, works without smart devices)
 - **Scene approval sheet** (consent before any scene executes, with humanized action list)
 - **Lumen reasoning view** (signals behind every suggestion — time, presence, devices, matching scene)
 - Geofence-triggered scene automations (arrival/departure, 100 m radius)
