@@ -896,8 +896,6 @@ function AIChatSection() {
           <p className="ai-chat-contrast">
             Other smart-home apps are racing toward fully automatic AI. Lumen
             is built the other way: calm, explainable, and never a surprise.
-            Designed for ADHD and autistic minds, and just as useful if
-            that's not you.
           </p>
           <div className="ai-callouts">
             {aiCallouts.map(({ icon: Icon, label, sub }) => (
