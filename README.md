@@ -1,5 +1,11 @@
 # Lumen
 
+[![CI](https://github.com/mohabbis/Lumen/actions/workflows/ci.yml/badge.svg)](https://github.com/mohabbis/Lumen/actions/workflows/ci.yml)
+[![Last commit](https://img.shields.io/github/last-commit/mohabbis/Lumen)](https://github.com/mohabbis/Lumen/commits)
+[![Open issues](https://img.shields.io/github/issues/mohabbis/Lumen)](https://github.com/mohabbis/Lumen/issues)
+[![Open PRs](https://img.shields.io/github/issues-pr/mohabbis/Lumen)](https://github.com/mohabbis/Lumen/pulls)
+[![Top language](https://img.shields.io/github/languages/top/mohabbis/Lumen)](https://github.com/mohabbis/Lumen)
+
 A calm home companion for iOS.
 
 Lumen builds a local model of your home — rooms, devices, presence, time of day — and surfaces gentle, explainable suggestions instead of silent automations. It controls HomeKit devices when they're present and stays useful when they aren't.
