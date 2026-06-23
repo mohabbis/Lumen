@@ -118,7 +118,13 @@ async function sendFormSubmitEmail(env, { email, source, userAgent }) {
   return true;
 }
 
-export async function onRequestPost({ request, env }) {
+export async function onRequest(context) {
+  const { request, env } = context;
+
+  if (request.method !== 'POST') {
+    return json({ ok: false, error: 'Method not allowed' }, 405);
+  }
+
   let payload = {};
   try {
     payload = await request.json();
@@ -153,12 +159,4 @@ export async function onRequestPost({ request, env }) {
     console.error(error);
     return json({ ok: false, error: 'Unable to submit waitlist request.' }, 500);
   }
-}
-
-export function onRequest({ request }) {
-  if (request.method !== 'POST') {
-    return json({ ok: false, error: 'Method not allowed' }, 405);
-  }
-
-  return onRequestPost(...arguments);
 }
