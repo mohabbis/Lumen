@@ -24,6 +24,8 @@ A calm home companion for iOS. Lumen builds a local model of a home — rooms, d
 
 The iOS app and the marketing site are independent. Changes to one do **not** require touching the other. When working on iOS, do not pull from `src/` to validate claims — the two lanes are kept in sync separately.
 
+`AGENTS.md` at the repo root is a byte-for-byte mirror of this file — if you update one, update the other so both stay in sync. `.github/workflows/` holds the GitHub CI (`ci.yml` runs the **web** test + build on Node 22 — it does not build the iOS app) plus the Claude PR-assistant and code-review workflows.
+
 ---
 
 ## iOS app
@@ -59,17 +61,18 @@ Protocol-driven MVVM using Swift Observation (`@Observable`) and SwiftData.
 
 #### Services (`Services/`)
 
-All services are `@Observable @MainActor` classes passed through the SwiftUI environment from `MuhomeApp`. They are the only places that touch `ModelContext`.
+Most services are `@Observable @MainActor` classes passed through the SwiftUI environment from `MuhomeApp` (see the `.environment(...)` chain in `MuhomeApp.body`). They are the only places that touch `ModelContext`. Services are grouped into subfolders (`Home/`, `Device/`, `Scene/`, `Intelligence/`, `Persistence/`); `LocationService`, `NotificationService`, and `KeychainService` sit at the `Services/` root.
 
-| Service | Owns |
-|---------|------|
-| `HomeService` | Home / Room CRUD, primary-home promotion |
-| `DeviceService` | PlannedDevice CRUD; routes `SceneActionSnapshot` to the right bridge |
-| `DeviceStateStore` | In-memory live state for all connected devices — rebuilt from bridges on each launch, never persisted |
-| `SceneService` | Scene CRUD, execution, geofence-triggered automation. Owns a cancellable `monitoringTask` for the geofence poller |
-| `LocationService` | CLLocationManager wrapper; publishes `GeofenceEvent` when the user crosses the home radius. Gates first-check event emission via `hasCompletedFirstCheck` so launching at home does not fire a spurious arrival |
-| `NotificationService` | UNUserNotificationCenter wrapper; called by `SceneService` after automation fires |
-| `SensorObservationService` | Subscribes to motion/contact `AsyncStream`s from all capable devices |
+| Service | Path | Owns |
+|---------|------|------|
+| `HomeService` | `Services/Home/` | Home / Room CRUD, primary-home promotion |
+| `DeviceService` | `Services/Device/` | PlannedDevice CRUD; routes `SceneActionSnapshot` to the right bridge |
+| `DeviceStateStore` | `Services/Device/` | In-memory live state for all connected devices — rebuilt from bridges on each launch, never persisted |
+| `SceneService` | `Services/Scene/` | Scene CRUD, execution, geofence-triggered automation. Owns a cancellable `monitoringTask` for the geofence poller |
+| `LocationService` | `Services/` | CLLocationManager wrapper; publishes `GeofenceEvent` when the user crosses the home radius. Gates first-check event emission via `hasCompletedFirstCheck` so launching at home does not fire a spurious arrival |
+| `NotificationService` | `Services/` | UNUserNotificationCenter wrapper; called by `SceneService` after automation fires |
+| `SensorObservationService` | `Services/Intelligence/` | Subscribes to motion/contact `AsyncStream`s from all capable devices. Wired in `RootView` via `DeviceStateStore.onDevicesDiscovered/onDevicesRemoved` |
+| `KeychainService` | `Services/` | Singleton (`KeychainService.shared`) wrapping the Security framework for secure string/data storage. **Not** an `@Observable` environment service — used directly (e.g. for IR-bridge credentials) |
 
 #### Calm-tone surfaces (the consent + explainability layer)
 
@@ -130,9 +133,35 @@ Follow this pattern for new feature work.
 
 #### SwiftData persistence (`Services/Persistence/`)
 
-- Schema is versioned: `MuhomeSchemaV1` → `V2` → `V3`. `PersistenceCoordinator` always uses `MuhomeSchemaV3`.
+- Schema is versioned in `MuhomeSchema.swift`: `MuhomeSchemaV1` → `V2` → `V3`, with a lightweight `MuhomeSchemaMigrationPlan`. `PersistenceCoordinator` always uses `MuhomeSchemaV3`.
+- The registered `@Model` types (identical across V1–V3 except `ExecutionEvent`, added in V2) are: `Home`, `Room`, `Zone`, `PlannedDevice`, `Scene`, `SceneAction`, `RemoteProfile`, `IRCommand`, `ExecutionEvent`. V2→V3 only drops `@Attribute(.unique)` from `id` fields for CloudKit compatibility; `Home.latitude`/`longitude` were added via SwiftData's inferred nullable-column migration (no new version).
 - CloudKit sync is **off** (`PersistenceCoordinator.enableCloudKitSync = false`). The flag is guarded by a test (`PersistenceTests.testCloudKitSyncIsGatedOffForBeta`). Flip only after provisioning `iCloud.com.muhome.app` in the Apple Developer portal.
-- `MuhomeDataModels.swift` and `SceneModels.swift` contain **legacy structs** (`MuhaScene`, `MuhaSceneRecord`, etc.) from an older design. They compile but are not wired to any active schema or service — treat as dead code. The `TimeOfDay` enum in `SceneModels.swift` is the exception: it is actively used.
+- The old `MuhomeDataModels.swift` / `SceneModels.swift` legacy-struct files (`MuhaScene`, `MuhaSceneRecord`, etc.) have been **removed**. `TimeOfDay` — the one enum from that era still in use — now lives in its own file, `Lumen/Models/TimeOfDay.swift`. There is no dead legacy schema to avoid anymore.
+
+#### Data models & their homes
+
+SwiftData `@Model` types are split by domain across two roots:
+
+| Location | Models |
+|----------|--------|
+| `Lumen/Models/Space/` | `Home`, `Room`, `Zone`, `PlannedDevice` (plus value enums `DeviceType`, `RoomType`, `ZoneType`) |
+| `Lumen/Models/Analytics/` | `ExecutionEvent` (persisted), `SensorEvent` (in-memory value type, **not** in the schema) |
+| `Lumen/Models/` | `TimeOfDay`, `PlanningStage` (planned→commissioned lifecycle enum for `PlannedDevice`) |
+| `Lumen/Domain/Models/Automation/` | `Scene`, `SceneAction` |
+| `Lumen/Domain/Models/Remote/` | `RemoteProfile`, `IRCommand` |
+
+`Home` owns a cascade relationship to `[Zone]`; `Zone` can hang off either a `Home` (top-level) or a `Room` (sub-zone) with optional normalised `positionX/Y` coordinates.
+
+#### Scaffolded but not yet wired
+
+Some surfaces are persisted in the schema and have view/view-model code, but are **not** reachable from navigation yet. Treat them as in-progress, not dead code — extend rather than delete:
+
+- **IR remote control** (`Features/Remote/`, `Domain/Models/Remote/`): `RemoteProfile` ⟶ `[IRCommand]` model a learnable IR remote (Broadlink/raw codes, optional `bridgeHostname` for an IR blaster). `RemoteListView` + `RemoteViewModel` exist but no tab routes to them yet.
+- **Zones** (`Models/Space/Zone.swift`): part of the schema and relationships, but no service or UI surfaces zones yet.
+
+#### Navigation
+
+`RootView` renders an iPhone `TabView` and an iPad `NavigationSplitView` over the same `AppState.Tab` cases: **Home** (`HomeDashboardView`), **Rooms** (`RoomListView`), **Intel** (`DeviceListView`), **Auto** (`SceneListView`), **Settings** (`SettingsView`). Note the "Intel" tab is the device list. The selected tab is driven by `AppState.selectedTab`.
 
 #### Local preview mode
 
@@ -153,7 +182,7 @@ The flag defaults to `true`. Tests rely on it indirectly: `DeviceService.addPlan
 
 The `LumenTests` target uses XCTest with an in-memory `ModelContainer` via `PersistenceCoordinator.makeInMemoryContainer()`. Tests are `@MainActor` where they touch services or view models.
 
-Coverage groups (90 tests at time of writing):
+Coverage groups (91 tests at time of writing):
 
 | File | Covers |
 |------|--------|
@@ -184,10 +213,13 @@ npm run dev        # dev server on 0.0.0.0:5173
 npm run build      # production build → dist/
 npm run lint       # ESLint
 npm run test       # Vitest (single run)
+npm run e2e        # Playwright end-to-end tests
 npm run ci         # lint + test + build
 ```
 
-Single-page React/Vite app — no router, anchor-scroll only. All components are co-located in `src/App.jsx`; all styles in `src/App.css`. `src/styles.css` is unused. `public/privacy/index.html` is fully self-contained (no React); the `vercel.json` rewrite maps `/privacy` → `/privacy/index.html`.
+Single-page React/Vite app — no router, anchor-scroll only. Entry is `src/main.jsx`, which mounts `src/App.jsx` into `#root` in the top-level `index.html` and imports the page styles (`App.css`, `lumen-overrides.css`, `mobile-polish.css`, `architecture-actions.css`). `src/styles.css` is unused. Unit tests run on Vitest (`src/main.test.jsx`, setup in `src/test/setup.js`); end-to-end coverage uses Playwright (`playwright.config.js`). `public/privacy/index.html` is fully self-contained (no React); the `vercel.json` rewrite maps `/privacy` → `/privacy/index.html`.
+
+> The `src/pages/*.astro` files and `src/styles/global.css` are exploratory and **not** part of the Vite build (there is no `astro` dependency or config) — the production site is the React entry above.
 
 ---
 
@@ -195,7 +227,7 @@ Single-page React/Vite app — no router, anchor-scroll only. All components are
 
 - New service surfaces and view models should follow the `@Observable @MainActor` pattern.
 - New views that carry math or rules should extract a pure helper `struct` for testing. See "Testable helper structs" above.
-- New SwiftData models live under `Lumen/Models/` (or `Lumen/Domain/Models/` for automation/remote types). Do not add to `MuhomeDataModels.swift` or `SceneModels.swift` — both are legacy.
+- New SwiftData models live under `Lumen/Models/` (spatial/analytics types) or `Lumen/Domain/Models/` (automation/remote types). One model per file; register it in **all three** schema versions in `MuhomeSchema.swift` (or add a new versioned schema + migration stage if the change isn't lightweight).
 - Errors surface through `viewModel.error: (any Error)?`. The dashboard already has an alert binding pattern (`errorAlertBinding`); reuse it on new views rather than swallowing with `try?`.
 - Default `AppState.enableLocalPreviewControls = true` should be respected — many tests rely on the local-preview state store path.
 - Keep consent-before-action. New tap → action paths route through a confirmation surface (sheet/alert), not direct execution.
