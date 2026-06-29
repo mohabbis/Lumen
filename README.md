@@ -6,17 +6,36 @@
 [![Open PRs](https://img.shields.io/github/issues-pr/mohabbis/Lumen)](https://github.com/mohabbis/Lumen/pulls)
 [![Top language](https://img.shields.io/github/languages/top/mohabbis/Lumen)](https://github.com/mohabbis/Lumen)
 
-A calm home companion for iOS.
+Lumen is a local-first iOS smart-home companion that turns rooms, scenes, presence, and time of day into calm, explainable routines.
 
 Lumen builds a local model of your home — rooms, devices, presence, time of day — and surfaces gentle, explainable suggestions instead of silent automations. It controls HomeKit devices when they're present and stays useful when they aren't.
 
-Design references are Apple Design Award–tier apps built for ADHD/autistic and sensory-sensitive users: low cognitive load, neurodivergent-friendly, explainable. Nothing fires from a tap without a confirmation surface.
+Lumen is designed for low cognitive load: calm surfaces, clear explanations, and confirmation before meaningful actions. Nothing fires from a tap without a confirmation surface.
 
 ---
 
 ## Status
 
-Native SwiftUI / SwiftData app, iPhone + iPad. Local-first; CloudKit sync is provisioned but off. 90 unit tests, build clean.
+Native SwiftUI / SwiftData app, iPhone + iPad. Local-first; CloudKit sync is gated off pending final provisioning. 90 unit tests, build clean.
+
+## Preview
+
+| Dashboard | Scene Approval | Reasoning View |
+|---|---|---|
+| `docs/screenshots/dashboard.png` | `docs/screenshots/scene-approval.png` | `docs/screenshots/reasoning-view.png` |
+
+The app also ships with a React/Vite marketing preview in `src/` that recreates the dashboard, reasoning, and scene approval surfaces for web review.
+
+## Launch Readiness
+
+- [x] Native SwiftUI app
+- [x] Local preview mode
+- [x] HomeKit discovery
+- [x] Scene approval flow
+- [x] Unit test coverage for core logic
+- [ ] Internal TestFlight
+- [ ] External beta
+- [ ] App Store review
 
 **Shipped**
 
@@ -53,13 +72,14 @@ Full month-by-month detail, including a note on how Lumen's roadmap relates to t
 
 ---
 
-## Repository layout
+## Repo Map
 
 ```
-Lumen/             # Native iOS app (SwiftUI / SwiftData)
+Lumen/             # Native iOS app
 Lumen.xcodeproj/   # Xcode project
-LumenTests/        # XCTest target
-src/, public/      # Independent React/Vite marketing site
+LumenTests/        # XCTest suite
+src/, public/      # Marketing site
+docs/              # Product, design, architecture, and launch notes
 ```
 
 The iOS app and the marketing site are independent lanes — each ships on its own cadence.
@@ -70,7 +90,7 @@ The iOS app and the marketing site are independent lanes — each ships on its o
 
 You don't need a physical iPhone — the app runs on the iOS Simulator with mock devices.
 
-**Easiest path:** open `Lumen.xcodeproj` in Xcode, select an **iPhone 16 Pro Max** or **iPad Pro 13-inch (M4)** simulator, press **Cmd+R**.
+**Easiest path:** open `Lumen.xcodeproj` in Xcode, select an **iPhone 17 Pro Max** or **iPad Pro 13-inch (M5)** simulator, press **Cmd+R**.
 
 Signing is automatic for the simulator (no provisioning needed). `AppState.enableLocalPreviewControls` defaults to `true`, so the dashboard populates with rooms and devices even without HomeKit hardware.
 
@@ -78,7 +98,7 @@ Signing is automatic for the simulator (no provisioning needed). `AppState.enabl
 
 ```sh
 xcodebuild -project Lumen.xcodeproj -scheme Lumen \
-  -destination 'platform=iOS Simulator,name=iPhone 16 Pro Max' \
+  -destination 'platform=iOS Simulator,name=iPhone 17 Pro Max' \
   -configuration Debug build
 ```
 
@@ -90,7 +110,7 @@ Close Xcode before running CLI builds — the SQLite project lock is exclusive.
 
 ```sh
 xcodebuild test -project Lumen.xcodeproj -scheme Lumen \
-  -destination 'platform=iOS Simulator,name=iPhone 16 Pro Max'
+  -destination 'platform=iOS Simulator,name=iPhone 17 Pro Max'
 ```
 
 Or **Cmd+U** in Xcode. All tests use an in-memory `ModelContainer` and are timezone-deterministic where dates matter; no simulator state pollution.
@@ -111,13 +131,24 @@ A convention: when view code carries logic, lift it into a pure helper `struct` 
 
 Full architecture notes — including the consent-first data flow for scene execution and the reasoning surface — are in [`CLAUDE.md`](CLAUDE.md).
 
+## Product Docs
+
+- [`docs/product-brief.md`](docs/product-brief.md)
+- [`docs/homekit-architecture.md`](docs/homekit-architecture.md)
+- [`docs/design-principles.md`](docs/design-principles.md)
+- [`docs/test-strategy.md`](docs/test-strategy.md)
+- [`docs/launch-plan.md`](docs/launch-plan.md)
+- [`docs/beta-tester-guide.md`](docs/beta-tester-guide.md)
+- [`docs/manual-qa.md`](docs/manual-qa.md)
+- [`docs/release-notes-1.0-build-7.md`](docs/release-notes-1.0-build-7.md)
+
 ---
 
 ## Bundle
 
-- Bundle ID: `com.muhome.app`
+- Bundle ID: `com.muharafiq.lumen`
 - Team: `CU67F9EY3Q`
-- Minimum: iOS 18+ (uses `@Observable`, SwiftData, modern SwiftUI sheet APIs)
+- Minimum: iOS 17+ (uses `@Observable`, SwiftData, modern SwiftUI sheet APIs)
 
 ---
 
