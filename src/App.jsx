@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   Activity, ArrowRight, BedDouble, Blinds, ChevronRight, DoorClosed, DoorOpen,
@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import './App.css';
 
-// Data — faithful to the real Lumen app
+// Data - faithful to the real Lumen app
 
 const tabs = [
   { label: 'Home', icon: Home },
@@ -94,9 +94,27 @@ const chapters = [
   'Lumen explains why',
   'One tap applies',
   'Scene is live',
+  'Every room, glanceable',
+  'All devices, one list',
 ];
 
-const STEP_DURATIONS = [6000, 1900, 3300, 3500, 3000];
+const STEP_DURATIONS = [6000, 1900, 3300, 3500, 3000, 3000, 3000];
+const STEP_TABS = ['Home', 'Home', 'Home', 'Home', 'Scenes', 'Rooms', 'Intel'];
+
+// Ambient tint per chapter - the whole page washes toward this color while
+// the step is on screen. Reuses the app's own accent colors (rhythm
+// terracotta, Lumen violet, the amber of an active scene) rather than
+// inventing a new palette.
+const STEP_AMBIENT = [
+  '200,184,154', // Try the lights - inviting gold
+  '212,130,90',  // Arrives home - sunset terracotta
+  '160,108,240', // Lumen explains why - Lumen violet
+  '232,160,32',  // One tap applies - amber anticipation
+  '212,130,90',  // Scene is live - warm & dim evening
+  '111,219,168', // Every room, glanceable - fresh mint
+  '120,170,230', // All devices, one list - cool clarity
+];
+
 const IDLE_ADVANCE_MS = 2500;
 
 const actionFlowModes = [
@@ -128,7 +146,15 @@ const actionFlowModes = [
 
 const FLOW_ADVANCE_MS = 3200;
 
-// Rhythm card — mirrors the real app's TimeOfDay enum + RhythmTiming math
+// Ambient tint per mode, in the same order as actionFlowModes.
+const FLOW_AMBIENT = [
+  '111,219,168', // Awareness - fresh mint, reading the room
+  '160,108,240', // Reasoning - Lumen violet
+  '232,160,32',  // Execution - amber, waiting for your tap
+  '212,130,90',  // Action - warm terracotta, devices responding
+];
+
+// Rhythm card - mirrors the real app's TimeOfDay enum + RhythmTiming math
 // (Lumen/Models/TimeOfDay.swift, Lumen/Components/NowNextCard.swift)
 
 const RHYTHM_BLOCKS = [
@@ -168,6 +194,90 @@ function getRhythmTiming(date) {
   const nextStartFormatted = nextStart.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
 
   return { block, next, progress, nextStartFormatted };
+}
+
+// Ambient background - the whole page tints subtly to match the story's
+// current moment (a demo step while the hero is in view, a fixed mood once
+// you scroll into a later section). Two stacked full-viewport layers
+// crossfade between colors so the shift is a smooth wash, never a snap.
+
+const AMBIENT_IDLE = '200,184,154';
+
+const AmbientContext = createContext(() => {});
+
+function useSetAmbient() {
+  return useContext(AmbientContext);
+}
+
+function useAmbientController(initial) {
+  const frontRef = useRef(0);
+  const currentRef = useRef(initial);
+  const [colors, setColors] = useState([initial, initial]);
+  const [front, setFront] = useState(0);
+
+  const setAmbient = useCallback(color => {
+    if (color === currentRef.current) return;
+    currentRef.current = color;
+    const back = 1 - frontRef.current;
+    setColors(prev => {
+      const next = [...prev];
+      next[back] = color;
+      return next;
+    });
+    requestAnimationFrame(() => {
+      frontRef.current = back;
+      setFront(back);
+    });
+  }, []);
+
+  return { colors, front, setAmbient };
+}
+
+function AmbientBackdrop({ colors, front }) {
+  return (
+    <div className="ambient-backdrop" aria-hidden="true">
+      {colors.map((rgb, i) => (
+        <div
+          key={i}
+          className="ambient-layer"
+          style={{
+            opacity: i === front ? 1 : 0,
+            background:
+              `radial-gradient(ellipse 70% 55% at 50% -8%, rgba(${rgb},0.30) 0%, transparent 60%), ` +
+              `radial-gradient(ellipse 55% 45% at 8% 94%, rgba(${rgb},0.13) 0%, transparent 55%)`,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+// Ties a section (or the live demo) to an ambient color. Only pushes the
+// color while the region is actually in view, so the page doesn't fight
+// itself when several regions are mounted at once.
+function useAmbientRegion(ref, color) {
+  const setAmbient = useSetAmbient();
+  const colorRef = useRef(color);
+  colorRef.current = color;
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return undefined;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) setAmbient(colorRef.current); },
+      { threshold: 0.35 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [ref, setAmbient]);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || typeof window === 'undefined') return;
+    const rect = el.getBoundingClientRect();
+    const inView = rect.top < window.innerHeight * 0.75 && rect.bottom > window.innerHeight * 0.25;
+    if (inView) setAmbient(color);
+  }, [color, setAmbient]);
 }
 
 // Primitives
@@ -417,6 +527,53 @@ function ScenesScreen({ onSelectScene }) {
   );
 }
 
+function RoomsScreen() {
+  return (
+    <div className="app-screen">
+      <div className="app-topbar">
+        <span className="app-wordmark">LUMEN</span>
+      </div>
+      <h4 className="app-greeting small">Rooms</h4>
+      <p className="app-label">All Rooms</p>
+      <div className="fav-rooms-grid">
+        {favoriteRooms.map(({ name, icon: Icon, count }) => (
+          <div className="fav-room-card" key={name}>
+            <div className="fav-room-icon"><Icon size={15} /></div>
+            <b>{name}</b>
+            <span>{count}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function IntelScreen() {
+  return (
+    <div className="app-screen">
+      <div className="app-topbar">
+        <span className="app-wordmark">LUMEN</span>
+      </div>
+      <h4 className="app-greeting small">Intel</h4>
+      <div className="intel-banner">
+        <span className="online-dot" /> HomeKit · 8 devices · 7 online
+      </div>
+      <div className="device-list">
+        {devices.map(({ name, room, icon: Icon, online }) => (
+          <div className="device-row" key={name}>
+            <div className="device-icon"><Icon size={15} /></div>
+            <div className="device-meta">
+              <b>{name}</b>
+              <span>{room}</span>
+            </div>
+            <span className={online ? 'online-dot' : 'offline-dot'} />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function DragSlider({ value, onChange, onInteractStart, onInteractEnd, children }) {
   const trackRef = useRef(null);
   const [dragging, setDragging] = useState(false);
@@ -516,7 +673,7 @@ function InteractiveRoomScreen({
   );
 }
 
-// The live demo — auto-playing recreation of the real app
+// The live demo - auto-playing recreation of the real app
 
 function LiveDemo() {
   const [step, setStep] = useState(0);
@@ -524,11 +681,14 @@ function LiveDemo() {
   const reducedRef = useRef(false);
   const lastInteractionRef = useRef(Date.now());
   const stepStartRef = useRef(Date.now());
+  const demoRef = useRef(null);
 
   const [lightOn, setLightOn] = useState(true);
   const [brightness, setBrightness] = useState(62);
   const [colorTemp, setColorTemp] = useState(40);
   const [selectedScene, setSelectedScene] = useState(null);
+
+  useAmbientRegion(demoRef, STEP_AMBIENT[step]);
 
   const markInteraction = () => { lastInteractionRef.current = Date.now(); };
 
@@ -567,10 +727,10 @@ function LiveDemo() {
     return () => clearTimeout(id);
   }, [step, paused, selectedScene]);
 
-  const activeTab = step === 4 ? 'Scenes' : 'Home';
+  const activeTab = STEP_TABS[step];
 
   return (
-    <div className="live-demo">
+    <div className="live-demo" ref={demoRef}>
       <div
         className="phone phone-featured phone-app"
         onMouseEnter={() => setPaused(true)}
@@ -596,8 +756,12 @@ function LiveDemo() {
                 highlight={step === 2}
                 dimmed={step === 3}
               />
-            ) : (
+            ) : step === 4 ? (
               <ScenesScreen onSelectScene={setSelectedScene} />
+            ) : step === 5 ? (
+              <RoomsScreen />
+            ) : (
+              <IntelScreen />
             )}
             <AnimatePresence>
               {step === 3 && <ReasoningSheet key="sheet" />}
@@ -634,118 +798,20 @@ function LiveDemo() {
   );
 }
 
-// App tour — real screens beyond the demo flow
-
-function RoomsTourScreen() {
-  return (
-    <div className="phone mini-phone tour-phone">
-      <div className="phone-screen">
-        <StatusBar />
-        <div className="app-screen">
-          <div className="app-topbar"><span className="app-wordmark">LUMEN</span></div>
-          <h4 className="app-greeting small">Rooms</h4>
-          <p className="app-label">All Rooms</p>
-          <div className="fav-rooms-grid">
-            {favoriteRooms.map(({ name, icon: Icon, count }) => (
-              <div className="fav-room-card" key={name}>
-                <div className="fav-room-icon"><Icon size={15} /></div>
-                <b>{name}</b>
-                <span>{count}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-        <TabBar active="Rooms" />
-      </div>
-    </div>
-  );
-}
-
-function IntelTourScreen() {
-  return (
-    <div className="phone mini-phone tour-phone">
-      <div className="phone-screen">
-        <StatusBar />
-        <div className="app-screen">
-          <div className="app-topbar"><span className="app-wordmark">LUMEN</span></div>
-          <h4 className="app-greeting small">Intel</h4>
-          <div className="intel-banner">
-            <span className="online-dot" /> HomeKit · 8 devices · 7 online
-          </div>
-          <div className="device-list">
-            {devices.map(({ name, room, icon: Icon, online }) => (
-              <div className="device-row" key={name}>
-                <div className="device-icon"><Icon size={15} /></div>
-                <div className="device-meta">
-                  <b>{name}</b>
-                  <span>{room}</span>
-                </div>
-                <span className={online ? 'online-dot' : 'offline-dot'} />
-              </div>
-            ))}
-          </div>
-        </div>
-        <TabBar active="Intel" />
-      </div>
-    </div>
-  );
-}
-
-function RoomDetailTourScreen() {
-  return (
-    <div className="phone mini-phone tour-phone">
-      <div className="phone-screen">
-        <StatusBar />
-        <div className="app-screen">
-          <div className="app-topbar"><span className="app-wordmark">LIVING ROOM</span></div>
-          <h4 className="app-greeting small">Living Room</h4>
-          <p className="app-label">Ceiling Light</p>
-          <div className="control-card">
-            <div className="control-row">
-              <span>Power</span>
-              <span className="toggle on"><span /></span>
-            </div>
-            <div className="control-slider">
-              <SunMedium size={11} className="dim" />
-              <div className="slider-track"><span style={{ width: '62%' }} /><i style={{ left: '62%' }} /></div>
-              <SunMedium size={13} />
-              <small>62%</small>
-            </div>
-            <div className="control-slider">
-              <span className="warm">Warm</span>
-              <div className="slider-track"><span style={{ width: '40%' }} /><i style={{ left: '40%' }} /></div>
-              <span className="cool">Cool</span>
-              <small>3200K</small>
-            </div>
-          </div>
-        </div>
-        <TabBar active="Rooms" />
-      </div>
-    </div>
-  );
-}
+// App tour recap - the live demo above already walked through the whole
+// app in one phone; this section just grounds it in what else it speaks to.
 
 function AppTourSection() {
-  const tour = [
-    { screen: <RoomsTourScreen />, label: 'Rooms' },
-    { screen: <IntelTourScreen />, label: 'Devices' },
-    { screen: <RoomDetailTourScreen />, label: 'Controls' },
-  ];
+  const sectionRef = useRef(null);
+  useAmbientRegion(sectionRef, '200,184,154');
+
   return (
-    <section className="app-tour-section" id="product">
+    <section className="app-tour-section" id="product" ref={sectionRef}>
       <FadeIn className="section-copy centered">
         <p className="eyebrow">The whole app</p>
         <h2>More than<br />a dashboard.</h2>
-        <p className="section-note">Built for low cognitive load: fewer decisions, less noise, one clear next step.</p>
+        <p className="section-note">Built for low cognitive load: fewer decisions, less noise, one clear next step. The demo above walks the same rooms, devices, and scenes you'll actually use.</p>
       </FadeIn>
-      <div className="tour-row">
-        {tour.map(({ screen, label }, i) => (
-          <FadeIn key={label} delay={i * 0.1} className="tour-item">
-            {screen}
-            <div className="tour-label">{label}</div>
-          </FadeIn>
-        ))}
-      </div>
       <FadeIn className="capability-chips-wrap">
         <p className="eyebrow">Also speaks to</p>
         <div className="capability-chips">
@@ -762,8 +828,11 @@ function AppTourSection() {
 }
 
 function RoomShowcaseSection() {
+  const sectionRef = useRef(null);
+  useAmbientRegion(sectionRef, '196,154,108');
+
   return (
-    <section className="room-show-section" id="showcase">
+    <section className="room-show-section" id="showcase" ref={sectionRef}>
       <FadeIn className="section-copy centered">
         <p className="eyebrow">Your home at a glance</p>
         <h2>Every room,<br /><em>one glance.</em></h2>
@@ -787,6 +856,9 @@ function RoomShowcaseSection() {
 function ActionFlowSection() {
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
+  const sectionRef = useRef(null);
+
+  useAmbientRegion(sectionRef, FLOW_AMBIENT[active]);
 
   useEffect(() => {
     if (paused) return undefined;
@@ -800,6 +872,7 @@ function ActionFlowSection() {
     <section
       className="action-flow-section"
       id="flow"
+      ref={sectionRef}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
@@ -879,8 +952,11 @@ function AIChatScreen() {
 }
 
 function AIChatSection() {
+  const sectionRef = useRef(null);
+  useAmbientRegion(sectionRef, '150,120,235');
+
   return (
-    <section className="ai-chat-section" id="ai">
+    <section className="ai-chat-section" id="ai" ref={sectionRef}>
       <div className="ai-chat-inner">
         <FadeIn className="ai-chat-phone-wrap">
           <AIChatScreen />
@@ -916,35 +992,30 @@ function AIChatSection() {
 
 function Waitlist() {
   const [status, setStatus] = useState('idle');
+  const sectionRef = useRef(null);
+  useAmbientRegion(sectionRef, '200,184,154');
 
   async function handleSubmit(e) {
     e.preventDefault();
     const email = new FormData(e.currentTarget).get('email');
     setStatus('loading');
+    const endpoint = import.meta.env.VITE_WAITLIST_ENDPOINT || '/api/waitlist';
     try {
-      const endpoint = import.meta.env.VITE_WAITLIST_ENDPOINT;
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-      if (endpoint) {
-        await fetch(endpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, source: 'lumen-site' }),
-        });
-      } else if (supabaseUrl && supabaseKey) {
-        await fetch(`${supabaseUrl}/rest/v1/lumen_waitlist`, {
-          method: 'POST',
-          headers: {
-            apikey: supabaseKey,
-            Authorization: `Bearer ${supabaseKey}`,
-            'Content-Type': 'application/json',
-            Prefer: 'return=minimal',
-          },
-          body: JSON.stringify({ email, source: 'lumen-site', user_agent: navigator.userAgent }),
-        });
-      } else {
-        window.location.href = `mailto:m.rafiq2006@icloud.com?subject=Lumen%20Early%20Access&body=${encodeURIComponent(`Please add me to the Lumen waitlist: ${email}`)}`;
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, source: 'lumen-site' }),
+      });
+      let delivered = res.ok;
+      if (delivered) {
+        try {
+          const data = await res.json();
+          delivered = data.ok !== false;
+        } catch {
+          // A non-JSON 2xx response still counts as delivered.
+        }
       }
+      if (!delivered) throw new Error('Waitlist endpoint rejected the request');
       setStatus('success');
       e.target.reset();
     } catch {
@@ -953,7 +1024,7 @@ function Waitlist() {
   }
 
   return (
-    <section className="waitlist-section" id="access">
+    <section className="waitlist-section" id="access" ref={sectionRef}>
       <div className="waitlist-inner">
         <FadeIn className="waitlist-copy">
           <p className="eyebrow">Early access</p>
@@ -1002,99 +1073,103 @@ function Waitlist() {
 export function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const close = () => setMenuOpen(false);
+  const ambient = useAmbientController(AMBIENT_IDLE);
 
   return (
-    <main className="site-shell">
-      <div className="grain" />
+    <AmbientContext.Provider value={ambient.setAmbient}>
+      <main className="site-shell">
+        <AmbientBackdrop colors={ambient.colors} front={ambient.front} />
+        <div className="grain" />
 
-      <nav className="nav">
-        <a className="logo" href="#top">
-          <SunMedium size={22} />
-          <span>LUMEN</span>
-        </a>
-        <div className="links">
-          <a href="#product">The App</a>
-          <a href="#ai">AI</a>
-          <a href="/privacy">Privacy</a>
-        </div>
-        <div className="nav-actions">
-          <a href="#access">Request Access</a>
-          <button
-            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
-            onClick={() => setMenuOpen(o => !o)}
-            className={menuOpen ? 'menu-btn open' : 'menu-btn'}
-          >
-            {menuOpen ? <X size={18} /> : <Menu size={18} />}
-          </button>
-        </div>
-      </nav>
-
-      {menuOpen && (
-        <div className="mobile-menu" onClick={close}>
-          <div className="mobile-menu-inner" onClick={e => e.stopPropagation()}>
-            <a href="#product" onClick={close}><span>01</span>The App</a>
-            <a href="#ai" onClick={close}><span>02</span>AI</a>
-            <a href="/privacy" onClick={close} className="privacy-link"><span>03</span>Privacy</a>
-            <a href="#access" onClick={close} className="mobile-cta">
-              Request Access <ArrowRight size={14} />
-            </a>
-          </div>
-        </div>
-      )}
-
-      <section className="hero" id="top">
-        <div className="hero-bg" />
-
-        <FadeIn className="hero-copy">
-          <div className="pill">
-            <span />
-            Coming soon · iOS private beta
-          </div>
-          <h1>Your home,<br /><em>understood.</em></h1>
-          <p>
-            A calm layer over your smart home. Lumen notices the moment,<br />
-            explains why, and waits for your tap before anything changes.
-          </p>
-          <div className="hero-actions">
-            <a className="primary" href="#access">
-              Request Early Access <ArrowRight size={15} />
-            </a>
-            <a className="ghost" href="#product">See the whole app</a>
-          </div>
-        </FadeIn>
-
-        <div className="hero-demo">
-          <div className="hero-glow" />
-          <LiveDemo />
-        </div>
-      </section>
-
-      <AppTourSection />
-      <RoomShowcaseSection />
-      <ActionFlowSection />
-      <AIChatSection />
-      <Waitlist />
-
-      <footer className="site-footer">
-        <a className="logo" href="#top">
-          <SunMedium size={17} /><span>LUMEN</span>
-        </a>
-        <p>Native iOS · Calm by design · Explainable AI · Private beta</p>
-        <div className="footer-links">
-          <a href="#access" className="footer-cta">
-            Request Early Access <ArrowRight size={13} />
+        <nav className="nav">
+          <a className="logo" href="#top">
+            <SunMedium size={22} />
+            <span>LUMEN</span>
           </a>
-          <a href="/privacy">Privacy</a>
-          <a
-            href="https://github.com/mohabbis/lumen"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            GitHub
+          <div className="links">
+            <a href="#product">The App</a>
+            <a href="#ai">AI</a>
+            <a href="/privacy">Privacy</a>
+          </div>
+          <div className="nav-actions">
+            <a href="#access">Request Access</a>
+            <button
+              aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+              onClick={() => setMenuOpen(o => !o)}
+              className={menuOpen ? 'menu-btn open' : 'menu-btn'}
+            >
+              {menuOpen ? <X size={18} /> : <Menu size={18} />}
+            </button>
+          </div>
+        </nav>
+
+        {menuOpen && (
+          <div className="mobile-menu" onClick={close}>
+            <div className="mobile-menu-inner" onClick={e => e.stopPropagation()}>
+              <a href="#product" onClick={close}><span>01</span>The App</a>
+              <a href="#ai" onClick={close}><span>02</span>AI</a>
+              <a href="/privacy" onClick={close} className="privacy-link"><span>03</span>Privacy</a>
+              <a href="#access" onClick={close} className="mobile-cta">
+                Request Access <ArrowRight size={14} />
+              </a>
+            </div>
+          </div>
+        )}
+
+        <section className="hero" id="top">
+          <div className="hero-bg" />
+
+          <FadeIn className="hero-copy">
+            <div className="pill">
+              <span />
+              Coming soon · iOS private beta
+            </div>
+            <h1>Your home,<br /><em>understood.</em></h1>
+            <p>
+              A calm layer over your smart home. Lumen notices the moment,<br />
+              explains why, and waits for your tap before anything changes.
+            </p>
+            <div className="hero-actions">
+              <a className="primary" href="#access">
+                Request Early Access <ArrowRight size={15} />
+              </a>
+              <a className="ghost" href="#product">See the whole app</a>
+            </div>
+          </FadeIn>
+
+          <div className="hero-demo">
+            <div className="hero-glow" />
+            <LiveDemo />
+          </div>
+        </section>
+
+        <AppTourSection />
+        <RoomShowcaseSection />
+        <ActionFlowSection />
+        <AIChatSection />
+        <Waitlist />
+
+        <footer className="site-footer">
+          <a className="logo" href="#top">
+            <SunMedium size={17} /><span>LUMEN</span>
           </a>
-          <a href="mailto:m.rafiq2006@icloud.com">Contact</a>
-        </div>
-      </footer>
-    </main>
+          <p>Native iOS · Calm by design · Explainable AI · Private beta</p>
+          <div className="footer-links">
+            <a href="#access" className="footer-cta">
+              Request Early Access <ArrowRight size={13} />
+            </a>
+            <a href="/privacy">Privacy</a>
+            <a
+              href="https://github.com/mohabbis/lumen"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              GitHub
+            </a>
+            <a href="mailto:m.rafiq2006@icloud.com">Contact</a>
+          </div>
+        </footer>
+      </main>
+    </AmbientContext.Provider>
   );
 }
