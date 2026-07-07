@@ -1,5 +1,5 @@
 /* =====================================================
-   LUMEN — App.css
+   LUMEN - App.css
    Dark luxury editorial landing page
    ===================================================== */
 
@@ -46,6 +46,33 @@ h1, h2, h3, h4, p {
     radial-gradient(ellipse at 8% 85%, rgba(90,20,180,0.18) 0%, transparent 45%),
     radial-gradient(ellipse at 92% 60%, rgba(60,10,130,0.14) 0%, transparent 40%),
     linear-gradient(180deg, #0e0818 0%, #090612 50%, #070410 100%);
+}
+
+/* ===== AMBIENT BACKDROP =====
+   A slow-shifting color wash behind the whole page. Two full-viewport
+   layers crossfade opacity so the tint eases from one moment's color to
+   the next instead of snapping - driven by the live demo's current step,
+   and by whichever section is centered in the viewport once you scroll
+   past the hero. */
+
+.ambient-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.ambient-layer {
+  position: absolute;
+  inset: 0;
+  transition: opacity 1.8s ease;
+  will-change: opacity;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ambient-layer {
+    transition: none;
+  }
 }
 
 /* ===== GRAIN TEXTURE ===== */
@@ -485,16 +512,6 @@ p {
 
 .phone-featured {
   width: 290px;
-}
-
-.mini-phone {
-  width: 180px;
-  opacity: 0.5;
-  transition: opacity 0.3s;
-}
-
-.mini-phone:hover {
-  opacity: 0.8;
 }
 
 .phone-screen {
@@ -1912,33 +1929,6 @@ p {
 
 .app-tour-section {
   padding: 80px clamp(20px, 5%, 64px);
-}
-
-.tour-row {
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  gap: 24px;
-  margin-top: 52px;
-}
-
-.tour-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 14px;
-}
-
-.tour-item .mini-phone,
-.tour-item .mini-phone:hover {
-  opacity: 1;
-}
-
-.tour-label {
-  font-size: 10px;
-  color: rgba(232,224,212,0.38);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
 }
 
 .capability-chips-wrap {
