@@ -52,7 +52,7 @@ The app also ships with a React/Vite marketing preview in `src/` that recreates 
 **Not yet**
 
 - Multi-home support
-- Matter integration
+- In-app Matter commissioning (pairing Matter accessories from inside Lumen). Note: Lumen already *controls* Matter accessories that are in your Apple Home today, because iOS surfaces them through the same HomeKit framework Lumen uses; this item is only about adding them directly rather than through the Apple Home app.
 - On-device reasoning engine (the current "Lumen noticed" surface is rule-based)
 - TestFlight beta
 
@@ -66,7 +66,7 @@ Lumen is on a deliberately gradual path from "Not yet" to public release:
 2. **TestFlight beta** — internal, then external via the marketing site waitlist.
 3. **App Store submission** — after beta feedback is incorporated.
 4. **Public launch** — iOS App Store, with site copy updated accordingly.
-5. **Post-launch** — multi-home support, Matter integration, continued reasoning-quality improvements.
+5. **Post-launch** — multi-home support, in-app Matter commissioning, continued reasoning-quality improvements.
 
 Full month-by-month detail, including a note on how Lumen's roadmap relates to the broader smart-home AI landscape, lives in [`ROADMAP.md`](ROADMAP.md).
 

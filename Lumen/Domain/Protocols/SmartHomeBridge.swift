@@ -7,10 +7,10 @@ struct BridgeID: Hashable, Sendable, CustomStringConvertible, Codable {
     init(_ value: String) { rawValue = value }
     var description: String { rawValue }
 
+    // HomeKit is the one real hardware bridge. Matter accessories are reached
+    // through it too: iOS surfaces them as HomeKit accessories, so they arrive
+    // via HomeKitBridge rather than needing a bridge of their own.
     static let homeKit = BridgeID("homekit")
-    static let govee   = BridgeID("govee")
-    static let kasa    = BridgeID("kasa")
-    static let matter  = BridgeID("matter")
 }
 
 // MARK: - Bridge Status

@@ -1962,6 +1962,36 @@ p {
   color: rgba(232,224,212,0.45);
 }
 
+/* ===== COMPATIBILITY BRANDS + HONESTY NOTE ===== */
+
+.compat-brands {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 560px;
+  margin: 40px auto 0;
+}
+
+.compat-brands-line {
+  font-size: 13px;
+  line-height: 1.7;
+  color: rgba(232,224,212,0.55);
+  margin-bottom: 14px;
+}
+
+.compat-brands-line b {
+  font-weight: 400;
+  color: rgba(232,224,212,0.82);
+}
+
+.compat-note {
+  font-size: 12px;
+  line-height: 1.7;
+  color: rgba(232,224,212,0.34);
+  margin: 0;
+}
+
 /* ===== ROOM SHOWCASE SECTION ===== */
 
 .room-show-section {

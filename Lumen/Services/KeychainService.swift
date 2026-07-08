@@ -89,19 +89,3 @@ final class KeychainService {
         (try? retrieve(forKey: key)) != nil
     }
 }
-
-// MARK: - Well-known Keys
-
-extension KeychainService {
-    enum Keys {
-        static let goveeApiKey       = "muhome.govee.apiKey"
-        static let kasaUsername      = "muhome.kasa.username"
-        static let kasaPassword      = "muhome.kasa.password"
-        static let homebridgeBaseURL = "muhome.homebridge.baseURL"
-        static let homebridgeToken   = "muhome.homebridge.token"
-        static let hueApiKey             = "muhome.hue.apiKey"
-        static let hueBaseURL            = "muhome.hue.baseURL"
-        static let homebridgeUsername    = "muhome.homebridge.username"
-        static let homebridgePassword    = "muhome.homebridge.password"
-    }
-}
