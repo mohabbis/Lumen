@@ -41,27 +41,31 @@ struct RemoteListView: View {
     private var remoteList: some View {
         List {
             ForEach(remotes, id: \.id) { remote in
-                HStack(spacing: 12) {
-                    Image(systemName: remote.iconName)
-                        .font(.body)
-                        .foregroundStyle(Color("MuhaBrown"))
-                        .frame(width: 28)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(remote.name)
+                NavigationLink {
+                    RemoteDetailView(viewModel: viewModel, remote: remote)
+                } label: {
+                    HStack(spacing: 12) {
+                        Image(systemName: remote.iconName)
                             .font(.body)
-                            .foregroundStyle(Color("PrimaryText"))
-                        if let brand = remote.deviceBrand {
-                            Text(brand)
-                                .font(.caption)
-                                .foregroundStyle(Color("SecondaryText"))
+                            .foregroundStyle(Color("MuhaBrown"))
+                            .frame(width: 28)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(remote.name)
+                                .font(.body)
+                                .foregroundStyle(Color("PrimaryText"))
+                            if let brand = remote.deviceBrand {
+                                Text(brand)
+                                    .font(.caption)
+                                    .foregroundStyle(Color("SecondaryText"))
+                            }
                         }
+                        Spacer()
+                        Text("\(remote.commands.count) btn")
+                            .font(.caption)
+                            .foregroundStyle(Color("TertiaryText"))
                     }
-                    Spacer()
-                    Text("\(remote.commands.count) btn")
-                        .font(.caption)
-                        .foregroundStyle(Color("TertiaryText"))
+                    .padding(.vertical, 4)
                 }
-                .padding(.vertical, 4)
             }
             .onDelete { indexSet in
                 for i in indexSet { viewModel.deleteRemote(remotes[i]) }

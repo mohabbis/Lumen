@@ -32,6 +32,11 @@ enum AppError: LocalizedError {
     case homeAlreadyExists(name: String)
     case invalidConfiguration(reason: String)
 
+    // IR / Remote
+    case remoteBridgeNotConfigured
+    case invalidBridgeHostname(String)
+    case irSendFailed(underlying: any Error)
+
     // MARK: - LocalizedError
 
     var errorDescription: String? {
@@ -72,6 +77,12 @@ enum AppError: LocalizedError {
             return "A home named '\(name)' already exists."
         case .invalidConfiguration(let reason):
             return reason
+        case .remoteBridgeNotConfigured:
+            return "This remote has no IR bridge address set."
+        case .invalidBridgeHostname(let value):
+            return "'\(value)' is not a valid IR bridge address."
+        case .irSendFailed(let err):
+            return "Could not send the IR command: \(err.localizedDescription)"
         }
     }
 
@@ -81,6 +92,10 @@ enum AppError: LocalizedError {
             return "Open Settings → Privacy & Security and grant the required access."
         case .deviceUnreachable:
             return "Check that the device is powered on and on the same network."
+        case .remoteBridgeNotConfigured, .invalidBridgeHostname:
+            return "Set the IR blaster's address (IP or hostname) in the remote's settings."
+        case .irSendFailed:
+            return "Check that the IR bridge is powered on and reachable on your local network."
         case .sceneExecutionPartialFailure:
             return "Some devices may be unreachable. Review device status."
         case .containerInitializationFailed:

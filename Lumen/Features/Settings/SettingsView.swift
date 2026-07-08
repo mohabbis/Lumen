@@ -6,6 +6,8 @@ struct SettingsView: View {
     @Environment(DeviceService.self) private var deviceService
     @Environment(DeviceStateStore.self) private var stateStore
     @Environment(AppState.self) private var appState
+    @Environment(RemoteService.self) private var remoteService
+    @Environment(\.modelContext) private var modelContext
 
     var body: some View {
         ZStack {
@@ -21,6 +23,7 @@ struct SettingsView: View {
                 header
                 homeSection
                 bridgesSection
+                remotesSection
                 preferencesSection
                 aboutSection
             }
@@ -82,6 +85,30 @@ struct SettingsView: View {
                         isLast: i == statuses.count - 1
                     )
                 }
+            }
+        }
+    }
+
+    // MARK: - Remotes Section
+
+    private var remotesSection: some View {
+        SettingsDarkCard(title: "REMOTES") {
+            NavigationLink {
+                RemoteListView(
+                    viewModel: RemoteViewModel(modelContext: modelContext, remoteService: remoteService)
+                )
+            } label: {
+                HStack {
+                    Text("IR Remotes")
+                        .font(.system(size: 15))
+                        .foregroundStyle(.white)
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(Color.white.opacity(0.3))
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 14)
             }
         }
     }
