@@ -72,7 +72,8 @@ Most services are `@Observable @MainActor` classes passed through the SwiftUI en
 | `LocationService` | `Services/` | CLLocationManager wrapper; publishes `GeofenceEvent` when the user crosses the home radius. Gates first-check event emission via `hasCompletedFirstCheck` so launching at home does not fire a spurious arrival |
 | `NotificationService` | `Services/` | UNUserNotificationCenter wrapper; called by `SceneService` after automation fires |
 | `SensorObservationService` | `Services/Intelligence/` | Subscribes to motion/contact `AsyncStream`s from all capable devices. Wired in `RootView` via `DeviceStateStore.onDevicesDiscovered/onDevicesRemoved` |
-| `KeychainService` | `Services/` | Singleton (`KeychainService.shared`) wrapping the Security framework for secure string/data storage. **Not** an `@Observable` environment service — used directly (e.g. for IR-bridge credentials) |
+| `RemoteService` | `Services/Remote/` | Sends IR commands to a user-configured bridge over HTTP via an injectable `IRTransport` (default `HTTPIRTransport`). Standalone, **not** a `SmartHomeBridge` — IR is fire-and-forget |
+| `KeychainService` | `Services/` | Singleton (`KeychainService.shared`) wrapping the Security framework for secure string/data storage. **Not** an `@Observable` environment service — used directly when a feature needs secure storage |
 
 #### Calm-tone surfaces (the consent + explainability layer)
 
@@ -156,8 +157,11 @@ SwiftData `@Model` types are split by domain across two roots:
 
 Some surfaces are persisted in the schema and have view/view-model code, but are **not** reachable from navigation yet. Treat them as in-progress, not dead code — extend rather than delete:
 
-- **IR remote control** (`Features/Remote/`, `Domain/Models/Remote/`): `RemoteProfile` ⟶ `[IRCommand]` model a learnable IR remote (Broadlink/raw codes, optional `bridgeHostname` for an IR blaster). `RemoteListView` + `RemoteViewModel` exist but no tab routes to them yet.
 - **Zones** (`Models/Space/Zone.swift`): part of the schema and relationships, but no service or UI surfaces zones yet.
+
+#### IR remotes (`Features/Remote/`, `Integrations/IR/`, `Domain/Models/Remote/`)
+
+Wired and reachable via **Settings → Remotes**. `RemoteProfile` ⟶ `[IRCommand]` model a remote (Broadlink/pronto/raw/nec/samsung codes, plus a `bridgeHostname` for the IR blaster). `RemoteListView` → `RemoteDetailView` lets you set the bridge address, add buttons (paste a code + pick a format), and tap to send. Sending goes through `RemoteViewModel` → `RemoteService` → an `IRTransport`. The only transport today is `HTTPIRTransport` (POST `<bridge>/send` with `{ "format", "code" }`); the pure `normalizedEndpoint(from:)` / `makeRequest(endpoint:code:format:)` helpers are unit-tested (`LumenTests/RemoteIRTests.swift`). Deliberately **not** a `SmartHomeBridge` — IR is fire-and-forget with no state stream, so it stays out of the device/scene pipeline. Future extensions behind the same seam: a native Broadlink LAN transport (UDP discovery + AES) and an on-device IR "learn" capture flow (users paste codes for now).
 
 #### Navigation
 
@@ -197,6 +201,7 @@ Coverage groups (91 tests at time of writing):
 | `RhythmTests` | `RhythmTiming` block math, midnight wrap |
 | `ReasoningTests` | `ReasoningCalculator` signal generation, suggestion labels |
 | `RoomViewModelTests` | RoomVM CRUD wrapper |
+| `RemoteIRTests` | IR endpoint normalization, HTTP request building, `RemoteService.send` (fake transport), `RemoteViewModel` command/hostname CRUD |
 
 Run from inside Xcode (Cmd+U) or via the xcodebuild test command above.
 

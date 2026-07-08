@@ -27,3 +27,5 @@ SwiftData stores homes, rooms, planned devices, scenes, and execution history lo
 ## Hardware Boundaries
 
 HomeKit capability code stays inside `Lumen/Integrations/HomeKit/`. UI and services depend on Lumen protocols, not HomeKit classes directly.
+
+Matter accessories are reached through this same path: iOS exposes Matter accessories in the user's Apple Home as `HMAccessory`, so `HomeKitBridge.discover()` returns them and `HomeKitDevice.buildCapabilities` maps their capabilities with no separate Matter stack. Commissioning Matter accessories from inside Lumen (rather than through the Apple Home app) is a separate, future capability; controlling ones already in Apple Home works today.

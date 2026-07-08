@@ -15,6 +15,7 @@ struct MuhomeApp: App {
     @State private var sceneService: SceneService
     @State private var sensorService = SensorObservationService()
     @State private var locationService = LocationService()
+    @State private var remoteService = RemoteService()
 
     init() {
         let c = PersistenceCoordinator.makeContainer()
@@ -42,6 +43,7 @@ struct MuhomeApp: App {
                 .environment(sceneService)
                 .environment(sensorService)
                 .environment(locationService)
+                .environment(remoteService)
         }
         .modelContainer(container)
     }

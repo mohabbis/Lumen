@@ -23,7 +23,12 @@
 	<key>NSHomeKitUsageDescription</key>
 	<string>Lumen uses HomeKit to discover and control your smart home devices.</string>
 	<key>NSLocalNetworkUsageDescription</key>
-	<string>Lumen controls your smart home accessories through Apple Home over your local network, keeping changes on-device with no Lumen cloud in between.</string>
+	<string>Lumen controls your smart home accessories over your local network: through Apple Home, and by sending IR codes directly to a bridge you configure. Changes stay on-device with no Lumen cloud in between.</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Lumen uses your location to detect when you're home and show "Welcome Home" greeting.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
