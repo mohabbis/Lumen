@@ -50,4 +50,13 @@ describe('Lumen landing page', () => {
     render(<App />);
     expect(screen.getByRole('button', { name: /request access/i })).toBeInTheDocument();
   });
+
+  it('states the honest Apple Home / HomeKit + Matter compatibility', () => {
+    render(<App />);
+    // The compatibility claim must survive refactors: Lumen controls what's in
+    // your Apple Home (HomeKit + Matter), not bespoke brand integrations.
+    const heading = screen.getByRole('heading', { name: /apple home/i });
+    expect(heading).toHaveTextContent(/matter/i);
+    expect(screen.getByText(/if it's in your apple home, lumen works with it/i)).toBeInTheDocument();
+  });
 });

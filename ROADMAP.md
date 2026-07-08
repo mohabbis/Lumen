@@ -30,7 +30,7 @@ Lumen is a solo/small-team indie iOS project (team `CU67F9EY3Q`, bundle ID `com.
 
 ## Phase 5 — Post-launch iteration (ongoing)
 
-- Multi-home support, Matter integration — not required for v1.
+- Multi-home support and in-app Matter commissioning (pairing Matter accessories from inside Lumen). Not required for v1: Lumen already controls Matter accessories that are in the user's Apple Home today, since iOS exposes them through the HomeKit framework the app already uses. This item is about adding them directly, not controlling them.
 - Expand the reasoning surface based on real usage signals.
 - Revisit on-device model quality with real (anonymized, opt-in) usage data if/when that becomes feasible without compromising the local-first posture.
 

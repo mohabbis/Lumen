@@ -56,4 +56,4 @@ Please include:
 - CloudKit sync is off, so data is local to the device.
 - Preview controls are sample devices, not real hardware.
 - HomeKit results vary by the tester's Home configuration and accessory support.
-- Matter-specific setup is outside the first beta scope.
+- Matter accessories already added to your Apple Home are controllable (iOS surfaces them through HomeKit); pairing Matter accessories from inside Lumen is outside the first beta scope.

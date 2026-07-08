@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import {
   Activity, ArrowRight, BedDouble, Blinds, ChevronRight, DoorClosed, DoorOpen,
   Droplets, Home, Laptop, Lightbulb, Lock, MapPin, Menu, MessageCircle, Moon,
-  MoonStar, Plus, Popcorn, Send, Settings, Sofa, Sparkle, Sparkles,
+  MoonStar, Plug, Plus, Popcorn, Send, Settings, Sofa, Sparkle, Sparkles,
   SunMedium, Sunrise, Thermometer, Utensils, X, Zap,
 } from 'lucide-react';
 import './App.css';
@@ -80,13 +80,27 @@ const aiCallouts = [
   { icon: Zap, label: 'You decide', sub: 'One tap to approve' },
 ];
 
-const otherCapabilities = [
+// Accessory categories Lumen actually controls today. These mirror the
+// HomeKit service types the app maps in HomeKitDevice.buildCapabilities
+// (lights, plugs/switches, thermostats, locks, window coverings, and
+// motion/contact/humidity sensors). Everything here is reached through
+// Apple Home, so any HomeKit- or Matter-certified accessory of these
+// kinds works, brand regardless.
+const supportedCategories = [
+  { label: 'Lights', icon: Lightbulb },
+  { label: 'Plugs & switches', icon: Plug },
+  { label: 'Thermostats', icon: Thermometer },
   { label: 'Window blinds', icon: Blinds },
   { label: 'Door locks', icon: Lock },
   { label: 'Motion sensors', icon: Activity },
-  { label: 'Door sensors', icon: DoorClosed },
+  { label: 'Door & window sensors', icon: DoorClosed },
   { label: 'Humidity', icon: Droplets },
 ];
+
+// Named only as familiar examples of HomeKit/Matter-certified brands. They
+// work because they live in your Apple Home, not through any Lumen-specific
+// brand integration.
+const exampleBrands = ['Philips Hue', 'Eve', 'Aqara', 'Nanoleaf', 'Matter-enabled Cync'];
 
 const chapters = [
   'Try the lights',
@@ -556,7 +570,7 @@ function IntelScreen() {
       </div>
       <h4 className="app-greeting small">Intel</h4>
       <div className="intel-banner">
-        <span className="online-dot" /> HomeKit · 8 devices · 7 online
+        <span className="online-dot" /> Apple Home · 8 devices · 7 online
       </div>
       <div className="device-list">
         {devices.map(({ name, room, icon: Icon, online }) => (
@@ -798,30 +812,50 @@ function LiveDemo() {
   );
 }
 
-// App tour recap - the live demo above already walked through the whole
-// app in one phone; this section just grounds it in what else it speaks to.
+// Compatibility - what Lumen actually controls. Lumen is a HomeKit app: it
+// works with whatever lives in your Apple Home, which on iOS includes both
+// HomeKit and Matter accessories. It rides on Apple Home rather than talking
+// to each brand's cloud, so the honest umbrella is "if it's in your Apple
+// Home, Lumen works with it."
 
-function AppTourSection() {
+function CompatibilitySection() {
   const sectionRef = useRef(null);
   useAmbientRegion(sectionRef, '200,184,154');
 
   return (
-    <section className="app-tour-section" id="product" ref={sectionRef}>
+    <section className="app-tour-section compat-section" id="product" ref={sectionRef}>
       <FadeIn className="section-copy centered">
-        <p className="eyebrow">The whole app</p>
-        <h2>More than<br />a dashboard.</h2>
-        <p className="section-note">Built for low cognitive load: fewer decisions, less noise, one clear next step. The demo above walks the same rooms, devices, and scenes you'll actually use.</p>
+        <p className="eyebrow">Works with your home</p>
+        <h2>Your Apple Home,<br /><em>HomeKit &amp; Matter.</em></h2>
+        <p className="section-note">Lumen controls whatever lives in your Apple Home: every HomeKit accessory, plus the Matter ones you've added. No extra hubs, no brand logins. If it's in your Apple Home, Lumen works with it.</p>
       </FadeIn>
+
       <FadeIn className="capability-chips-wrap">
-        <p className="eyebrow">Also speaks to</p>
+        <p className="eyebrow">Controls these accessories</p>
         <div className="capability-chips">
-          {otherCapabilities.map(({ label, icon: Icon }) => (
+          {supportedCategories.map(({ label, icon: Icon }) => (
             <span className="capability-chip" key={label}>
               <Icon size={11} />
               {label}
             </span>
           ))}
         </div>
+      </FadeIn>
+
+      <FadeIn className="compat-brands">
+        <p className="compat-brands-line">
+          Works with certified brands through Apple Home, like{' '}
+          {exampleBrands.map((brand, i) => (
+            <React.Fragment key={brand}>
+              <b>{brand}</b>{i < exampleBrands.length - 1 ? ', ' : '.'}
+            </React.Fragment>
+          ))}
+        </p>
+        <p className="compat-note">
+          Lumen rides on Apple Home instead of each brand's cloud, so anything HomeKit- or
+          Matter-certified works, and anything that isn't in your Apple Home stays out of reach.
+          The calm rhythm layer keeps working with no smart hardware at all.
+        </p>
       </FadeIn>
     </section>
   );
@@ -1143,7 +1177,7 @@ export function App() {
           </div>
         </section>
 
-        <AppTourSection />
+        <CompatibilitySection />
         <RoomShowcaseSection />
         <ActionFlowSection />
         <AIChatSection />
