@@ -70,18 +70,29 @@ Lumen controls Matter accessories through the same path as HomeKit: iOS surfaces
 - If granted, run a low-risk automation path and confirm the notification copy is understandable.
 - If denied, confirm scene execution still works and no repeated prompt loop appears.
 
-## Remotes / IR
+## Remotes / IR (HTTP bridge)
 
-Requires an IR bridge on your local network that accepts `POST <address>/send` with a JSON body `{ "format", "code" }` (a small DIY / ESP blaster or a Home Assistant style REST shim). Native Broadlink discovery is a future step.
+Requires an IR bridge on your local network that accepts `POST <address>/send` with a JSON body `{ "format", "code" }` (a small DIY / ESP blaster or a Home Assistant style REST shim).
 
 - Open Settings and tap **Remotes** under the REMOTES card.
 - Add a remote (for example `Living Room TV`), then open it.
-- Set the **IR bridge address** to your bridge's IP or hostname (for example `192.168.1.50`).
+- Leave the transport on **HTTP bridge** and set the address to your bridge's IP or hostname (for example `192.168.1.50`).
 - Add a button: give it a name (for example `Power`), paste a known-good IR code, and pick the matching format.
 - Tap the button and confirm the **physical** device reacts (the first send may prompt for Local Network access; grant it).
-- Clear the bridge address and tap a button; confirm a visible "no IR bridge address" error appears rather than a silent failure.
+- Clear the address and tap a button; confirm a visible "no IR bridge address" error appears rather than a silent failure.
 - Set a malformed address and confirm the invalid-address error appears.
 - Delete a button and a remote; confirm both persist after relaunch.
+
+## Remotes / IR (Broadlink)
+
+Requires a Broadlink RM-series blaster on the **same Wi-Fi** as the iPhone, already set up in the Broadlink app. This path uses native UDP + AES and can only be verified on device.
+
+- In a remote, switch the transport to **Broadlink** and enter the blaster's IP (for example `192.168.1.50`).
+- Tap **Add button**, then **Learn from remote**. Point a physical remote at the blaster and press a button.
+- Confirm the button shows as captured, name it, and tap **Add** (the first exchange may prompt for Local Network access; grant it).
+- Tap the new button and confirm the target device (TV/AC) reacts.
+- Start Learn and do **not** press any remote button; confirm it times out with a clear "no IR code captured" message.
+- On an **HTTP bridge** remote, confirm there is no Learn button (learning is Broadlink-only); switching such a remote to Broadlink and calling learn must not silently no-op.
 
 ## iPad Smoke Test
 

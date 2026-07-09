@@ -78,13 +78,13 @@ final class RemoteIRTests: XCTestCase {
         XCTAssertEqual(json?["format"], "broadlink")
     }
 
-    // MARK: - RemoteService.send
+    // MARK: - RemoteService.send (HTTP routing)
 
-    func testServiceSendPassesValuesToTransport() async throws {
+    func testServiceSendPassesValuesToHTTPTransport() async throws {
         let fake = FakeIRTransport()
-        let service = RemoteService(transport: fake)
+        let service = RemoteService(httpTransport: fake)
         let ctx = makeContext()
-        let profile = RemoteProfile(name: "TV", bridgeHostname: "192.168.1.50")
+        let profile = RemoteProfile(name: "TV", bridgeHostname: "192.168.1.50")   // .http default
         ctx.insert(profile)
         let command = IRCommand(name: "Power", irCode: "PWR", irFormat: .nec)
         command.remote = profile
@@ -92,13 +92,14 @@ final class RemoteIRTests: XCTestCase {
 
         try await service.send(command, using: profile)
 
-        XCTAssertEqual(fake.capturedCode, "PWR")
-        XCTAssertEqual(fake.capturedFormat, .nec)
-        XCTAssertEqual(fake.capturedEndpoint?.absoluteString, "http://192.168.1.50")
+        let host = await fake.capturedHost
+        XCTAssertEqual(await fake.capturedCode, "PWR")
+        XCTAssertEqual(await fake.capturedFormat, .nec)
+        XCTAssertEqual(host?.address, "192.168.1.50")
     }
 
     func testServiceSendWithoutHostnameThrows() async {
-        let service = RemoteService(transport: FakeIRTransport())
+        let service = RemoteService(httpTransport: FakeIRTransport())
         let ctx = makeContext()
         let profile = RemoteProfile(name: "TV")   // no bridgeHostname
         ctx.insert(profile)
@@ -117,9 +118,8 @@ final class RemoteIRTests: XCTestCase {
     }
 
     func testServiceSendWrapsTransportFailure() async {
-        let fake = FakeIRTransport()
-        fake.errorToThrow = URLError(.cannotConnectToHost)
-        let service = RemoteService(transport: fake)
+        let fake = FakeIRTransport(error: URLError(.cannotConnectToHost))
+        let service = RemoteService(httpTransport: fake)
         let ctx = makeContext()
         let profile = RemoteProfile(name: "TV", bridgeHostname: "192.168.1.50")
         ctx.insert(profile)
@@ -133,6 +133,52 @@ final class RemoteIRTests: XCTestCase {
         } catch {
             guard case AppError.irSendFailed = error else {
                 return XCTFail("expected irSendFailed, got \(error)")
+            }
+        }
+    }
+
+    // MARK: - RemoteService transport routing + learn
+
+    func testServiceRoutesBroadlink() async throws {
+        let http = FakeIRTransport()
+        let broadlink = FakeLearningTransport()
+        let service = RemoteService(httpTransport: http, broadlinkTransport: broadlink)
+        let ctx = makeContext()
+        let profile = RemoteProfile(name: "TV", bridgeHostname: "192.168.1.50", transportKind: .broadlink)
+        ctx.insert(profile)
+        let command = IRCommand(name: "Power", irCode: "PWR", irFormat: .broadlink)
+        command.remote = profile
+        ctx.insert(command)
+
+        try await service.send(command, using: profile)
+
+        XCTAssertTrue(await broadlink.didSend)
+        XCTAssertNil(await http.capturedHost)
+    }
+
+    func testServiceLearnReturnsCode() async throws {
+        let broadlink = FakeLearningTransport(codeToReturn: "LEARNED==")
+        let service = RemoteService(httpTransport: FakeIRTransport(), broadlinkTransport: broadlink)
+        let ctx = makeContext()
+        let profile = RemoteProfile(name: "TV", bridgeHostname: "192.168.1.50", transportKind: .broadlink)
+        ctx.insert(profile)
+
+        let code = try await service.learn(using: profile)
+        XCTAssertEqual(code, "LEARNED==")
+    }
+
+    func testServiceLearnOnHTTPThrowsNotSupported() async {
+        let service = RemoteService(httpTransport: FakeIRTransport(), broadlinkTransport: FakeLearningTransport())
+        let ctx = makeContext()
+        let profile = RemoteProfile(name: "TV", bridgeHostname: "192.168.1.50")   // .http
+        ctx.insert(profile)
+
+        do {
+            _ = try await service.learn(using: profile)
+            XCTFail("expected throw")
+        } catch {
+            guard case AppError.learningNotSupported = error else {
+                return XCTFail("expected learningNotSupported, got \(error)")
             }
         }
     }
@@ -179,21 +225,56 @@ final class RemoteIRTests: XCTestCase {
         vm.setBridgeHostname("   ", on: profile)
         XCTAssertNil(profile.bridgeHostname)
     }
+
+    func testSetTransportKind() throws {
+        let ctx = makeContext()
+        let vm = RemoteViewModel(modelContext: ctx)
+        let profile = RemoteProfile(name: "TV")
+        ctx.insert(profile)
+
+        XCTAssertEqual(profile.transportKind, .http)
+        vm.setTransportKind(.broadlink, on: profile)
+        XCTAssertEqual(profile.transportKind, .broadlink)
+    }
 }
 
-// MARK: - Fake Transport
-// Records the values RemoteService hands it; touched only on the main actor.
+// MARK: - Fakes (actors: race-free under strict concurrency)
 
-private final class FakeIRTransport: IRTransport, @unchecked Sendable {
-    var capturedCode: String?
-    var capturedFormat: IRFormat?
-    var capturedEndpoint: URL?
-    var errorToThrow: (any Error)?
+private actor FakeIRTransport: IRTransport {
+    let errorToThrow: (any Error)?
+    private(set) var capturedCode: String?
+    private(set) var capturedFormat: IRFormat?
+    private(set) var capturedHost: IRHost?
 
-    func send(code: String, format: IRFormat, to endpoint: URL) async throws {
+    init(error: (any Error)? = nil) { errorToThrow = error }
+
+    func send(code: String, format: IRFormat, to host: IRHost) async throws {
         capturedCode = code
         capturedFormat = format
-        capturedEndpoint = endpoint
+        capturedHost = host
         if let errorToThrow { throw errorToThrow }
+    }
+}
+
+private actor FakeLearningTransport: IRLearningTransport {
+    let codeToReturn: String
+    let sendError: (any Error)?
+    private(set) var didSend = false
+    private(set) var capturedHost: IRHost?
+
+    init(codeToReturn: String = "LEARNED==", sendError: (any Error)? = nil) {
+        self.codeToReturn = codeToReturn
+        self.sendError = sendError
+    }
+
+    func send(code: String, format: IRFormat, to host: IRHost) async throws {
+        didSend = true
+        capturedHost = host
+        if let sendError { throw sendError }
+    }
+
+    func learn(from host: IRHost, timeout: Duration) async throws -> String {
+        capturedHost = host
+        return codeToReturn
     }
 }

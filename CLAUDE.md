@@ -135,7 +135,7 @@ Follow this pattern for new feature work.
 #### SwiftData persistence (`Services/Persistence/`)
 
 - Schema is versioned in `MuhomeSchema.swift`: `MuhomeSchemaV1` → `V2` → `V3`, with a lightweight `MuhomeSchemaMigrationPlan`. `PersistenceCoordinator` always uses `MuhomeSchemaV3`.
-- The registered `@Model` types (identical across V1–V3 except `ExecutionEvent`, added in V2) are: `Home`, `Room`, `Zone`, `PlannedDevice`, `Scene`, `SceneAction`, `RemoteProfile`, `IRCommand`, `ExecutionEvent`. V2→V3 only drops `@Attribute(.unique)` from `id` fields for CloudKit compatibility; `Home.latitude`/`longitude` were added via SwiftData's inferred nullable-column migration (no new version).
+- The registered `@Model` types (identical across V1–V3 except `ExecutionEvent`, added in V2) are: `Home`, `Room`, `Zone`, `PlannedDevice`, `Scene`, `SceneAction`, `RemoteProfile`, `IRCommand`, `ExecutionEvent`. V2→V3 only drops `@Attribute(.unique)` from `id` fields for CloudKit compatibility; `Home.latitude`/`longitude`, and later `RemoteProfile.transportKindRaw`/`broadlinkMAC`/`broadlinkDeviceType`, were added via SwiftData's inferred nullable-column migration (no new version).
 - CloudKit sync is **off** (`PersistenceCoordinator.enableCloudKitSync = false`). The flag is guarded by a test (`PersistenceTests.testCloudKitSyncIsGatedOffForBeta`). Flip only after provisioning `iCloud.com.muhome.app` in the Apple Developer portal.
 - The old `MuhomeDataModels.swift` / `SceneModels.swift` legacy-struct files (`MuhaScene`, `MuhaSceneRecord`, etc.) have been **removed**. `TimeOfDay` — the one enum from that era still in use — now lives in its own file, `Lumen/Models/TimeOfDay.swift`. There is no dead legacy schema to avoid anymore.
 
@@ -161,7 +161,13 @@ Some surfaces are persisted in the schema and have view/view-model code, but are
 
 #### IR remotes (`Features/Remote/`, `Integrations/IR/`, `Domain/Models/Remote/`)
 
-Wired and reachable via **Settings → Remotes**. `RemoteProfile` ⟶ `[IRCommand]` model a remote (Broadlink/pronto/raw/nec/samsung codes, plus a `bridgeHostname` for the IR blaster). `RemoteListView` → `RemoteDetailView` lets you set the bridge address, add buttons (paste a code + pick a format), and tap to send. Sending goes through `RemoteViewModel` → `RemoteService` → an `IRTransport`. The only transport today is `HTTPIRTransport` (POST `<bridge>/send` with `{ "format", "code" }`); the pure `normalizedEndpoint(from:)` / `makeRequest(endpoint:code:format:)` helpers are unit-tested (`LumenTests/RemoteIRTests.swift`). Deliberately **not** a `SmartHomeBridge` — IR is fire-and-forget with no state stream, so it stays out of the device/scene pipeline. Future extensions behind the same seam: a native Broadlink LAN transport (UDP discovery + AES) and an on-device IR "learn" capture flow (users paste codes for now).
+Wired and reachable via **Settings → Remotes**. `RemoteProfile` ⟶ `[IRCommand]` model a remote (Broadlink/pronto/raw/nec/samsung codes, a `bridgeHostname` for the blaster, and a `transportKind` + optional `broadlinkMAC`/`broadlinkDeviceType`). `RemoteListView` → `RemoteDetailView` lets you pick a transport, set the address, add buttons, and tap to send. Sending/learning goes through `RemoteViewModel` → `RemoteService` (routes by `transportKind`) → an `IRTransport`.
+
+Two transports conform to the seam (`Integrations/IR/IRTransport.swift`, which passes an `IRHost` value, never a model):
+- **`HTTPIRTransport`** — POST `<bridge>/send` with `{ "format", "code" }` to a user-run bridge. Pure `normalizedEndpoint(from:)` / `makeRequest(endpoint:code:format:)` helpers.
+- **`BroadlinkTransport`** — native RM blaster over UDP (`actor`, `Integrations/IR/Broadlink/`). The byte-exact protocol (AES-128-CBC via `CommonCrypto`, checksums, auth/send/learn/discovery framing) lives in the pure `BroadlinkProtocol` codec; socket I/O is isolated behind the `UDPChannel` seam (`NWUDPChannel` uses `Network.framework`). It also conforms to `IRLearningTransport`, so `RemoteDetailView`'s **Learn** button captures a code from a physical remote. Device MAC/type come from a targeted discovery "hello" to the entered IP (broadcast auto-discovery is a follow-up).
+
+Tests: the codec (vs crafted vectors) and the actor (vs a fake `UDPChannel`) are covered by `LumenTests/BroadlinkTests.swift`; transport routing + learn-capability by `RemoteIRTests`. The native protocol/socket and on-device Broadlink send/learn are verified on real hardware (not in CI) — see `docs/manual-qa.md`. Deliberately **not** a `SmartHomeBridge` — IR is fire-and-forget with no state stream, so it stays out of the device/scene pipeline.
 
 #### Navigation
 
@@ -201,7 +207,8 @@ Coverage groups (91 tests at time of writing):
 | `RhythmTests` | `RhythmTiming` block math, midnight wrap |
 | `ReasoningTests` | `ReasoningCalculator` signal generation, suggestion labels |
 | `RoomViewModelTests` | RoomVM CRUD wrapper |
-| `RemoteIRTests` | IR endpoint normalization, HTTP request building, `RemoteService.send` (fake transport), `RemoteViewModel` command/hostname CRUD |
+| `RemoteIRTests` | IR endpoint normalization, HTTP request building, `RemoteService` transport routing + learn-capability (fake transports), `RemoteViewModel` command/hostname/transport CRUD |
+| `BroadlinkTests` | Broadlink codec vs crafted vectors (checksum, AES round-trip, packet framing, auth, IR/learn/discovery payloads) + `BroadlinkTransport` actor flow vs a fake `UDPChannel` (send, learn, timeout) |
 
 Run from inside Xcode (Cmd+U) or via the xcodebuild test command above.
 
