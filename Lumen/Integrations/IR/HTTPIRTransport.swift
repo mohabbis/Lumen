@@ -15,9 +15,12 @@ struct HTTPIRTransport: IRTransport {
         self.session = session
     }
 
-    // Throws raw transport errors (URLSession failures, or a bad HTTP status).
-    // RemoteService is the single place that maps these to AppError.irSendFailed.
-    func send(code: String, format: IRFormat, to endpoint: URL) async throws {
+    // Resolves the host address to a URL and POSTs the code. Throws
+    // AppError.invalidBridgeHostname on a bad address; otherwise raw transport
+    // errors (URLSession failures, or a bad HTTP status). RemoteService maps
+    // non-AppError throws to AppError.irSendFailed.
+    func send(code: String, format: IRFormat, to host: IRHost) async throws {
+        let endpoint = try Self.normalizedEndpoint(from: host.address)
         let request = Self.makeRequest(endpoint: endpoint, code: code, format: format)
         let (_, response) = try await session.data(for: request)
         if let http = response as? HTTPURLResponse, !(200..<300).contains(http.statusCode) {

@@ -2,10 +2,9 @@ import SwiftUI
 import SwiftData
 
 // MARK: - Remote Detail View
-// Per-remote screen: set the IR bridge address, then tap a button to send its
-// IR code over HTTP to that bridge. Adding a button takes a pasted IR code and
-// a format; an on-device "learn" capture flow is a future step (needs the
-// native Broadlink transport), so codes are entered by hand for now.
+// Per-remote screen: pick a transport, set the blaster/bridge address, then tap
+// a button to send its IR code. HTTP-bridge remotes take a pasted code + format;
+// Broadlink remotes can capture a code from a physical remote with Learn.
 
 struct RemoteDetailView: View {
 
@@ -53,16 +52,40 @@ struct RemoteDetailView: View {
 
     private var bridgeSection: some View {
         Section {
-            TextField("IR bridge address (e.g. 192.168.1.50)", text: $hostnameField)
+            Picker("Transport", selection: transportBinding) {
+                ForEach(RemoteTransportKind.allCases, id: \.self) { kind in
+                    Text(kind.displayName).tag(kind)
+                }
+            }
+            TextField(addressPlaceholder, text: $hostnameField)
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
                 .keyboardType(.URL)
                 .onSubmit { viewModel.setBridgeHostname(hostnameField, on: remote) }
         } header: {
-            Text("IR Bridge")
+            Text("Blaster")
         } footer: {
-            Text("Lumen sends IR codes to this address on your local network. Enter your IR blaster's IP or hostname, then tap a button below.")
+            Text(bridgeFooter)
         }
+    }
+
+    private var transportBinding: Binding<RemoteTransportKind> {
+        Binding(
+            get: { remote.transportKind },
+            set: { viewModel.setTransportKind($0, on: remote) }
+        )
+    }
+
+    private var addressPlaceholder: String {
+        remote.transportKind == .broadlink
+            ? "Broadlink IP (e.g. 192.168.1.50)"
+            : "IR bridge address (e.g. 192.168.1.50)"
+    }
+
+    private var bridgeFooter: String {
+        remote.transportKind == .broadlink
+            ? "Enter your Broadlink blaster's IP on the same Wi-Fi. Use Learn to capture a button from a physical remote."
+            : "Lumen POSTs IR codes to this address on your local network. Enter your IR bridge's IP or hostname, then tap a button below."
     }
 
     // MARK: - Buttons
@@ -115,14 +138,43 @@ struct RemoteDetailView: View {
                 Section("Button") {
                     TextField("Name (e.g. Power)", text: $newCommandName)
                 }
-                Section("IR Code") {
-                    TextField("Paste IR code", text: $newCommandCode, axis: .vertical)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-                        .lineLimit(1...4)
-                    Picker("Format", selection: $newCommandFormat) {
-                        ForEach(IRFormat.allCases, id: \.self) { format in
-                            Text(format.rawValue.capitalized).tag(format)
+
+                if remote.transportKind == .broadlink {
+                    Section {
+                        Button {
+                            Task {
+                                if let code = await viewModel.learn(from: remote) {
+                                    newCommandCode = code
+                                    newCommandFormat = .broadlink
+                                }
+                            }
+                        } label: {
+                            if viewModel.isLearning {
+                                HStack(spacing: 10) {
+                                    ProgressView()
+                                    Text("Point your remote at the blaster and press a button…")
+                                }
+                            } else {
+                                Label(newCommandCode.isEmpty ? "Learn from remote" : "Captured. Learn again",
+                                      systemImage: "dot.radiowaves.left.and.right")
+                            }
+                        }
+                        .disabled(viewModel.isLearning)
+                    } footer: {
+                        Text(newCommandCode.isEmpty
+                             ? "Captures the code straight from your physical remote."
+                             : "A code was captured. Name it and tap Add.")
+                    }
+                } else {
+                    Section("IR Code") {
+                        TextField("Paste IR code", text: $newCommandCode, axis: .vertical)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                            .lineLimit(1...4)
+                        Picker("Format", selection: $newCommandFormat) {
+                            ForEach(IRFormat.allCases, id: \.self) { format in
+                                Text(format.rawValue.capitalized).tag(format)
+                            }
                         }
                     }
                 }
@@ -147,7 +199,7 @@ struct RemoteDetailView: View {
                 }
             }
         }
-        .presentationDetents([.height(320)])
+        .presentationDetents([.medium])
     }
 
     private var canAddCommand: Bool {
