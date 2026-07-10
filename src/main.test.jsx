@@ -18,7 +18,8 @@ describe('Lumen landing page', () => {
   it('states Tiimo-inspired neurodivergent positioning', () => {
     render(<App />);
     expect(screen.getAllByText(/tiimo/i).length).toBeGreaterThan(0);
-    expect(screen.getByText(/adhd, autism, and sensory-sensitive brains/i)).toBeInTheDocument();
+    expect(screen.getByText(/designed for neurodivergent minds first/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/open to everyone/i).length).toBeGreaterThan(0);
   });
 
   it('renders core nav links', () => {

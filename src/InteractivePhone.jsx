@@ -1,8 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
-  Activity, BedDouble, ChevronRight, Home, Laptop, Lightbulb, Lock, MapPin, Plus,
-  Settings, Sofa, Sparkle, Sparkles, SunMedium, Thermometer, Utensils,
+  Activity, BedDouble, ChevronRight, Home, Laptop, Lightbulb, Lock, Settings, Sofa, Sparkle, Sparkles, SunMedium, Thermometer, Utensils,
 } from 'lucide-react';
 import {
   Moon, MoonStar, Popcorn, Sunrise,
@@ -87,8 +86,6 @@ const SHEET_AMBIENT = {
   action: '232,160,32',
   approval: '212,130,90',
 };
-
-const FLOW_BY_SHEET = { reasoning: 1, action: 2, approval: 1 };
 
 export const PHONE_HINTS = {
   idle: 'Tap through the phone like the real app. Calm tabs, gentle suggestions, and consent before anything runs.',

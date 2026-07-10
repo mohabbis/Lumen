@@ -170,9 +170,8 @@ function HeroCopy() {
       </div>
       <h1>Your home,<br /><em>understood.</em></h1>
       <p className="hero-lede">
-        Smart home apps can feel loud. Lumen is a calm companion for ADHD, autism,
-        and sensory-sensitive brains. It notices the moment, explains why, and waits
-        for your tap before anything changes.
+        Smart home apps can feel loud. Lumen is designed for neurodivergent minds first,
+        and better for anyone who wants a home that explains itself before it acts.
       </p>
       <p className="hero-hint">{phone.hint}</p>
       <div className="hero-actions">
@@ -196,7 +195,8 @@ function WhyLumenSection() {
         <p className="section-note">
           HomeKit dashboards pack every toggle onto one screen. Lumen takes inspiration
           from Tiimo, an Apple Design Award winner built for neurodivergent planners,
-          and brings that same low-stress clarity to your home.
+          and brings that same low-stress clarity to your home. The design is niche.
+          The welcome is not.
         </p>
       </FadeIn>
       <div className="calm-principles-grid">
@@ -212,8 +212,9 @@ function WhyLumenSection() {
       </div>
       <FadeIn className="why-lumen-contrast centered">
         <p>
-          Lumen is not a tinkerer tool or a power-user controller. It is the gentle
-          layer you reach for when your brain already has enough to hold.
+          Lumen is not a tinkerer tool or a power-user controller. Anyone can use it.
+          Building for neurodivergent minds first just makes it calmer than dashboards
+          built for everyone and optimised for no one.
         </p>
       </FadeIn>
     </section>
@@ -399,7 +400,7 @@ function Waitlist() {
         <FadeIn className="waitlist-copy">
           <p className="eyebrow">Early access</p>
           <h2>Try the calmer<br />smart-home layer.</h2>
-          <p>A private beta for minds that need a gentler home. No spam, no fake urgency.</p>
+          <p>A private iOS beta, open to everyone. No spam, no fake urgency.</p>
         </FadeIn>
         <FadeIn delay={0.1} className="waitlist-form-wrap">
           <form className="waitlist-form" onSubmit={handleSubmit}>
@@ -410,7 +411,7 @@ function Waitlist() {
             </button>
           </form>
           <div className="waitlist-checks">
-            <span>Neurodivergent-first</span>
+            <span>Open to everyone</span>
             <span>Private beta</span>
             <span>No spam</span>
           </div>
@@ -496,7 +497,7 @@ function SiteShell() {
             <a className="logo" href="#top">
               <SunMedium size={17} /><span>LUMEN</span>
             </a>
-            <p>Neurodivergent-first · Tiimo-inspired calm · Native iOS · Private beta</p>
+            <p>Neurodivergent-first design · Open to everyone · Native iOS · Private beta</p>
             <div className="footer-links">
               <a href="#access" className="footer-cta">
                 Request Early Access <ArrowRight size={13} />
