@@ -1,35 +1,115 @@
 /* Mobile and layout polish for the Lumen landing page. */
 
 .waitlist-section {
-  padding: 88px clamp(20px, 5vw, 72px);
+  padding: 96px clamp(20px, 5vw, 72px);
+  display: flex;
+  justify-content: center;
 }
 
-.waitlist-inner {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(320px, 520px);
-  gap: clamp(32px, 7vw, 72px);
-  align-items: end;
-  max-width: 1180px;
-  margin: 0 auto;
-  padding: clamp(28px, 5vw, 56px);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 28px;
+/* ===== SIGN-UP CARD (Claude / Cursor style get-started flow) ===== */
+
+.signup-card {
+  width: 100%;
+  max-width: 560px;
+  padding: clamp(26px, 4vw, 44px);
+  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(138, 180, 248, 0.05) 0%, rgba(255, 255, 255, 0.02) 42%);
+  box-shadow: 0 44px 120px -54px rgba(138, 180, 248, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.signup-head {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.signup-logo {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 13px;
+  margin-bottom: 16px;
+  background: var(--grad-accent-soft, rgba(138, 180, 248, 0.14));
+  border: 1px solid rgba(138, 180, 248, 0.26);
+  color: var(--ag-blue, #8ab4f8);
+}
+
+.signup-head .eyebrow {
+  display: block;
+  margin-bottom: 12px;
+}
+
+.signup-head h2 {
+  font-size: clamp(26px, 4vw, 38px);
+  margin-bottom: 0;
+}
+
+.signup-sub {
+  max-width: 430px;
+  margin: 12px auto 0;
+  color: var(--text-muted, rgba(214, 221, 236, 0.56));
+  font-size: 14.5px;
+  line-height: 1.6;
+}
+
+.signup-steps {
+  list-style: none;
+  margin: 0 0 20px;
+  padding: 6px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
   background: rgba(255, 255, 255, 0.02);
 }
 
-.waitlist-copy {
-  margin: 0;
+.signup-step {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 4px;
 }
 
-.waitlist-copy p:not(.eyebrow) {
-  max-width: 560px;
-  color: rgba(232, 224, 212, 0.52);
-  font-size: 15px;
-  line-height: 1.65;
+.signup-step + .signup-step {
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.waitlist-form-wrap {
-  width: 100%;
+.signup-step-num {
+  font-family: var(--font-mono, monospace);
+  font-size: 11px;
+  color: var(--ag-blue, #8ab4f8);
+  width: 14px;
+}
+
+.signup-step-icon {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: rgba(138, 180, 248, 0.1);
+  color: var(--ag-blue, #8ab4f8);
+}
+
+.signup-step-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.signup-step-text b {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-primary, #f4f6fb);
+}
+
+.signup-step-text span {
+  font-size: 12px;
+  color: var(--text-faint, rgba(214, 221, 236, 0.4));
+  line-height: 1.4;
 }
 
 .waitlist-form {
@@ -39,25 +119,41 @@
   width: 100%;
 }
 
-.waitlist-form input,
-.waitlist-form button {
-  min-height: 48px;
-  border-radius: 999px;
+.signup-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.signup-field-icon {
+  position: absolute;
+  left: 14px;
+  color: var(--text-faint, rgba(214, 221, 236, 0.4));
+  pointer-events: none;
 }
 
 .waitlist-form input {
   min-width: 0;
   width: 100%;
-  padding: 0 18px;
+  min-height: 50px;
+  padding: 0 16px 0 40px;
+  border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.92);
-  color: #130f18;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-primary, #f4f6fb);
   font-size: 15px;
   outline: none;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.waitlist-form input:focus {
+  border-color: rgba(138, 180, 248, 0.55);
+  background: rgba(138, 180, 248, 0.06);
 }
 
 .waitlist-form input::placeholder {
-  color: rgba(19, 15, 24, 0.42);
+  color: var(--text-faint, rgba(214, 221, 236, 0.4));
 }
 
 .waitlist-form button {
@@ -65,22 +161,31 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 0 24px;
+  min-height: 50px;
+  padding: 0 22px;
   border: 0;
-  background: #f2efe9;
-  color: #130f18;
+  border-radius: 12px;
+  background: var(--grad-accent, linear-gradient(135deg, #8ab4f8, #c58af9));
+  color: #0a0c12;
   font-size: 14px;
-  font-weight: 400;
+  font-weight: 600;
   white-space: nowrap;
   cursor: pointer;
+  box-shadow: 0 14px 40px -18px rgba(138, 180, 248, 0.8);
+  transition: transform 0.2s, filter 0.2s;
+}
+
+.waitlist-form button:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
 }
 
 .waitlist-form button:disabled {
-  opacity: 0.55;
+  opacity: 0.6;
   cursor: not-allowed;
+  transform: none;
 }
 
-.waitlist-checks,
 .footer-links {
   display: flex;
   flex-wrap: wrap;
@@ -88,11 +193,24 @@
 }
 
 .waitlist-checks {
-  margin-top: 14px;
-  color: rgba(232, 224, 212, 0.38);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 18px;
+  margin-top: 16px;
+  color: var(--text-faint, rgba(214, 221, 236, 0.4));
   font-size: 12px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.waitlist-checks span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.waitlist-checks svg {
+  color: var(--ag-blue, #8ab4f8);
 }
 
 .site-footer {

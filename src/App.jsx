@@ -1,8 +1,8 @@
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
-  Activity, ArrowRight, Blinds, Brain, DoorClosed, Droplets, Eye, Hand, Home, Lightbulb, Lock,
-  Menu, MessageCircle, Moon, Sparkle, Sparkles, Sun, SunMedium, Thermometer, X, Zap,
+  Activity, Apple, ArrowRight, Blinds, Brain, Check, DoorClosed, Droplets, Eye, Hand, Home, Lightbulb, Lock,
+  Mail, Menu, MessageCircle, Moon, Send, Sparkle, Sparkles, Sun, SunMedium, Thermometer, X, Zap,
 } from 'lucide-react';
 import { PhoneProvider, InteractivePhone, usePhone } from './InteractivePhone.jsx';
 import { submitWaitlist } from './waitlistSubmit.js';
@@ -88,23 +88,24 @@ const actionFlowModes = [
   },
 ];
 
-const FLOW_AMBIENT = ['111,219,168', '160,108,240', '232,160,32', '212,130,90'];
+const FLOW_AMBIENT = ['138,180,248', '197,138,249', '124,197,255', '150,130,250'];
 const FLOW_ADVANCE_MS = 4200;
-const AMBIENT_IDLE = '200,184,154';
+const AMBIENT_IDLE = '120,150,235';
 const THEME_STORAGE_KEY = 'lumen-theme';
 
 function resolveTheme() {
   if (typeof window === 'undefined') return 'dark';
   const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
   if (stored === 'light' || stored === 'dark') return stored;
-  if (typeof window.matchMedia !== 'function') return 'dark';
-  return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+  // Dark-first: the calm, high-contrast look is the intended first impression.
+  // Visitors can still switch to light, and that choice is remembered.
+  return 'dark';
 }
 
 function applyTheme(theme) {
   document.documentElement.dataset.theme = theme;
   const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute('content', theme === 'light' ? '#faf8f5' : '#0c0814');
+  if (meta) meta.setAttribute('content', theme === 'light' ? '#f7f8fb' : '#08090d');
 }
 
 function useSiteTheme() {
@@ -218,16 +219,22 @@ function HeroCopy() {
       <p className="hero-hint">{phone.hint}</p>
       <div className="hero-actions">
         <a className="primary" href="#access">
-          Request Early Access <ArrowRight size={15} />
+          Get early access <ArrowRight size={15} />
+        </a>
+        <a className="secondary" href="#flow">
+          See how it works
         </a>
       </div>
+      <p className="hero-platform-note">
+        <Apple size={13} /> Private iOS beta · invite by TestFlight · free
+      </p>
     </FadeIn>
   );
 }
 
 function WhyLumenSection() {
   const sectionRef = useRef(null);
-  useAmbientRegion(sectionRef, '150,120,235');
+  useAmbientRegion(sectionRef, '150,130,250');
 
   return (
     <section className="why-lumen-section surface-alt" id="why" ref={sectionRef}>
@@ -263,7 +270,7 @@ function WhyLumenSection() {
 
 function CompatibilitySection() {
   const sectionRef = useRef(null);
-  useAmbientRegion(sectionRef, '200,184,154');
+  useAmbientRegion(sectionRef, '138,180,248');
 
   return (
     <section className="app-tour-section compat-section" id="product" ref={sectionRef}>
@@ -345,7 +352,7 @@ function ActionFlowSection() {
 
 function AIChatSection() {
   const sectionRef = useRef(null);
-  useAmbientRegion(sectionRef, '150,120,235');
+  useAmbientRegion(sectionRef, '150,130,250');
 
   return (
     <section className="ai-chat-section surface-alt" id="ai" ref={sectionRef}>
@@ -378,7 +385,7 @@ function AIChatSection() {
 function Waitlist() {
   const [status, setStatus] = useState('idle');
   const sectionRef = useRef(null);
-  useAmbientRegion(sectionRef, '200,184,154');
+  useAmbientRegion(sectionRef, '138,180,248');
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -394,38 +401,65 @@ function Waitlist() {
     }
   }
 
+  const steps = [
+    { icon: Mail, title: 'Enter your email', sub: 'One field. No account to create yet.' },
+    { icon: Send, title: 'Get your TestFlight invite', sub: 'We send an Apple TestFlight link when a spot opens.' },
+    { icon: Apple, title: 'Install on your iPhone', sub: 'Tap install and Lumen opens like any App Store app.' },
+  ];
+
   return (
     <section className="waitlist-section" id="access" ref={sectionRef}>
-      <div className="waitlist-inner">
-        <FadeIn className="waitlist-copy">
-          <p className="eyebrow">Early access</p>
-          <h2>Try the calmer<br />smart-home layer.</h2>
-          <p>A private iOS beta, open to everyone. No spam, no fake urgency.</p>
-        </FadeIn>
-        <FadeIn delay={0.1} className="waitlist-form-wrap">
-          <form className="waitlist-form" onSubmit={handleSubmit}>
-            <input name="email" type="email" placeholder="Your email address" required />
-            <button disabled={status === 'loading'}>
-              {status === 'loading' ? 'Joining...' : 'Request access'}
-              <ArrowRight size={15} />
-            </button>
-          </form>
-          <div className="waitlist-checks">
-            <span>Open to everyone</span>
-            <span>Private beta</span>
-            <span>No spam</span>
+      <FadeIn className="signup-card">
+        <div className="signup-head">
+          <div className="signup-logo"><SunMedium size={20} /></div>
+          <p className="eyebrow">Get Lumen</p>
+          <h2>Set up your <em>calm home</em>.</h2>
+          <p className="signup-sub">
+            Getting started takes one step. Join the private iOS beta — open to everyone,
+            no spam, no fake urgency.
+          </p>
+        </div>
+
+        <ol className="signup-steps">
+          {steps.map(({ icon: Icon, title, sub }, i) => (
+            <li className="signup-step" key={title}>
+              <span className="signup-step-num">{i + 1}</span>
+              <span className="signup-step-icon"><Icon size={16} /></span>
+              <span className="signup-step-text">
+                <b>{title}</b>
+                <span>{sub}</span>
+              </span>
+            </li>
+          ))}
+        </ol>
+
+        <form className="waitlist-form" onSubmit={handleSubmit}>
+          <div className="signup-field">
+            <Mail size={15} className="signup-field-icon" />
+            <input name="email" type="email" placeholder="you@example.com" required />
           </div>
-          {status === 'success' && (
-            <p className="form-note">You are on the list. We will reach out when Lumen is ready.</p>
-          )}
-          {status === 'error' && (
-            <p className="form-note error">
-              Something went wrong. Try{' '}
-              <a href="mailto:m.rafiq2006@icloud.com">m.rafiq2006@icloud.com</a>.
-            </p>
-          )}
-        </FadeIn>
-      </div>
+          <button disabled={status === 'loading'}>
+            {status === 'loading' ? 'Setting up…' : 'Continue'}
+            <ArrowRight size={15} />
+          </button>
+        </form>
+
+        <div className="waitlist-checks">
+          <span><Check size={12} /> Free during beta</span>
+          <span><Check size={12} /> Open to everyone</span>
+          <span><Check size={12} /> No spam</span>
+        </div>
+
+        {status === 'success' && (
+          <p className="form-note">You&apos;re in. We&apos;ll email your TestFlight invite when a spot opens.</p>
+        )}
+        {status === 'error' && (
+          <p className="form-note error">
+            Something went wrong. Try{' '}
+            <a href="mailto:m.rafiq2006@icloud.com">m.rafiq2006@icloud.com</a>.
+          </p>
+        )}
+      </FadeIn>
     </section>
   );
 }
