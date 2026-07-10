@@ -243,3 +243,14 @@ Single-page React/Vite app — no router, anchor-scroll only. Entry is `src/main
 - Errors surface through `viewModel.error: (any Error)?`. The dashboard already has an alert binding pattern (`errorAlertBinding`); reuse it on new views rather than swallowing with `try?`.
 - Default `AppState.enableLocalPreviewControls = true` should be respected — many tests rely on the local-preview state store path.
 - Keep consent-before-action. New tap → action paths route through a confirmation surface (sheet/alert), not direct execution.
+
+---
+
+## Cursor Cloud specific instructions
+
+Cloud agents run on **Linux**, so the **iOS app (`Lumen/`, `LumenTests/`) cannot be built or run here** — `xcodebuild` and the iOS Simulator require macOS/Xcode. On Linux the only runnable lane is the **web marketing site** (`src/`). Do iOS work by reasoning about the Swift source; you cannot compile or test it in this environment.
+
+- **Runtime:** Node 22 is pre-installed. Dependencies install with `npm install` (npm + `package-lock.json`; deps are pinned to `latest`, so a fresh install may drift from the lockfile). The startup update script already runs `npm install`.
+- **Web commands** are the ones in `package.json` (`dev`, `build`, `preview`, `lint`, `test`, `e2e`, `ci`) and are documented in the "Web app" section above. `npm run dev` serves on `0.0.0.0:5173`.
+- **Waitlist form does not fully work under `npm run dev`.** The form POSTs to `/api/waitlist`, a Vercel serverless function (`api/waitlist.js`) that Vite does **not** run; the client fallbacks (`web3forms`/`formsubmit.co`) need external network egress + secrets. Locally the form shows its error state after submitting — this is expected, not a bug. Use the theme toggle (nav icon left of "Request Access", persists to `localStorage`) or anchor-nav for an offline, reliable end-to-end interaction check.
+- **`npm run e2e` has no tests.** Playwright's `testDir: ./tests` does not exist and browsers aren't installed (`npx playwright install` would be needed). Use `npm run test` (Vitest) for the web unit suite instead.
