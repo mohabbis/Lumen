@@ -32,17 +32,17 @@ The iOS app and the marketing site are independent. Changes to one do **not** re
 
 ### Building & running
 
-The project builds and runs on the iOS Simulator. Standard targets are **iPhone 16 Pro Max** and **iPad Pro 13-inch (M4)**.
+The project builds and runs on the iOS Simulator. Standard targets are **iPhone 17 Pro Max** and **iPad Pro 13-inch (M5)**.
 
 ```bash
 # Build via xcodebuild (use the simulator destination — no provisioning needed)
 xcodebuild -project Lumen.xcodeproj -scheme Lumen \
-  -destination 'platform=iOS Simulator,name=iPhone 16 Pro Max' \
+  -destination 'platform=iOS Simulator,name=iPhone 17 Pro Max' \
   -configuration Debug build
 
 # Run all tests
 xcodebuild test -project Lumen.xcodeproj -scheme Lumen \
-  -destination 'platform=iOS Simulator,name=iPhone 16 Pro Max'
+  -destination 'platform=iOS Simulator,name=iPhone 17 Pro Max'
 ```
 
 **Easier path:** open `Lumen.xcodeproj` in Xcode and press **Cmd+R** with a simulator selected. Signing is set to automatic (team `CU67F9EY3Q`, bundle ID `com.muhome.app`); the simulator does not need provisioning.
