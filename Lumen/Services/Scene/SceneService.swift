@@ -126,7 +126,13 @@ final class SceneService {
         try modelContext.save()
     }
 
-    func updateScene(_ scene: Scene, name: String? = nil, iconName: String? = nil, isFavorite: Bool? = nil) throws {
+    func updateScene(
+        _ scene: Scene,
+        name: String? = nil,
+        iconName: String? = nil,
+        isFavorite: Bool? = nil,
+        geofenceTrigger: GeofenceTrigger? = nil
+    ) throws {
         if let name {
             let cleaned = name.trimmingCharacters(in: .whitespacesAndNewlines)
             guard !cleaned.isEmpty else {
@@ -136,6 +142,7 @@ final class SceneService {
         }
         if let iconName { scene.iconName = iconName }
         if let isFavorite { scene.isFavorite = isFavorite }
+        if let geofenceTrigger { scene.geofenceTrigger = geofenceTrigger }
         scene.updatedAt = Date()
         try modelContext.save()
     }

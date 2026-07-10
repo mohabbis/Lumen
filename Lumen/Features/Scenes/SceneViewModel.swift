@@ -12,6 +12,7 @@ final class SceneViewModel {
     var isShowingAddScene = false
     var executingSceneID: UUID?
     var pendingScene: Scene?
+    var editingScene: Scene?
     var error: (any Error)?
 
     init(sceneService: SceneService) {
@@ -70,5 +71,43 @@ final class SceneViewModel {
     func toggleFavorite(_ scene: Scene) {
         do { try sceneService.updateScene(scene, isFavorite: !scene.isFavorite) }
         catch { self.error = error }
+    }
+
+    func updateScene(
+        _ scene: Scene,
+        name: String? = nil,
+        geofenceTrigger: GeofenceTrigger? = nil
+    ) {
+        do {
+            try sceneService.updateScene(scene, name: name, geofenceTrigger: geofenceTrigger)
+        } catch {
+            self.error = error
+        }
+    }
+
+    func addAction(
+        to scene: Scene,
+        deviceID: UUID,
+        capabilityID: CapabilityID,
+        payload: ActionPayload
+    ) {
+        do {
+            try sceneService.addAction(
+                to: scene,
+                deviceID: deviceID,
+                capabilityID: capabilityID,
+                payload: payload
+            )
+        } catch {
+            self.error = error
+        }
+    }
+
+    func removeAction(_ action: SceneAction, from scene: Scene) {
+        do {
+            try sceneService.removeAction(action, from: scene)
+        } catch {
+            self.error = error
+        }
     }
 }

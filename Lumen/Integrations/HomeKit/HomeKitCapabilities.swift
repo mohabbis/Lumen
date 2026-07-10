@@ -328,9 +328,12 @@ struct HomeKitMotionCapability: MotionCapability {
 
     private let accessory: HMAccessory
     private let service: HMService
+    private let _motionStream: AsyncStream<Bool>
 
-    init(accessory: HMAccessory, service: HMService) {
-        self.accessory = accessory; self.service = service
+    init(accessory: HMAccessory, service: HMService, motionStream: AsyncStream<Bool>? = nil) {
+        self.accessory = accessory
+        self.service = service
+        self._motionStream = motionStream ?? AsyncStream { _ in }
     }
 
     var motionDetected: Bool {
@@ -340,7 +343,7 @@ struct HomeKitMotionCapability: MotionCapability {
     }
 
     var lastMotionDate: Date? { get async { nil } }
-    var motionStream: AsyncStream<Bool> { AsyncStream { _ in } }
+    var motionStream: AsyncStream<Bool> { _motionStream }
 }
 
 // MARK: - Contact Sensor
@@ -352,9 +355,12 @@ struct HomeKitContactCapability: ContactCapability {
 
     private let accessory: HMAccessory
     private let service: HMService
+    private let _contactStream: AsyncStream<ContactState>
 
-    init(accessory: HMAccessory, service: HMService) {
-        self.accessory = accessory; self.service = service
+    init(accessory: HMAccessory, service: HMService, contactStream: AsyncStream<ContactState>? = nil) {
+        self.accessory = accessory
+        self.service = service
+        self._contactStream = contactStream ?? AsyncStream { _ in }
     }
 
     var contactState: ContactState {
@@ -367,7 +373,7 @@ struct HomeKitContactCapability: ContactCapability {
         }
     }
 
-    var contactStream: AsyncStream<ContactState> { AsyncStream { _ in } }
+    var contactStream: AsyncStream<ContactState> { _contactStream }
 }
 
 // MARK: - Comparable Clamp

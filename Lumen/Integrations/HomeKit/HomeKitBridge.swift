@@ -15,8 +15,10 @@ actor HomeKitBridge: SmartHomeBridge {
     private var deviceMap: [DeviceID: HomeKitDevice] = [:]
     private var stateStreamContinuation: AsyncStream<DeviceStateChange>.Continuation?
     private var delegateAdapter: HomeKitManagerDelegateAdapter?
+    private var accessoryObservers: [UUID: HomeKitAccessoryObserver] = [:]
 
-    // MARK: - SmartHomeBridge
+    private var motionContinuations: [DeviceID: AsyncStream<Bool>.Continuation] = [:]
+    private var contactContinuations: [DeviceID: AsyncStream<ContactState>.Continuation] = [:]
 
     func authorize() async throws {
         status = .connecting
@@ -47,7 +49,9 @@ actor HomeKitBridge: SmartHomeBridge {
         var result: [HomeKitDevice] = []
         for home in hmHomes {
             for accessory in home.accessories {
-                let device = HomeKitDevice(accessory: accessory, homeName: home.name)
+                await subscribeToUpdates(for: accessory)
+                let streams = makeStreams(for: accessory.uniqueIdentifier)
+                let device = HomeKitDevice(accessory: accessory, homeName: home.name, streams: streams)
                 deviceMap[device.id] = device
                 result.append(device)
             }
@@ -65,7 +69,15 @@ actor HomeKitBridge: SmartHomeBridge {
     }
 
     func device(withID id: DeviceID) async -> (any SmartDevice)? {
-        deviceMap[id]
+        guard let existing = deviceMap[id] else { return nil }
+        let streams = makeStreams(for: id)
+        let refreshed = HomeKitDevice(
+            accessory: existing.accessoryReference,
+            homeName: existing.homeName,
+            streams: streams
+        )
+        deviceMap[id] = refreshed
+        return refreshed
     }
 
     func executeAction(_ action: SceneActionSnapshot) async throws {
@@ -76,13 +88,13 @@ actor HomeKitBridge: SmartHomeBridge {
     }
 
     func shutdown() async {
+        finishAllStreams()
         stateStreamContinuation?.finish()
         stateStreamContinuation = nil
         delegateAdapter = nil
+        accessoryObservers.removeAll()
         status = .idle
     }
-
-    // MARK: - Internal — called from delegate on nonisolated context
 
     func handleManagerReady(homes: [HMHome]) {
         hmHomes = homes
@@ -100,10 +112,78 @@ actor HomeKitBridge: SmartHomeBridge {
     func clearStreamContinuation() {
         stateStreamContinuation = nil
     }
-}
 
-// MARK: - HMHomeManager Delegate Adapter
-// Bridges Obj-C delegate callbacks into the actor world.
+    func handleCharacteristicUpdate(accessory: HMAccessory, characteristic: HMCharacteristic) {
+        let deviceID = accessory.uniqueIdentifier
+
+        if let motion = HomeKitCharacteristicMapper.motionValue(from: characteristic) {
+            motionContinuations[deviceID]?.yield(motion)
+        }
+
+        if let contact = HomeKitCharacteristicMapper.contactValue(from: characteristic) {
+            contactContinuations[deviceID]?.yield(contact)
+        }
+
+        if let capabilityID = HomeKitCharacteristicMapper.capabilityID(for: characteristic.characteristicType) {
+            emitStateChange(DeviceStateChange(deviceID: deviceID, capabilityID: capabilityID))
+        }
+    }
+
+    private func subscribeToUpdates(for accessory: HMAccessory) async {
+        let deviceID = accessory.uniqueIdentifier
+        let observer = HomeKitAccessoryObserver { [weak self] accessory, characteristic in
+            Task { await self?.handleCharacteristicUpdate(accessory: accessory, characteristic: characteristic) }
+        }
+        accessoryObservers[deviceID] = observer
+        accessory.delegate = observer
+
+        for service in accessory.services {
+            for characteristic in service.characteristics
+            where HomeKitCharacteristicMapper.notifiableTypes.contains(characteristic.characteristicType) {
+                await enableNotifications(for: characteristic)
+            }
+        }
+    }
+
+    private func enableNotifications(for characteristic: HMCharacteristic) async {
+        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+            characteristic.enableNotification(true) { _ in
+                continuation.resume()
+            }
+        }
+    }
+
+    private func makeStreams(for deviceID: DeviceID) -> HomeKitDeviceStreams {
+        let motion = AsyncStream<Bool> { continuation in
+            motionContinuations[deviceID] = continuation
+            continuation.onTermination = { [weak self] _ in
+                Task { await self?.removeMotionContinuation(deviceID: deviceID) }
+            }
+        }
+        let contact = AsyncStream<ContactState> { continuation in
+            contactContinuations[deviceID] = continuation
+            continuation.onTermination = { [weak self] _ in
+                Task { await self?.removeContactContinuation(deviceID: deviceID) }
+            }
+        }
+        return HomeKitDeviceStreams(motion: motion, contact: contact)
+    }
+
+    private func removeMotionContinuation(deviceID: DeviceID) {
+        motionContinuations.removeValue(forKey: deviceID)
+    }
+
+    private func removeContactContinuation(deviceID: DeviceID) {
+        contactContinuations.removeValue(forKey: deviceID)
+    }
+
+    private func finishAllStreams() {
+        motionContinuations.values.forEach { $0.finish() }
+        motionContinuations.removeAll()
+        contactContinuations.values.forEach { $0.finish() }
+        contactContinuations.removeAll()
+    }
+}
 
 private final class HomeKitManagerDelegateAdapter: NSObject, HMHomeManagerDelegate, @unchecked Sendable {
 

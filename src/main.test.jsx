@@ -10,9 +10,15 @@ describe('Lumen landing page', () => {
     expect(h1).toHaveTextContent(/your home/i);
   });
 
-  it('renders the hero beta pill', () => {
+  it('renders the neurodivergent hero pill', () => {
     render(<App />);
-    expect(screen.getByText(/coming soon · iOS private beta/i)).toBeInTheDocument();
+    expect(screen.getByText(/built for neurodivergent minds/i)).toBeInTheDocument();
+  });
+
+  it('states Tiimo-inspired neurodivergent positioning', () => {
+    render(<App />);
+    expect(screen.getAllByText(/tiimo/i).length).toBeGreaterThan(0);
+    expect(screen.getByText(/adhd, autism, and sensory-sensitive brains/i)).toBeInTheDocument();
   });
 
   it('renders core nav links', () => {
@@ -51,12 +57,18 @@ describe('Lumen landing page', () => {
     expect(screen.getByRole('button', { name: /request access/i })).toBeInTheDocument();
   });
 
+  it('renders interactive phone tabs', () => {
+    render(<App />);
+    expect(screen.getByRole('button', { name: /auto tab/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /home tab/i })).toBeInTheDocument();
+  });
+
   it('states the honest Apple Home / HomeKit + Matter compatibility', () => {
     render(<App />);
     // The compatibility claim must survive refactors: Lumen controls what's in
     // your Apple Home (HomeKit + Matter), not bespoke brand integrations.
     const heading = screen.getByRole('heading', { name: /apple home/i });
     expect(heading).toHaveTextContent(/matter/i);
-    expect(screen.getByText(/if it's in your apple home, lumen works with it/i)).toBeInTheDocument();
+    expect(screen.getByText(/lumen controls whatever lives in your apple home/i)).toBeInTheDocument();
   });
 });

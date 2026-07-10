@@ -6,7 +6,7 @@ Guidance for Claude Code when working in this repository.
 
 A calm home companion for iOS. Lumen builds a local model of a home — rooms, devices, presence, time of day — and surfaces gentle, explainable suggestions instead of silent automations. It controls HomeKit devices when they're present and stays useful when they aren't (rhythm/awareness layer works without any smart hardware).
 
-**Audience and tone:** calm, low cognitive load, neurodivergent-friendly. Design references are Apple Design Award–tier apps built for ADHD/autistic and sensory-sensitive users. Not a power-user HomeKit dashboard, not a tinkerer tool.
+**Audience and tone:** calm, low cognitive load, neurodivergent-first. Design takes inspiration from Tiimo, an Apple Design Award winner built for ADHD and autistic planners, applied to the home. Not a power-user HomeKit dashboard, not a tinkerer tool.
 
 **Consent before action** is a core principle: nothing fires from a tap without a confirmation surface (`SceneApprovalSheet` for direct scene runs, `LumenReasoningView` for ambient suggestions).
 

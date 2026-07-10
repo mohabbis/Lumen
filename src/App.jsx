@@ -1,78 +1,11 @@
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
-  Activity, ArrowRight, BedDouble, Blinds, ChevronRight, DoorClosed, DoorOpen,
-  Droplets, Home, Laptop, Lightbulb, Lock, MapPin, Menu, MessageCircle, Moon,
-  MoonStar, Plug, Plus, Popcorn, Send, Settings, Sofa, Sparkle, Sparkles,
-  SunMedium, Sunrise, Thermometer, Utensils, X, Zap,
+  Activity, ArrowRight, Blinds, Brain, DoorClosed, Droplets, Eye, Hand, Home, Lightbulb, Lock,
+  Menu, MessageCircle, Sparkle, Sparkles, SunMedium, Thermometer, X, Zap,
 } from 'lucide-react';
+import { PhoneProvider, InteractivePhone, favoriteRooms, usePhone } from './InteractivePhone.jsx';
 import './App.css';
-
-// Data - faithful to the real Lumen app
-
-const tabs = [
-  { label: 'Home', icon: Home },
-  { label: 'Rooms', icon: DoorOpen },
-  { label: 'Intel', icon: Sparkle },
-  { label: 'Auto', icon: Sparkles },
-  { label: 'Settings', icon: Settings },
-];
-
-const favoriteRooms = [
-  { name: 'Living Room', icon: Sofa, count: '3 active' },
-  { name: 'Bedroom', icon: BedDouble, count: '2 active' },
-  { name: 'Kitchen', icon: Utensils, count: '1 active' },
-  { name: 'Office', icon: Laptop, count: 'No devices' },
-];
-
-const scenes = [
-  {
-    name: 'Morning', icon: Sunrise, devices: '4 devices', mood: 'Bright & energising',
-    actions: [
-      { capability: 'Power', detail: 'On' },
-      { capability: 'Brightness', detail: '90%' },
-      { capability: 'Temperature', detail: '5000K' },
-    ],
-  },
-  {
-    name: 'Evening', icon: MoonStar, devices: '3 devices', mood: 'Warm & dim',
-    actions: [
-      { capability: 'Power', detail: 'On' },
-      { capability: 'Brightness', detail: '40%' },
-      { capability: 'Temperature', detail: '2700K' },
-    ],
-  },
-  {
-    name: 'Movie Night', icon: Popcorn, devices: '5 devices', mood: 'Dim & ambient',
-    actions: [
-      { capability: 'Brightness', detail: '12%' },
-      { capability: 'Color', detail: 'Custom color' },
-      { capability: 'Lock', detail: 'Locked' },
-    ],
-  },
-  {
-    name: 'Sleep', icon: Moon, devices: '6 devices', mood: 'All lights off',
-    actions: [
-      { capability: 'Power', detail: 'Off' },
-      { capability: 'Lock', detail: 'Locked' },
-      { capability: 'Mode', detail: 'Away' },
-    ],
-  },
-];
-
-const reasoningSignals = [
-  { label: 'Time of day', value: 'Evening', weight: 'high' },
-  { label: 'Presence', value: 'At home', weight: 'high' },
-  { label: 'Reachable devices', value: '7', weight: 'medium' },
-  { label: 'Matching scene', value: 'Evening', weight: 'high' },
-];
-
-const devices = [
-  { name: 'Ceiling Light', room: 'Living Room', icon: Lightbulb, online: true },
-  { name: 'Desk Lamp', room: 'Office', icon: Lightbulb, online: true },
-  { name: 'Thermostat', room: 'Hallway', icon: Thermometer, online: true },
-  { name: 'Front Door', room: 'Entryway', icon: Lock, online: false },
-];
 
 const aiCallouts = [
   { icon: MessageCircle, label: 'Plain language', sub: 'Say it your way' },
@@ -80,15 +13,9 @@ const aiCallouts = [
   { icon: Zap, label: 'You decide', sub: 'One tap to approve' },
 ];
 
-// Accessory categories Lumen actually controls today. These mirror the
-// HomeKit service types the app maps in HomeKitDevice.buildCapabilities
-// (lights, plugs/switches, thermostats, locks, window coverings, and
-// motion/contact/humidity sensors). Everything here is reached through
-// Apple Home, so any HomeKit- or Matter-certified accessory of these
-// kinds works, brand regardless.
 const supportedCategories = [
   { label: 'Lights', icon: Lightbulb },
-  { label: 'Plugs & switches', icon: Plug },
+  { label: 'Plugs & switches', icon: Home },
   { label: 'Thermostats', icon: Thermometer },
   { label: 'Window blinds', icon: Blinds },
   { label: 'Door locks', icon: Lock },
@@ -97,41 +24,30 @@ const supportedCategories = [
   { label: 'Humidity', icon: Droplets },
 ];
 
-// Named only as familiar examples of HomeKit/Matter-certified brands. They
-// work because they live in your Apple Home, not through any Lumen-specific
-// brand integration.
 const exampleBrands = ['Philips Hue', 'Eve', 'Aqara', 'Nanoleaf', 'Matter-enabled Cync'];
 
-const demoCaptions = [
-  'Planned devices let you try controls before hardware arrives',
-  'Arrival near home shows a quiet welcome overlay',
-  'Lumen noticed opens when you want to understand a suggestion',
-  'Signals show time, presence, devices, and the matching scene',
-  'A second sheet lists exactly what Lumen will change',
-  'Nothing runs until you tap Apply',
-  'Scenes live under Auto with calm approval before each run',
-  'Intel keeps every device in one reachable list',
+const calmPrinciples = [
+  {
+    icon: Brain,
+    headline: 'Low cognitive load',
+    description: 'One gentle suggestion at a time. No dense grids of toggles fighting for attention.',
+  },
+  {
+    icon: Hand,
+    headline: 'Consent before action',
+    description: 'Lumen proposes. You read the reasoning, see what will change, and approve.',
+  },
+  {
+    icon: Eye,
+    headline: 'Sensory-aware rhythm',
+    description: 'Morning and evening blocks that match how your day actually feels, not alarm clocks.',
+  },
+  {
+    icon: Sparkle,
+    headline: 'Plain language',
+    description: 'Every suggestion shows its signals in words you can question or dismiss.',
+  },
 ];
-
-const STEP_DURATIONS = [5500, 2200, 2800, 3400, 3400, 2800, 2600, 2600];
-const STEP_TABS = ['Home', 'Home', 'Home', 'Home', 'Home', 'Auto', 'Rooms', 'Intel'];
-
-// Ambient tint per chapter - the whole page washes toward this color while
-// the step is on screen. Reuses the app's own accent colors (rhythm
-// terracotta, Lumen violet, the amber of an active scene) rather than
-// inventing a new palette.
-const STEP_AMBIENT = [
-  '200,184,154',
-  '212,130,90',
-  '160,108,240',
-  '160,108,240',
-  '232,160,32',
-  '212,130,90',
-  '111,219,168',
-  '120,170,230',
-];
-
-const IDLE_ADVANCE_MS = 2500;
 
 const actionFlowModes = [
   {
@@ -160,63 +76,8 @@ const actionFlowModes = [
   },
 ];
 
-const FLOW_ADVANCE_MS = 3200;
-
-// Ambient tint per mode, in the same order as actionFlowModes.
-const FLOW_AMBIENT = [
-  '111,219,168',
-  '160,108,240',
-  '232,160,32',
-  '212,130,90',
-];
-
-// Rhythm card - mirrors the real app's TimeOfDay enum + RhythmTiming math
-// (Lumen/Models/TimeOfDay.swift, Lumen/Components/NowNextCard.swift)
-
-const RHYTHM_BLOCKS = [
-  { name: 'Dawn', description: 'Your home is waking up.', accent: '#D4825A', startHour: 5, endHour: 7, greeting: 'Good morning' },
-  { name: 'Morning', description: 'Settling into the day.', accent: '#C4956A', startHour: 7, endHour: 12, greeting: 'Good morning' },
-  { name: 'Afternoon', description: 'Steady, bright, alert.', accent: '#B8A08A', startHour: 12, endHour: 17, greeting: 'Good afternoon' },
-  { name: 'Evening', description: 'Winding down softly.', accent: '#D4825A', startHour: 17, endHour: 21, greeting: 'Good evening' },
-  { name: 'Night', description: 'Quiet and resting.', accent: '#8B5E3C', startHour: 21, endHour: 5, greeting: 'Good night' },
-];
-
-function hexToRgb(hex) {
-  const v = parseInt(hex.slice(1), 16);
-  return [(v >> 16) & 255, (v >> 8) & 255, v & 255];
-}
-
-function getRhythmTiming(date) {
-  const fractional = date.getHours() + date.getMinutes() / 60;
-  const index = RHYTHM_BLOCKS.findIndex(({ startHour, endHour }) =>
-    startHour < endHour
-      ? fractional >= startHour && fractional < endHour
-      : fractional >= startHour || fractional < endHour,
-  );
-  const block = RHYTHM_BLOCKS[index];
-  const next = RHYTHM_BLOCKS[(index + 1) % RHYTHM_BLOCKS.length];
-
-  const span = block.startHour > block.endHour
-    ? (24 - block.startHour) + block.endHour
-    : block.endHour - block.startHour;
-  const into = fractional >= block.startHour
-    ? fractional - block.startHour
-    : (24 - block.startHour) + fractional;
-  const progress = Math.min(1, Math.max(0, into / span));
-
-  const nextStart = new Date(date);
-  nextStart.setHours(next.startHour, 0, 0, 0);
-  if (nextStart <= date) nextStart.setDate(nextStart.getDate() + 1);
-  const nextStartFormatted = nextStart.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-
-  return { block, next, progress, nextStartFormatted };
-}
-
-// Ambient background - the whole page tints subtly to match the story's
-// current moment (a demo step while the hero is in view, a fixed mood once
-// you scroll into a later section). Two stacked full-viewport layers
-// crossfade between colors so the shift is a smooth wash, never a snap.
-
+const FLOW_AMBIENT = ['111,219,168', '160,108,240', '232,160,32', '212,130,90'];
+const FLOW_ADVANCE_MS = 4200;
 const AMBIENT_IDLE = '200,184,154';
 
 const AmbientContext = createContext(() => {});
@@ -259,8 +120,8 @@ function AmbientBackdrop({ colors, front }) {
           style={{
             opacity: i === front ? 1 : 0,
             background:
-              `radial-gradient(ellipse 70% 55% at 50% -8%, rgba(${rgb},0.30) 0%, transparent 60%), ` +
-              `radial-gradient(ellipse 55% 45% at 8% 94%, rgba(${rgb},0.13) 0%, transparent 55%)`,
+              `radial-gradient(ellipse 70% 55% at 50% -8%, rgba(${rgb},0.30) 0%, transparent 60%), `
+              + `radial-gradient(ellipse 55% 45% at 8% 94%, rgba(${rgb},0.13) 0%, transparent 55%)`,
           }}
         />
       ))}
@@ -268,9 +129,6 @@ function AmbientBackdrop({ colors, front }) {
   );
 }
 
-// Ties a section (or the live demo) to an ambient color. Only pushes the
-// color while the region is actually in view, so the page doesn't fight
-// itself when several regions are mounted at once.
 function useAmbientRegion(ref, color) {
   const setAmbient = useSetAmbient();
   const colorRef = useRef(color);
@@ -286,17 +144,7 @@ function useAmbientRegion(ref, color) {
     observer.observe(el);
     return () => observer.disconnect();
   }, [ref, setAmbient]);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el || typeof window === 'undefined') return;
-    const rect = el.getBoundingClientRect();
-    const inView = rect.top < window.innerHeight * 0.75 && rect.bottom > window.innerHeight * 0.25;
-    if (inView) setAmbient(color);
-  }, [color, setAmbient]);
 }
-
-// Primitives
 
 function FadeIn({ children, delay = 0, className = '' }) {
   return (
@@ -312,492 +160,65 @@ function FadeIn({ children, delay = 0, className = '' }) {
   );
 }
 
-function StatusBar() {
+function HeroCopy() {
+  const phone = usePhone();
   return (
-    <div className="phone-status">
-      <span>9:41</span>
-      <span className="dynamic-island" />
-      <span>5G</span>
-    </div>
+    <FadeIn className="hero-copy">
+      <div className="pill">
+        <span />
+        Built for neurodivergent minds
+      </div>
+      <h1>Your home,<br /><em>understood.</em></h1>
+      <p className="hero-lede">
+        Smart home apps can feel loud. Lumen is a calm companion for ADHD, autism,
+        and sensory-sensitive brains. It notices the moment, explains why, and waits
+        for your tap before anything changes.
+      </p>
+      <p className="hero-hint">{phone.hint}</p>
+      <div className="hero-actions">
+        <a className="primary" href="#access">
+          Request Early Access <ArrowRight size={15} />
+        </a>
+      </div>
+    </FadeIn>
   );
 }
 
-function TabBar({ active }) {
-  return (
-    <div className="app-tabbar">
-      {tabs.map(({ label, icon: Icon }) => (
-        <span key={label} className={active === label ? 'active' : ''}>
-          <Icon size={15} strokeWidth={active === label ? 2.2 : 1.7} />
-          {label}
-        </span>
-      ))}
-    </div>
-  );
-}
-
-// Real-app screen recreations
-
-function DashboardScreen({ showWelcome = false, highlight = false, dimmed = false, greeting = 'Good evening' }) {
-  const [now, setNow] = useState(() => new Date());
-
-  useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), 30000);
-    return () => clearInterval(id);
-  }, []);
-
-  const { block, next, progress, nextStartFormatted } = getRhythmTiming(now);
-  const [r, g, b] = hexToRgb(block.accent);
+function WhyLumenSection() {
+  const sectionRef = useRef(null);
+  useAmbientRegion(sectionRef, '150,120,235');
 
   return (
-    <div className={dimmed ? 'app-screen dimmed' : 'app-screen'}>
-      <div className="app-topbar">
-        <span className="app-wordmark">LUMEN</span>
-        <span className="app-mode">
-          <Home size={9} /> HOME MODE
-        </span>
-      </div>
-
-      <h4 className="app-greeting serif">{greeting},</h4>
-      <h4 className="app-greeting serif home-name">Home</h4>
-      <p className="app-subtitle">7 of 8 devices online. All looking good.</p>
-
-      <div className="app-stats">
-        <span><b>4</b> rooms · <b>8</b> devices · <b>5</b> automations</span>
-        <span className="app-plus"><Plus size={11} /></span>
-      </div>
-
-      <div className="nownext-card">
-        <p className="app-label">Rhythm</p>
-        <div className="nownext-now">
-          <span
-            className="nownext-tag now"
-            style={{ color: block.accent, background: `rgba(${r},${g},${b},0.16)`, borderColor: `rgba(${r},${g},${b},0.22)` }}
-          >
-            Now
-          </span>
-          <div>
-            <b>{block.name}</b>
-            <span>{block.description}</span>
-          </div>
-        </div>
-        <div className="nownext-bar">
-          <span style={{ width: `${Math.max(4, progress * 100)}%`, background: `linear-gradient(90deg, ${block.accent}, rgba(${r},${g},${b},0.45))` }} />
-        </div>
-        <div className="nownext-next">
-          <span className="nownext-tag next">Next</span>
-          <b>{next.name}</b>
-          <span>at {nextStartFormatted}</span>
-        </div>
-      </div>
-
-      <div className="app-section-head">
-        <p className="app-label">Favorite Rooms</p>
-        <ChevronRight size={12} />
-      </div>
-      <div className="fav-rooms-grid">
-        {favoriteRooms.map(({ name, icon: Icon, count }) => (
-          <div className="fav-room-card" key={name}>
-            <div className="fav-room-icon"><Icon size={15} /></div>
-            <b>{name}</b>
-            <span>{count}</span>
-          </div>
-        ))}
-      </div>
-
-      <p className="app-label noticed-section-label">Lumen noticed</p>
-      <div className={highlight ? 'noticed-card highlight' : 'noticed-card'}>
-        <div className="noticed-head">
-          <Sparkles size={11} /> Lumen noticed
-        </div>
-        <p className="noticed-msg">Sunset detected. Warm lighting mode is available.</p>
-        <div className="noticed-action">
-          <div>
-            <b>Run Evening scene</b>
-            <span>Suggested by Lumen</span>
-          </div>
-          <ChevronRight size={13} />
-        </div>
-        {highlight && <span className="tap-ripple noticed-ripple" />}
-      </div>
-
-      {showWelcome && (
-        <motion.div
-          className="welcome-overlay"
-          initial={{ opacity: 0, scale: 0.85 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ type: 'spring', stiffness: 220, damping: 22 }}
-        >
-          🏠 Welcome Home!
-          <span className="welcome-caption">
-            <MapPin size={9} /> Detected when you arrive near home
-          </span>
-        </motion.div>
-      )}
-    </div>
-  );
-}
-
-function ReasoningSheet() {
-  return (
-    <motion.div
-      className="reason-sheet"
-      initial={{ y: '100%' }}
-      animate={{ y: 0 }}
-      exit={{ y: '100%' }}
-      transition={{ type: 'spring', stiffness: 320, damping: 34 }}
-    >
-      <span className="sheet-handle" />
-      <div className="sheet-icon"><Sparkles size={22} /></div>
-      <p className="sheet-kicker">Why Lumen noticed</p>
-      <h4 className="sheet-title">Sunset is moving<br />across your home.</h4>
-
-      <p className="app-label sheet-signals-label">Signals</p>
-      <div className="signal-list">
-        {reasoningSignals.map(({ label, value, weight }) => (
-          <div className="signal-row" key={label}>
-            <span className={`signal-dot ${weight}`} />
-            <span className="signal-label">{label}</span>
-            <span className="signal-value">{value}</span>
-          </div>
-        ))}
-      </div>
-
-      <div className="sheet-apply sheet-apply-static">
-        Apply Evening
-        <span className="tap-ripple apply-ripple" />
-      </div>
-      <p className="sheet-dismiss-static">Not now</p>
-    </motion.div>
-  );
-}
-
-function ActionConfirmationSheet({ scene }) {
-  return (
-    <motion.div
-      className="reason-sheet"
-      initial={{ y: '100%' }}
-      animate={{ y: 0 }}
-      exit={{ y: '100%' }}
-      transition={{ type: 'spring', stiffness: 320, damping: 34 }}
-    >
-      <span className="sheet-handle" />
-      <div className="sheet-icon"><scene.icon size={22} /></div>
-      <p className="sheet-kicker">Apply suggested scene</p>
-      <h4 className="sheet-title">{scene.name}</h4>
-
-      <p className="app-label sheet-signals-label">Lumen will</p>
-      <div className="signal-list">
-        {scene.actions.map(({ capability, detail }) => (
-          <div className="approval-action-row" key={capability}>
-            <span className="approval-action-capability">{capability}</span>
-            <span className="approval-action-detail">{detail}</span>
-          </div>
-        ))}
-      </div>
-
-      <div className="sheet-apply sheet-apply-static">
-        Apply
-        <span className="tap-ripple apply-ripple" />
-      </div>
-      <p className="sheet-dismiss-static">Not now</p>
-    </motion.div>
-  );
-}
-
-function AutoScreen() {
-  return (
-    <div className="app-screen">
-      <div className="app-topbar">
-        <span className="app-wordmark">LUMEN</span>
-      </div>
-      <h4 className="app-greeting small">Scenes</h4>
-
-      <div className="active-scene-card">
-        <div className="active-scene-badge">
-          <span className="active-pulse" /> ACTIVE NOW
-        </div>
-        <b>Evening</b>
-        <span>3 devices · Warm &amp; dim</span>
-      </div>
-
-      <p className="app-label">All Scenes</p>
-      <div className="scene-list">
-        {scenes.map(scene => {
-          const { name, icon: Icon, devices: d, mood } = scene;
-          return (
-            <div
-              className={name === 'Evening' ? 'scene-row active' : 'scene-row'}
-              key={name}
-            >
-              <div className="scene-icon"><Icon size={16} /></div>
-              <div className="scene-meta">
-                <b>{name}</b>
-                <span>{d} · {mood}</span>
-              </div>
-              <ChevronRight size={13} />
+    <section className="why-lumen-section" id="why" ref={sectionRef}>
+      <FadeIn className="section-copy centered">
+        <p className="eyebrow">Why Lumen</p>
+        <h2>Calm enough<br /><em>to stay open.</em></h2>
+        <p className="section-note">
+          HomeKit dashboards pack every toggle onto one screen. Lumen takes inspiration
+          from Tiimo, an Apple Design Award winner built for neurodivergent planners,
+          and brings that same low-stress clarity to your home.
+        </p>
+      </FadeIn>
+      <div className="calm-principles-grid">
+        {calmPrinciples.map(({ icon: Icon, headline, description }, i) => (
+          <FadeIn key={headline} delay={i * 0.06}>
+            <div className="calm-principle-card">
+              <div className="calm-principle-icon"><Icon size={18} /></div>
+              <b>{headline}</b>
+              <p>{description}</p>
             </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-function RoomsScreen() {
-  return (
-    <div className="app-screen">
-      <div className="app-topbar">
-        <span className="app-wordmark">LUMEN</span>
-      </div>
-      <h4 className="app-greeting small">Rooms</h4>
-      <p className="app-label">All Rooms</p>
-      <div className="fav-rooms-grid">
-        {favoriteRooms.map(({ name, icon: Icon, count }) => (
-          <div className="fav-room-card" key={name}>
-            <div className="fav-room-icon"><Icon size={15} /></div>
-            <b>{name}</b>
-            <span>{count}</span>
-          </div>
+          </FadeIn>
         ))}
       </div>
-    </div>
+      <FadeIn className="why-lumen-contrast centered">
+        <p>
+          Lumen is not a tinkerer tool or a power-user controller. It is the gentle
+          layer you reach for when your brain already has enough to hold.
+        </p>
+      </FadeIn>
+    </section>
   );
 }
-
-function IntelScreen() {
-  return (
-    <div className="app-screen">
-      <div className="app-topbar">
-        <span className="app-wordmark">LUMEN</span>
-      </div>
-      <h4 className="app-greeting small">Intel</h4>
-      <div className="intel-banner">
-        <span className="online-dot" /> Apple Home · 8 devices · 7 online
-      </div>
-      <div className="device-list">
-        {devices.map(({ name, room, icon: Icon, online }) => (
-          <div className="device-row" key={name}>
-            <div className="device-icon"><Icon size={15} /></div>
-            <div className="device-meta">
-              <b>{name}</b>
-              <span>{room}</span>
-            </div>
-            <span className={online ? 'online-dot' : 'offline-dot'} />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function DragSlider({ value, onChange, onInteractStart, onInteractEnd, children }) {
-  const trackRef = useRef(null);
-  const [dragging, setDragging] = useState(false);
-
-  const updateFromEvent = e => {
-    const rect = trackRef.current.getBoundingClientRect();
-    const pct = Math.min(100, Math.max(0, ((e.clientX - rect.left) / rect.width) * 100));
-    onChange(Math.round(pct));
-  };
-
-  const handleDown = e => {
-    e.currentTarget.setPointerCapture(e.pointerId);
-    setDragging(true);
-    onInteractStart();
-    updateFromEvent(e);
-  };
-  const handleMove = e => { if (dragging) updateFromEvent(e); };
-  const handleUp = () => { setDragging(false); onInteractEnd(); };
-
-  return (
-    <div
-      ref={trackRef}
-      className={dragging ? 'slider-track dragging' : 'slider-track'}
-      onPointerDown={handleDown}
-      onPointerMove={handleMove}
-      onPointerUp={handleUp}
-      onPointerCancel={handleUp}
-    >
-      <span style={{ width: `${value}%` }} />
-      <i style={{ left: `${value}%` }} />
-      {children}
-    </div>
-  );
-}
-
-function InteractiveRoomScreen({
-  lightOn, onToggle, brightness, onBrightness, colorTemp, onColorTemp,
-  onInteractStart, onInteractEnd,
-}) {
-  const warm = [212, 130, 90];
-  const cool = [120, 170, 230];
-  const t = colorTemp / 100;
-  const rgb = warm.map((w, i) => Math.round(w + (cool[i] - w) * t));
-  const glowOpacity = lightOn ? 0.15 + (brightness / 100) * 0.55 : 0.04;
-
-  return (
-    <div className="app-screen">
-      <div
-        className="room-glow"
-        style={{
-          background: `radial-gradient(ellipse at 50% 0%, rgba(${rgb.join(',')}, ${glowOpacity}) 0%, transparent 70%)`,
-        }}
-      />
-      <div className="app-topbar">
-        <span className="app-wordmark">LIVING ROOM</span>
-        <span className="try-it-pill">Try it</span>
-      </div>
-      <h4 className="app-greeting small">Living Room</h4>
-      <p className="app-label">Ceiling Light</p>
-
-      <div className="control-card">
-        <div className="control-row">
-          <span>Power</span>
-          <span
-            className={lightOn ? 'toggle on' : 'toggle'}
-            onClick={() => { onInteractStart(); onToggle(); onInteractEnd(); }}
-          >
-            <span />
-          </span>
-        </div>
-
-        <div className="control-slider">
-          <SunMedium size={11} className="dim" />
-          <DragSlider
-            value={brightness}
-            onChange={onBrightness}
-            onInteractStart={onInteractStart}
-            onInteractEnd={onInteractEnd}
-          />
-          <SunMedium size={13} />
-          <small>{brightness}%</small>
-        </div>
-
-        <div className="control-slider">
-          <span className="warm">Warm</span>
-          <DragSlider
-            value={colorTemp}
-            onChange={onColorTemp}
-            onInteractStart={onInteractStart}
-            onInteractEnd={onInteractEnd}
-          />
-          <span className="cool">Cool</span>
-          <small>{Math.round(1800 + (colorTemp / 100) * 4700)}K</small>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// The live demo - auto-playing recreation of the real app
-
-function LiveDemo() {
-  const [step, setStep] = useState(0);
-  const [paused, setPaused] = useState(false);
-  const reducedRef = useRef(false);
-  const lastInteractionRef = useRef(Date.now());
-  const stepStartRef = useRef(Date.now());
-  const demoRef = useRef(null);
-
-  const [lightOn, setLightOn] = useState(true);
-  const [brightness, setBrightness] = useState(62);
-  const [colorTemp, setColorTemp] = useState(40);
-
-  const eveningScene = scenes.find(s => s.name === 'Evening') ?? scenes[1];
-
-  useAmbientRegion(demoRef, STEP_AMBIENT[step]);
-
-  const markInteraction = () => { lastInteractionRef.current = Date.now(); };
-
-  useEffect(() => {
-    reducedRef.current =
-      typeof window !== 'undefined' &&
-      window.matchMedia &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  }, []);
-
-  useEffect(() => {
-    stepStartRef.current = Date.now();
-  }, [step]);
-
-  useEffect(() => {
-    if (paused || reducedRef.current) return undefined;
-
-    if (step === 0) {
-      const id = setInterval(() => {
-        const idleEnough = Date.now() - lastInteractionRef.current >= IDLE_ADVANCE_MS;
-        const dwelledEnough = Date.now() - stepStartRef.current >= STEP_DURATIONS[0];
-        if (idleEnough && dwelledEnough) setStep(1);
-      }, 250);
-      return () => clearInterval(id);
-    }
-
-    const id = setTimeout(
-      () => setStep(s => (s + 1) % STEP_DURATIONS.length),
-      STEP_DURATIONS[step],
-    );
-    return () => clearTimeout(id);
-  }, [step, paused]);
-
-  const activeTab = STEP_TABS[step];
-  const showReasoning = step === 3;
-  const showAction = step === 4;
-
-  return (
-    <div className="live-demo" ref={demoRef}>
-      <div
-        className="phone phone-featured phone-app"
-        onMouseEnter={() => setPaused(true)}
-        onMouseLeave={() => setPaused(false)}
-      >
-        <div className="phone-screen">
-          <StatusBar />
-          <div className="app-stage">
-            {step === 0 ? (
-              <InteractiveRoomScreen
-                lightOn={lightOn}
-                onToggle={() => setLightOn(o => !o)}
-                brightness={brightness}
-                onBrightness={setBrightness}
-                colorTemp={colorTemp}
-                onColorTemp={setColorTemp}
-                onInteractStart={markInteraction}
-                onInteractEnd={markInteraction}
-              />
-            ) : step === 5 ? (
-              <AutoScreen />
-            ) : step === 6 ? (
-              <RoomsScreen />
-            ) : step === 7 ? (
-              <IntelScreen />
-            ) : (
-              <DashboardScreen
-                showWelcome={step === 1}
-                highlight={step === 2}
-                dimmed={showReasoning || showAction}
-                greeting={step === 1 ? 'Welcome Home' : 'Good evening'}
-              />
-            )}
-            <AnimatePresence>
-              {showReasoning && <ReasoningSheet key="reasoning" />}
-              {showAction && <ActionConfirmationSheet key="action" scene={eveningScene} />}
-            </AnimatePresence>
-          </div>
-          <TabBar active={activeTab} />
-        </div>
-      </div>
-
-      <p className="demo-caption">{demoCaptions[step]}</p>
-    </div>
-  );
-}
-
-// Compatibility - what Lumen actually controls. Lumen is a HomeKit app: it
-// works with whatever lives in your Apple Home, which on iOS includes both
-// HomeKit and Matter accessories. It rides on Apple Home rather than talking
-// to each brand's cloud, so the honest umbrella is "if it's in your Apple
-// Home, Lumen works with it."
 
 function CompatibilitySection() {
   const sectionRef = useRef(null);
@@ -808,9 +229,8 @@ function CompatibilitySection() {
       <FadeIn className="section-copy centered">
         <p className="eyebrow">Works with your home</p>
         <h2>Your Apple Home,<br /><em>HomeKit &amp; Matter.</em></h2>
-        <p className="section-note">Lumen controls whatever lives in your Apple Home: every HomeKit accessory, plus the Matter ones you've added. No extra hubs, no brand logins. If it's in your Apple Home, Lumen works with it.</p>
+        <p className="section-note">Lumen controls whatever lives in your Apple Home: every HomeKit accessory, plus the Matter ones you have added. No extra hubs, no brand logins.</p>
       </FadeIn>
-
       <FadeIn className="capability-chips-wrap">
         <p className="eyebrow">Controls these accessories</p>
         <div className="capability-chips">
@@ -822,7 +242,6 @@ function CompatibilitySection() {
           ))}
         </div>
       </FadeIn>
-
       <FadeIn className="compat-brands">
         <p className="compat-brands-line">
           Works with certified brands through Apple Home, like{' '}
@@ -833,9 +252,7 @@ function CompatibilitySection() {
           ))}
         </p>
         <p className="compat-note">
-          Lumen rides on Apple Home instead of each brand's cloud, so anything HomeKit- or
-          Matter-certified works, and anything that isn't in your Apple Home stays out of reach.
-          The calm rhythm layer keeps working with no smart hardware at all.
+          Lumen rides on Apple Home instead of each brand cloud. The calm rhythm layer keeps working with no smart hardware at all.
         </p>
       </FadeIn>
     </section>
@@ -869,41 +286,37 @@ function RoomShowcaseSection() {
 }
 
 function ActionFlowSection() {
-  const [active, setActive] = useState(0);
-  const [paused, setPaused] = useState(false);
+  const phone = usePhone();
+  const [idleActive, setIdleActive] = useState(0);
   const sectionRef = useRef(null);
+  const active = phone.touched ? phone.flowMode : idleActive;
 
   useAmbientRegion(sectionRef, FLOW_AMBIENT[active]);
 
   useEffect(() => {
-    if (paused) return undefined;
+    if (phone.touched) return undefined;
     const id = setInterval(() => {
-      setActive(a => (a + 1) % actionFlowModes.length);
+      setIdleActive(a => (a + 1) % actionFlowModes.length);
     }, FLOW_ADVANCE_MS);
     return () => clearInterval(id);
-  }, [paused]);
+  }, [phone.touched]);
 
   return (
-    <section
-      className="action-flow-section"
-      id="flow"
-      ref={sectionRef}
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-    >
+    <section className="action-flow-section" id="flow" ref={sectionRef}>
       <FadeIn className="section-copy centered">
         <p className="eyebrow">How Lumen thinks</p>
         <h2>The same calm loop,<br /><em>every suggestion.</em></h2>
-        <p className="section-note">Every suggestion moves through the same calm loop, in order, every time.</p>
+        <p className="section-note">
+          {phone.touched
+            ? 'The cards below follow what you are doing in the phone.'
+            : 'Use the phone above, or watch the loop cycle on its own.'}
+        </p>
       </FadeIn>
-
       <div className="flow-row">
         {actionFlowModes.map(({ tag, icon: Icon, headline, description }, i) => (
           <FadeIn key={tag} delay={i * 0.06}>
             <div className={`flow-card ${active === i ? 'active' : ''}`}>
-              <div className="flow-card-top">
-                <Icon size={16} />
-              </div>
+              <div className="flow-card-top"><Icon size={16} /></div>
               <b className="flow-tag">{tag}</b>
               <span className="flow-headline">{headline}</span>
               <p className="flow-description">{description}</p>
@@ -915,46 +328,6 @@ function ActionFlowSection() {
   );
 }
 
-function AIChatScreen() {
-  return (
-    <div className="phone phone-featured phone-app">
-      <div className="phone-screen">
-        <StatusBar />
-        <div className="chat-header">
-          <div className="chat-avatar"><MessageCircle size={14} /></div>
-          <div>
-            <b>Lumen</b>
-            <small>AI assistant</small>
-          </div>
-          <span className="coming-pill">Soon</span>
-        </div>
-        <div className="chat-thread">
-          <div className="chat-msg user">Make the bedroom cozy</div>
-          <div className="chat-msg ai">
-            Dimming to 30%, warming colour to 2700K.
-            <div className="chat-chips">
-              <span className="chat-chip apply">Apply</span>
-              <span className="chat-chip">Edit</span>
-            </div>
-          </div>
-          <div className="chat-msg user">Also turn off the hallway</div>
-          <div className="chat-msg ai">
-            Hallway off. Ready when you are.
-            <div className="chat-chips">
-              <span className="chat-chip apply">Apply</span>
-            </div>
-          </div>
-        </div>
-        <div className="chat-input-bar">
-          <span className="chat-input-placeholder">Ask Lumen...</span>
-          <span className="chat-send-icon"><Send size={12} /></span>
-        </div>
-        <TabBar active="Home" />
-      </div>
-    </div>
-  );
-}
-
 function AIChatSection() {
   const sectionRef = useRef(null);
   useAmbientRegion(sectionRef, '150,120,235');
@@ -962,20 +335,13 @@ function AIChatSection() {
   return (
     <section className="ai-chat-section" id="ai" ref={sectionRef}>
       <div className="ai-chat-inner">
-        <FadeIn className="ai-chat-phone-wrap">
-          <AIChatScreen />
-        </FadeIn>
-        <FadeIn delay={0.1} className="ai-chat-copy">
+        <FadeIn className="ai-chat-copy">
           <p className="eyebrow">Coming soon · Built-in AI</p>
           <h2>Describe it.<br /><em>You approve it.</em></h2>
           <p className="ai-chat-lede">
             A conversational layer is on the way. Describe what you want in
             plain language, and Lumen proposes the scene, shows its
-            reasoning, and waits for your tap. No silent automation, ever.
-          </p>
-          <p className="ai-chat-contrast">
-            Other smart-home apps are racing toward fully automatic AI. Lumen
-            is built the other way: calm, explainable, and never a surprise.
+            reasoning, and waits for your tap.
           </p>
           <div className="ai-callouts">
             {aiCallouts.map(({ icon: Icon, label, sub }) => (
@@ -1016,7 +382,7 @@ function Waitlist() {
           const data = await res.json();
           delivered = data.ok !== false;
         } catch {
-          // A non-JSON 2xx response still counts as delivered.
+          // non-JSON 2xx still counts
         }
       }
       if (!delivered) throw new Error('Waitlist endpoint rejected the request');
@@ -1033,32 +399,23 @@ function Waitlist() {
         <FadeIn className="waitlist-copy">
           <p className="eyebrow">Early access</p>
           <h2>Try the calmer<br />smart-home layer.</h2>
-          <p>
-            A private iPhone beta. No spam, no fake urgency.
-          </p>
+          <p>A private beta for minds that need a gentler home. No spam, no fake urgency.</p>
         </FadeIn>
         <FadeIn delay={0.1} className="waitlist-form-wrap">
           <form className="waitlist-form" onSubmit={handleSubmit}>
-            <input
-              name="email"
-              type="email"
-              placeholder="Your email address"
-              required
-            />
+            <input name="email" type="email" placeholder="Your email address" required />
             <button disabled={status === 'loading'}>
               {status === 'loading' ? 'Joining...' : 'Request access'}
               <ArrowRight size={15} />
             </button>
           </form>
           <div className="waitlist-checks">
-            <span>iOS first</span>
+            <span>Neurodivergent-first</span>
             <span>Private beta</span>
             <span>No spam</span>
           </div>
           {status === 'success' && (
-            <p className="form-note">
-              You're on the list. We'll reach out when Lumen is ready.
-            </p>
+            <p className="form-note">You are on the list. We will reach out when Lumen is ready.</p>
           )}
           {status === 'error' && (
             <p className="form-note error">
@@ -1072,107 +429,89 @@ function Waitlist() {
   );
 }
 
-// App shell
-
-export function App() {
+function SiteShell() {
   const [menuOpen, setMenuOpen] = useState(false);
   const close = () => setMenuOpen(false);
   const ambient = useAmbientController(AMBIENT_IDLE);
 
   return (
     <AmbientContext.Provider value={ambient.setAmbient}>
-      <main className="site-shell">
-        <AmbientBackdrop colors={ambient.colors} front={ambient.front} />
-        <div className="grain" />
+      <PhoneProvider onAmbientChange={ambient.setAmbient}>
+        <main className="site-shell">
+          <AmbientBackdrop colors={ambient.colors} front={ambient.front} />
+          <div className="grain" />
 
-        <nav className="nav">
-          <a className="logo" href="#top">
-            <SunMedium size={22} />
-            <span>LUMEN</span>
-          </a>
-          <div className="links">
-            <a href="#product">The App</a>
-            <a href="#ai">AI</a>
-            <a href="/privacy">Privacy</a>
-          </div>
-          <div className="nav-actions">
-            <a href="#access">Request Access</a>
-            <button
-              aria-label={menuOpen ? 'Close menu' : 'Open menu'}
-              onClick={() => setMenuOpen(o => !o)}
-              className={menuOpen ? 'menu-btn open' : 'menu-btn'}
-            >
-              {menuOpen ? <X size={18} /> : <Menu size={18} />}
-            </button>
-          </div>
-        </nav>
-
-        {menuOpen && (
-          <div className="mobile-menu" onClick={close}>
-            <div className="mobile-menu-inner" onClick={e => e.stopPropagation()}>
-              <a href="#product" onClick={close}>The App</a>
-              <a href="#ai" onClick={close}>AI</a>
-              <a href="/privacy" onClick={close} className="privacy-link">Privacy</a>
-              <a href="#access" onClick={close} className="mobile-cta">
-                Request Access <ArrowRight size={14} />
-              </a>
-            </div>
-          </div>
-        )}
-
-        <section className="hero" id="top">
-          <div className="hero-bg" />
-
-          <FadeIn className="hero-copy">
-            <div className="pill">
-              <span />
-              Coming soon · iOS private beta
-            </div>
-            <h1>Your home,<br /><em>understood.</em></h1>
-            <p>
-              A calm layer over your smart home. Lumen notices the moment,<br />
-              explains why, and waits for your tap before anything changes.
-            </p>
-            <div className="hero-actions">
-              <a className="primary" href="#access">
-                Request Early Access <ArrowRight size={15} />
-              </a>
-            </div>
-          </FadeIn>
-
-          <div className="hero-demo">
-            <div className="hero-glow" />
-            <LiveDemo />
-          </div>
-        </section>
-
-        <CompatibilitySection />
-        <RoomShowcaseSection />
-        <ActionFlowSection />
-        <AIChatSection />
-        <Waitlist />
-
-        <footer className="site-footer">
-          <a className="logo" href="#top">
-            <SunMedium size={17} /><span>LUMEN</span>
-          </a>
-          <p>Native iOS · Calm by design · Explainable AI · Private beta</p>
-          <div className="footer-links">
-            <a href="#access" className="footer-cta">
-              Request Early Access <ArrowRight size={13} />
+          <nav className="nav">
+            <a className="logo" href="#top">
+              <SunMedium size={22} />
+              <span>LUMEN</span>
             </a>
-            <a href="/privacy">Privacy</a>
-            <a
-              href="https://github.com/mohabbis/lumen"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              GitHub
+            <div className="links">
+              <a href="#product">The App</a>
+              <a href="#ai">AI</a>
+              <a href="/privacy">Privacy</a>
+            </div>
+            <div className="nav-actions">
+              <a href="#access">Request Access</a>
+              <button
+                aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+                onClick={() => setMenuOpen(o => !o)}
+                className={menuOpen ? 'menu-btn open' : 'menu-btn'}
+              >
+                {menuOpen ? <X size={18} /> : <Menu size={18} />}
+              </button>
+            </div>
+          </nav>
+
+          {menuOpen && (
+            <div className="mobile-menu" onClick={close}>
+              <div className="mobile-menu-inner" onClick={e => e.stopPropagation()}>
+                <a href="#product" onClick={close}>The App</a>
+                <a href="#ai" onClick={close}>AI</a>
+                <a href="/privacy" onClick={close} className="privacy-link">Privacy</a>
+                <a href="#access" onClick={close} className="mobile-cta">
+                  Request Access <ArrowRight size={14} />
+                </a>
+              </div>
+            </div>
+          )}
+
+          <section className="hero" id="top">
+            <div className="hero-bg" />
+            <HeroCopy />
+            <div className="hero-demo">
+              <div className="hero-glow" />
+              <InteractivePhone />
+            </div>
+          </section>
+
+          <WhyLumenSection />
+          <CompatibilitySection />
+          <RoomShowcaseSection />
+          <ActionFlowSection />
+          <AIChatSection />
+          <Waitlist />
+
+          <footer className="site-footer">
+            <a className="logo" href="#top">
+              <SunMedium size={17} /><span>LUMEN</span>
             </a>
-            <a href="mailto:m.rafiq2006@icloud.com">Contact</a>
-          </div>
-        </footer>
-      </main>
+            <p>Neurodivergent-first · Tiimo-inspired calm · Native iOS · Private beta</p>
+            <div className="footer-links">
+              <a href="#access" className="footer-cta">
+                Request Early Access <ArrowRight size={13} />
+              </a>
+              <a href="/privacy">Privacy</a>
+              <a href="https://github.com/mohabbis/lumen" target="_blank" rel="noopener noreferrer">GitHub</a>
+              <a href="mailto:m.rafiq2006@icloud.com">Contact</a>
+            </div>
+          </footer>
+        </main>
+      </PhoneProvider>
     </AmbientContext.Provider>
   );
+}
+
+export function App() {
+  return <SiteShell />;
 }

@@ -19,14 +19,18 @@ struct HomeKitDevice: SmartDevice {
 
     var capabilities: [any DeviceCapability] { _capabilities }
 
-    init(accessory: HMAccessory, homeName: String) {
+    var accessoryReference: HMAccessory { accessory }
+    let homeName: String
+
+    init(accessory: HMAccessory, homeName: String, streams: HomeKitDeviceStreams = .empty) {
         self.id = accessory.uniqueIdentifier
         self.displayName = accessory.name
         self.roomName = accessory.room?.name
         self.reachability = accessory.isReachable ? .reachable : .unreachable
         self.category = DeviceCategory.from(accessory.category.categoryType)
         self.accessory = accessory
-        self._capabilities = Self.buildCapabilities(from: accessory)
+        self.homeName = homeName
+        self._capabilities = Self.buildCapabilities(from: accessory, streams: streams)
     }
 
     // MARK: - Action Execution (called by HomeKitBridge)
@@ -72,7 +76,7 @@ struct HomeKitDevice: SmartDevice {
 
     // MARK: - Capability Discovery
 
-    private static func buildCapabilities(from accessory: HMAccessory) -> [any DeviceCapability] {
+    private static func buildCapabilities(from accessory: HMAccessory, streams: HomeKitDeviceStreams) -> [any DeviceCapability] {
         var caps: [any DeviceCapability] = []
 
         for service in accessory.services {
@@ -106,10 +110,18 @@ struct HomeKitDevice: SmartDevice {
                 caps.append(HomeKitHumiditySensorCapability(accessory: accessory, service: service))
 
             case HMServiceTypeMotionSensor:
-                caps.append(HomeKitMotionCapability(accessory: accessory, service: service))
+                if let motion = streams.motion {
+                    caps.append(HomeKitMotionCapability(accessory: accessory, service: service, motionStream: motion))
+                } else {
+                    caps.append(HomeKitMotionCapability(accessory: accessory, service: service))
+                }
 
             case HMServiceTypeContactSensor:
-                caps.append(HomeKitContactCapability(accessory: accessory, service: service))
+                if let contact = streams.contact {
+                    caps.append(HomeKitContactCapability(accessory: accessory, service: service, contactStream: contact))
+                } else {
+                    caps.append(HomeKitContactCapability(accessory: accessory, service: service))
+                }
 
             case HMServiceTypeWindowCovering:
                 caps.append(HomeKitPositionCapability(accessory: accessory, service: service))
