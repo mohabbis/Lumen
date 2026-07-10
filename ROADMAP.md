@@ -36,6 +36,8 @@ Lumen is a solo/small-team indie iOS project (team `CU67F9EY3Q`, bundle ID `com.
 
 ## Competitive watch
 
+**Category benchmark (internal):** Controller for HomeKit — dense multi-platform HomeKit dashboard, widgets, power-user control surfaces. Lumen does not compete on feature breadth or toggle density.
+
 The broader smart-home market — other HomeKit-focused apps and platform-level AI expected in upcoming iOS releases — is moving toward fully automatic AI: agents that act on a user's behalf with little or no per-action confirmation. That's a reasonable bet for those products and platforms.
 
 Lumen's bet is the opposite: explainability and mandatory consent are the product, not a missing feature. As the market converges on "more automatic," the gap between "automatic" and "explained, approved, calm" gets more visible — that gap is the moat. Roadmap decisions should protect it: **do not add an "auto-apply without confirmation" mode, even as a power-user opt-in, without revisiting this document first.**
