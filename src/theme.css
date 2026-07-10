@@ -262,11 +262,36 @@ html[data-theme='light'] .mobile-menu-inner {
   border-color: var(--border-subtle);
 }
 
-html[data-theme='light'] .mobile-menu-inner a {
-  color: var(--text-body);
+html[data-theme='light'] .feature-overview-card,
+html[data-theme='light'] .more-capability-card,
+html[data-theme='light'] .platform-card,
+html[data-theme='light'] .feature-mock-card,
+html[data-theme='light'] .feature-mock-stack,
+html[data-theme='light'] .feature-mock-list {
+  background: var(--bg-card);
+  border-color: var(--border-subtle);
 }
 
-/* Theme toggle */
+html[data-theme='light'] .feature-overview-card b,
+html[data-theme='light'] .more-capability-card b,
+html[data-theme='light'] .platform-card b,
+html[data-theme='light'] .feature-mock-card b,
+html[data-theme='light'] .feature-mock-list-row {
+  color: var(--text-primary);
+}
+
+html[data-theme='light'] .feature-overview-card p,
+html[data-theme='light'] .more-capability-card p,
+html[data-theme='light'] .platform-card span,
+html[data-theme='light'] .feature-bullets li,
+html[data-theme='light'] .feature-mock-next,
+html[data-theme='light'] .feature-mock-row span {
+  color: var(--text-muted);
+}
+
+html[data-theme='light'] .feature-demo-link {
+  color: var(--accent-warm);
+}
 
 .theme-toggle {
   display: inline-flex;

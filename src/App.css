@@ -2682,3 +2682,335 @@ p {
   color: rgba(196,154,108,0.8);
   font-size: 8px;
 }
+
+/* ===== FEATURE SECTIONS ===== */
+
+.features-overview-section,
+.feature-spotlight,
+.more-capabilities-section,
+.platforms-section {
+  padding: 80px clamp(20px, 5%, 64px);
+}
+
+.features-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.feature-overview-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 22px 18px;
+  border-radius: 18px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  transition: border-color 0.25s, background 0.25s, transform 0.25s;
+}
+
+.feature-overview-card:hover {
+  border-color: rgba(200,184,154,0.22);
+  background: rgba(200,184,154,0.04);
+  transform: translateY(-2px);
+}
+
+.feature-overview-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(160,108,240,0.12);
+  color: rgba(200,184,154,0.8);
+}
+
+.feature-overview-card b {
+  font-size: 15px;
+  color: rgba(232,224,212,0.9);
+}
+
+.feature-overview-card p {
+  font-size: 13px;
+  line-height: 1.55;
+  margin: 0;
+  color: rgba(232,224,212,0.5);
+}
+
+.feature-spotlight-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 420px);
+  gap: clamp(32px, 6vw, 72px);
+  align-items: center;
+  max-width: 1040px;
+  margin: 0 auto;
+}
+
+.feature-spotlight-inner.reverse {
+  direction: rtl;
+}
+
+.feature-spotlight-inner.reverse > * {
+  direction: ltr;
+}
+
+.feature-spotlight-copy .section-note {
+  margin-bottom: 20px;
+}
+
+.feature-bullets {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.feature-bullets li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: rgba(232,224,212,0.68);
+}
+
+.feature-bullet-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(200,184,154,0.7);
+  margin-top: 7px;
+  flex-shrink: 0;
+}
+
+.feature-demo-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 13px;
+  color: rgba(200,184,154,0.85);
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.feature-demo-link:hover {
+  color: #e8a020;
+}
+
+.feature-mock-card,
+.feature-mock-stack,
+.feature-mock-list {
+  padding: 22px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.feature-mock-card.warm {
+  background: rgba(196,154,108,0.08);
+  border-color: rgba(196,154,108,0.18);
+}
+
+.feature-mock-card.presence {
+  background: rgba(111,219,168,0.08);
+  border-color: rgba(111,219,168,0.18);
+}
+
+.feature-mock-kicker {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(200,184,154,0.55);
+  margin: 0 0 8px;
+}
+
+.feature-mock-card b {
+  display: block;
+  font-size: 22px;
+  color: rgba(232,224,212,0.92);
+  margin-bottom: 14px;
+}
+
+.feature-mock-bar {
+  height: 4px;
+  border-radius: 99px;
+  background: rgba(255,255,255,0.08);
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.feature-mock-bar span {
+  display: block;
+  height: 100%;
+  border-radius: 99px;
+  background: rgba(160,108,240,0.65);
+}
+
+.feature-mock-bar.gold span {
+  background: rgba(196,154,108,0.75);
+}
+
+.feature-mock-next {
+  font-size: 12px;
+  color: rgba(232,224,212,0.45);
+  margin: 0;
+}
+
+.feature-mock-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.feature-mock-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.feature-mock-row span {
+  color: rgba(232,224,212,0.45);
+}
+
+.feature-mock-row b {
+  color: rgba(232,224,212,0.88);
+}
+
+.feature-mock-cta {
+  margin-top: 8px;
+  padding: 12px;
+  border-radius: 12px;
+  text-align: center;
+  font-size: 13px;
+  background: rgba(200,184,154,0.18);
+  color: rgba(232,224,212,0.9);
+}
+
+.feature-mock-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.feature-mock-list-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
+  color: rgba(232,224,212,0.82);
+}
+
+.feature-mock-list-row i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.feature-mock-list-row i.online {
+  background: rgba(130,220,130,0.8);
+}
+
+.feature-mock-list-row i.offline {
+  background: rgba(232,224,212,0.2);
+}
+
+.more-capabilities-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.more-capability-card {
+  padding: 20px 18px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+.more-capability-card svg {
+  color: rgba(200,184,154,0.65);
+  margin-bottom: 10px;
+}
+
+.more-capability-card b {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 6px;
+  color: rgba(232,224,212,0.88);
+}
+
+.more-capability-card p {
+  font-size: 12px;
+  line-height: 1.55;
+  margin: 0;
+  color: rgba(232,224,212,0.45);
+}
+
+.platforms-row {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.platform-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 28px 36px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  min-width: 180px;
+  text-align: center;
+}
+
+.platform-card svg {
+  color: rgba(200,184,154,0.7);
+}
+
+.platform-card b {
+  font-size: 16px;
+  color: rgba(232,224,212,0.9);
+}
+
+.platform-card span {
+  font-size: 12px;
+  color: rgba(232,224,212,0.45);
+}
+
+@media (max-width: 900px) {
+  .features-overview-grid,
+  .more-capabilities-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .feature-spotlight-inner,
+  .feature-spotlight-inner.reverse {
+    grid-template-columns: 1fr;
+    direction: ltr;
+  }
+}
+
+@media (max-width: 520px) {
+  .features-overview-grid,
+  .more-capabilities-grid {
+    grid-template-columns: 1fr;
+  }
+}

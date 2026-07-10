@@ -10,9 +10,9 @@ describe('Lumen landing page', () => {
     expect(h1).toHaveTextContent(/your home/i);
   });
 
-  it('renders the neurodivergent hero pill', () => {
+  it('renders the calm hero pill', () => {
     render(<App />);
-    expect(screen.getByText(/built for neurodivergent minds/i)).toBeInTheDocument();
+    expect(screen.getByText(/calm home companion/i)).toBeInTheDocument();
   });
 
   it('renders a light/dark theme toggle', () => {
@@ -20,17 +20,16 @@ describe('Lumen landing page', () => {
     expect(screen.getByRole('button', { name: /switch to light mode/i })).toBeInTheDocument();
   });
 
-  it('states Tiimo-inspired neurodivergent positioning', () => {
+  it('states calm consent-first positioning', () => {
     render(<App />);
-    expect(screen.getAllByText(/tiimo/i).length).toBeGreaterThan(0);
-    expect(screen.getByText(/designed for neurodivergent minds first/i)).toBeInTheDocument();
+    expect(screen.getByText(/waits for your tap before anything changes/i)).toBeInTheDocument();
     expect(screen.getAllByText(/open to everyone/i).length).toBeGreaterThan(0);
   });
 
   it('renders core nav links', () => {
     render(<App />);
     const nav = screen.getByRole('navigation');
-    expect(within(nav).getByRole('link', { name: /^the app$/i })).toHaveAttribute('href', '#product');
+    expect(within(nav).getByRole('link', { name: /^features$/i })).toHaveAttribute('href', '#features');
     expect(within(nav).getByRole('link', { name: /^ai$/i })).toHaveAttribute('href', '#ai');
     expect(within(nav).getByRole('link', { name: /^privacy$/i })).toHaveAttribute('href', '/privacy');
   });

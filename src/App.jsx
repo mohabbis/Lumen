@@ -4,7 +4,17 @@ import {
   Activity, ArrowRight, Blinds, Brain, DoorClosed, Droplets, Eye, Hand, Home, Lightbulb, Lock,
   Menu, MessageCircle, Moon, Sparkle, Sparkles, Sun, SunMedium, Thermometer, X, Zap,
 } from 'lucide-react';
-import { PhoneProvider, InteractivePhone, favoriteRooms, usePhone } from './InteractivePhone.jsx';
+import { PhoneProvider, InteractivePhone, usePhone } from './InteractivePhone.jsx';
+import {
+  FeaturesOverviewSection,
+  RhythmFeatureSection,
+  ScenesFeatureSection,
+  DevicesFeatureSection,
+  RoomsFeatureSection,
+  PresenceFeatureSection,
+  MoreCapabilitiesSection,
+  PlatformsSection,
+} from './FeatureSections.jsx';
 import './theme.css';
 import './App.css';
 
@@ -197,12 +207,12 @@ function HeroCopy() {
     <FadeIn className="hero-copy">
       <div className="pill">
         <span />
-        Built for neurodivergent minds
+        Calm home companion
       </div>
       <h1>Your home,<br /><em>understood.</em></h1>
       <p className="hero-lede">
-        Smart home apps can feel loud. Lumen is designed for neurodivergent minds first,
-        and better for anyone who wants a home that explains itself before it acts.
+        Smart home apps can feel loud. Lumen notices the moment, explains why,
+        and waits for your tap before anything changes.
       </p>
       <p className="hero-hint">{phone.hint}</p>
       <div className="hero-actions">
@@ -224,10 +234,8 @@ function WhyLumenSection() {
         <p className="eyebrow">Why Lumen</p>
         <h2>Calm enough<br /><em>to stay open.</em></h2>
         <p className="section-note">
-          HomeKit dashboards pack every toggle onto one screen. Lumen takes inspiration
-          from Tiimo, an Apple Design Award winner built for neurodivergent planners,
-          and brings that same low-stress clarity to your home. The design is niche.
-          The welcome is not.
+          HomeKit dashboards pack every toggle onto one screen. Lumen brings
+          low-stress clarity to your home. The design is focused. The welcome is open.
         </p>
       </FadeIn>
       <div className="calm-principles-grid">
@@ -244,7 +252,7 @@ function WhyLumenSection() {
       <FadeIn className="why-lumen-contrast centered">
         <p>
           Lumen is not a tinkerer tool or a power-user controller. Anyone can use it.
-          Building for neurodivergent minds first just makes it calmer than dashboards
+          Building for calm first just makes it easier to keep open than dashboards
           built for everyone and optimised for no one.
         </p>
       </FadeIn>
@@ -287,32 +295,6 @@ function CompatibilitySection() {
           Lumen rides on Apple Home instead of each brand cloud. The calm rhythm layer keeps working with no smart hardware at all.
         </p>
       </FadeIn>
-    </section>
-  );
-}
-
-function RoomShowcaseSection() {
-  const sectionRef = useRef(null);
-  useAmbientRegion(sectionRef, '196,154,108');
-
-  return (
-    <section className="room-show-section surface-alt" id="showcase" ref={sectionRef}>
-      <FadeIn className="section-copy centered">
-        <p className="eyebrow">Your home at a glance</p>
-        <h2>Every room,<br /><em>one glance.</em></h2>
-        <p className="section-note">Works the moment you open it. No smart hardware required.</p>
-      </FadeIn>
-      <div className="room-show-grid">
-        {favoriteRooms.map(({ name, icon: Icon, count }, i) => (
-          <FadeIn key={name} delay={i * 0.06}>
-            <div className="room-show-card">
-              <div className="room-show-icon"><Icon size={18} /></div>
-              <b>{name}</b>
-              <span>{count}</span>
-            </div>
-          </FadeIn>
-        ))}
-      </div>
     </section>
   );
 }
@@ -480,7 +462,8 @@ function SiteShell() {
               <span>LUMEN</span>
             </a>
             <div className="links">
-              <a href="#product">The App</a>
+              <a href="#features">Features</a>
+              <a href="#flow">How it works</a>
               <a href="#ai">AI</a>
               <a href="/privacy">Privacy</a>
             </div>
@@ -507,7 +490,11 @@ function SiteShell() {
           {menuOpen && (
             <div className="mobile-menu" onClick={close}>
               <div className="mobile-menu-inner" onClick={e => e.stopPropagation()}>
-                <a href="#product" onClick={close}>The App</a>
+                <a href="#features" onClick={close}>Features</a>
+                <a href="#rhythm" onClick={close}>Rhythm</a>
+                <a href="#scenes" onClick={close}>Scenes</a>
+                <a href="#devices" onClick={close}>Devices</a>
+                <a href="#flow" onClick={close}>How it works</a>
                 <a href="#ai" onClick={close}>AI</a>
                 <a href="/privacy" onClick={close} className="privacy-link">Privacy</a>
                 <a href="#access" onClick={close} className="mobile-cta">
@@ -527,9 +514,16 @@ function SiteShell() {
           </section>
 
           <WhyLumenSection />
+          <FeaturesOverviewSection />
+          <RhythmFeatureSection />
+          <ScenesFeatureSection />
+          <DevicesFeatureSection />
+          <RoomsFeatureSection />
+          <PresenceFeatureSection />
           <CompatibilitySection />
-          <RoomShowcaseSection />
           <ActionFlowSection />
+          <MoreCapabilitiesSection />
+          <PlatformsSection />
           <AIChatSection />
           <Waitlist />
 
@@ -537,7 +531,7 @@ function SiteShell() {
             <a className="logo" href="#top">
               <SunMedium size={17} /><span>LUMEN</span>
             </a>
-            <p>Neurodivergent-first design · Open to everyone · Native iOS · Private beta</p>
+            <p>Calm by design · Open to everyone · Native iOS · Private beta</p>
             <div className="footer-links">
               <a href="#access" className="footer-cta">
                 Request Early Access <ArrowRight size={13} />
