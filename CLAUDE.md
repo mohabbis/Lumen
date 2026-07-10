@@ -245,6 +245,8 @@ Single-page React/Vite app — no router, anchor-scroll only. Entry is `src/main
 
 > The `src/pages/*.astro` files and `src/styles/global.css` are exploratory and **not** part of the Vite build (there is no `astro` dependency or config) — the production site is the React entry above.
 
+Waitlist validation/delivery logic (`normalizeWaitlistPayload`, `isValidWaitlistEmail`, `postWebhook`/`deliverWaitlist`) is factored into `lib/waitlist.js` and shared by both sides of the submit path: `api/waitlist.js` (the Vercel serverless handler) imports it server-side, and `src/waitlistSubmit.js` (the browser-side submit + provider-fallback chain) imports `DEFAULT_TO_EMAIL` from it. `lib/waitlist.test.js` covers the shared module directly.
+
 ---
 
 ## Conventions when extending the iOS app
