@@ -14,7 +14,7 @@ const tabs = [
   { label: 'Home', icon: Home },
   { label: 'Rooms', icon: DoorOpen },
   { label: 'Intel', icon: Sparkle },
-  { label: 'Scenes', icon: Sparkles },
+  { label: 'Auto', icon: Sparkles },
   { label: 'Settings', icon: Settings },
 ];
 
@@ -102,31 +102,33 @@ const supportedCategories = [
 // brand integration.
 const exampleBrands = ['Philips Hue', 'Eve', 'Aqara', 'Nanoleaf', 'Matter-enabled Cync'];
 
-const chapters = [
-  'Try the lights',
-  'Arrives home',
-  'Lumen explains why',
-  'One tap applies',
-  'Scene is live',
-  'Every room, glanceable',
-  'All devices, one list',
+const demoCaptions = [
+  'Planned devices let you try controls before hardware arrives',
+  'Arrival near home shows a quiet welcome overlay',
+  'Lumen noticed opens when you want to understand a suggestion',
+  'Signals show time, presence, devices, and the matching scene',
+  'A second sheet lists exactly what Lumen will change',
+  'Nothing runs until you tap Apply',
+  'Scenes live under Auto with calm approval before each run',
+  'Intel keeps every device in one reachable list',
 ];
 
-const STEP_DURATIONS = [6000, 1900, 3300, 3500, 3000, 3000, 3000];
-const STEP_TABS = ['Home', 'Home', 'Home', 'Home', 'Scenes', 'Rooms', 'Intel'];
+const STEP_DURATIONS = [5500, 2200, 2800, 3400, 3400, 2800, 2600, 2600];
+const STEP_TABS = ['Home', 'Home', 'Home', 'Home', 'Home', 'Auto', 'Rooms', 'Intel'];
 
 // Ambient tint per chapter - the whole page washes toward this color while
 // the step is on screen. Reuses the app's own accent colors (rhythm
 // terracotta, Lumen violet, the amber of an active scene) rather than
 // inventing a new palette.
 const STEP_AMBIENT = [
-  '200,184,154', // Try the lights - inviting gold
-  '212,130,90',  // Arrives home - sunset terracotta
-  '160,108,240', // Lumen explains why - Lumen violet
-  '232,160,32',  // One tap applies - amber anticipation
-  '212,130,90',  // Scene is live - warm & dim evening
-  '111,219,168', // Every room, glanceable - fresh mint
-  '120,170,230', // All devices, one list - cool clarity
+  '200,184,154',
+  '212,130,90',
+  '160,108,240',
+  '160,108,240',
+  '232,160,32',
+  '212,130,90',
+  '111,219,168',
+  '120,170,230',
 ];
 
 const IDLE_ADVANCE_MS = 2500;
@@ -136,25 +138,25 @@ const actionFlowModes = [
     tag: 'Awareness',
     icon: Activity,
     headline: 'Notices the moment',
-    description: 'Time of day, who is home, and which devices are reachable, read continuously in the background.',
+    description: 'Time of day, presence, and reachable devices are read quietly in the background.',
   },
   {
     tag: 'Reasoning',
     icon: Sparkle,
     headline: 'Explains the why',
-    description: 'Signals turn into a plain language explanation you can read, question, or dismiss.',
-  },
-  {
-    tag: 'Execution',
-    icon: Zap,
-    headline: 'Waits for your tap',
-    description: 'One tap approves the scene. Nothing changes on a screen until you say so.',
+    description: 'Signals turn into a plain language sheet you can read, question, or dismiss.',
   },
   {
     tag: 'Action',
     icon: Lightbulb,
-    headline: 'Reaches the devices',
-    description: 'Lights, locks, and thermostats update to match what you approved, then awareness picks up again.',
+    headline: 'Shows what will change',
+    description: 'A second sheet lists each device action and waits for your confirmation.',
+  },
+  {
+    tag: 'Execution',
+    icon: Zap,
+    headline: 'Runs when you approve',
+    description: 'Lights, locks, and thermostats update only after you tap Apply.',
   },
 ];
 
@@ -162,10 +164,10 @@ const FLOW_ADVANCE_MS = 3200;
 
 // Ambient tint per mode, in the same order as actionFlowModes.
 const FLOW_AMBIENT = [
-  '111,219,168', // Awareness - fresh mint, reading the room
-  '160,108,240', // Reasoning - Lumen violet
-  '232,160,32',  // Execution - amber, waiting for your tap
-  '212,130,90',  // Action - warm terracotta, devices responding
+  '111,219,168',
+  '160,108,240',
+  '232,160,32',
+  '212,130,90',
 ];
 
 // Rhythm card - mirrors the real app's TimeOfDay enum + RhythmTiming math
@@ -335,7 +337,7 @@ function TabBar({ active }) {
 
 // Real-app screen recreations
 
-function DashboardScreen({ showWelcome = false, highlight = false, dimmed = false }) {
+function DashboardScreen({ showWelcome = false, highlight = false, dimmed = false, greeting = 'Good evening' }) {
   const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
@@ -355,7 +357,8 @@ function DashboardScreen({ showWelcome = false, highlight = false, dimmed = fals
         </span>
       </div>
 
-      <h4 className="app-greeting">{block.greeting}, Home</h4>
+      <h4 className="app-greeting serif">{greeting},</h4>
+      <h4 className="app-greeting serif home-name">Home</h4>
       <p className="app-subtitle">7 of 8 devices online. All looking good.</p>
 
       <div className="app-stats">
@@ -401,6 +404,7 @@ function DashboardScreen({ showWelcome = false, highlight = false, dimmed = fals
         ))}
       </div>
 
+      <p className="app-label noticed-section-label">Lumen noticed</p>
       <div className={highlight ? 'noticed-card highlight' : 'noticed-card'}>
         <div className="noticed-head">
           <Sparkles size={11} /> Lumen noticed
@@ -426,7 +430,7 @@ function DashboardScreen({ showWelcome = false, highlight = false, dimmed = fals
         >
           🏠 Welcome Home!
           <span className="welcome-caption">
-            <MapPin size={9} /> Detected automatically, no tap needed
+            <MapPin size={9} /> Detected when you arrive near home
           </span>
         </motion.div>
       )}
@@ -459,16 +463,16 @@ function ReasoningSheet() {
         ))}
       </div>
 
-      <button className="sheet-apply">
+      <div className="sheet-apply sheet-apply-static">
         Apply Evening
         <span className="tap-ripple apply-ripple" />
-      </button>
-      <button className="sheet-dismiss">Not now</button>
+      </div>
+      <p className="sheet-dismiss-static">Not now</p>
     </motion.div>
   );
 }
 
-function SceneApprovalSheet({ scene, onApply, onCancel }) {
+function ActionConfirmationSheet({ scene }) {
   return (
     <motion.div
       className="reason-sheet"
@@ -479,7 +483,7 @@ function SceneApprovalSheet({ scene, onApply, onCancel }) {
     >
       <span className="sheet-handle" />
       <div className="sheet-icon"><scene.icon size={22} /></div>
-      <p className="sheet-kicker">Apply scene</p>
+      <p className="sheet-kicker">Apply suggested scene</p>
       <h4 className="sheet-title">{scene.name}</h4>
 
       <p className="app-label sheet-signals-label">Lumen will</p>
@@ -492,16 +496,16 @@ function SceneApprovalSheet({ scene, onApply, onCancel }) {
         ))}
       </div>
 
-      <button className="sheet-apply" onClick={onApply}>
-        Apply {scene.name}
+      <div className="sheet-apply sheet-apply-static">
+        Apply
         <span className="tap-ripple apply-ripple" />
-      </button>
-      <button className="sheet-dismiss" onClick={onCancel}>Cancel</button>
+      </div>
+      <p className="sheet-dismiss-static">Not now</p>
     </motion.div>
   );
 }
 
-function ScenesScreen({ onSelectScene }) {
+function AutoScreen() {
   return (
     <div className="app-screen">
       <div className="app-topbar">
@@ -525,7 +529,6 @@ function ScenesScreen({ onSelectScene }) {
             <div
               className={name === 'Evening' ? 'scene-row active' : 'scene-row'}
               key={name}
-              onClick={() => onSelectScene(scene)}
             >
               <div className="scene-icon"><Icon size={16} /></div>
               <div className="scene-meta">
@@ -700,16 +703,12 @@ function LiveDemo() {
   const [lightOn, setLightOn] = useState(true);
   const [brightness, setBrightness] = useState(62);
   const [colorTemp, setColorTemp] = useState(40);
-  const [selectedScene, setSelectedScene] = useState(null);
+
+  const eveningScene = scenes.find(s => s.name === 'Evening') ?? scenes[1];
 
   useAmbientRegion(demoRef, STEP_AMBIENT[step]);
 
   const markInteraction = () => { lastInteractionRef.current = Date.now(); };
-
-  const closeApproval = () => {
-    setSelectedScene(null);
-    markInteraction();
-  };
 
   useEffect(() => {
     reducedRef.current =
@@ -723,7 +722,7 @@ function LiveDemo() {
   }, [step]);
 
   useEffect(() => {
-    if (paused || reducedRef.current || selectedScene) return undefined;
+    if (paused || reducedRef.current) return undefined;
 
     if (step === 0) {
       const id = setInterval(() => {
@@ -739,9 +738,11 @@ function LiveDemo() {
       STEP_DURATIONS[step],
     );
     return () => clearTimeout(id);
-  }, [step, paused, selectedScene]);
+  }, [step, paused]);
 
   const activeTab = STEP_TABS[step];
+  const showReasoning = step === 3;
+  const showAction = step === 4;
 
   return (
     <div className="live-demo" ref={demoRef}>
@@ -764,50 +765,30 @@ function LiveDemo() {
                 onInteractStart={markInteraction}
                 onInteractEnd={markInteraction}
               />
-            ) : step <= 3 ? (
+            ) : step === 5 ? (
+              <AutoScreen />
+            ) : step === 6 ? (
+              <RoomsScreen />
+            ) : step === 7 ? (
+              <IntelScreen />
+            ) : (
               <DashboardScreen
                 showWelcome={step === 1}
                 highlight={step === 2}
-                dimmed={step === 3}
+                dimmed={showReasoning || showAction}
+                greeting={step === 1 ? 'Welcome Home' : 'Good evening'}
               />
-            ) : step === 4 ? (
-              <ScenesScreen onSelectScene={setSelectedScene} />
-            ) : step === 5 ? (
-              <RoomsScreen />
-            ) : (
-              <IntelScreen />
             )}
             <AnimatePresence>
-              {step === 3 && <ReasoningSheet key="sheet" />}
-              {selectedScene && (
-                <SceneApprovalSheet
-                  key="approval"
-                  scene={selectedScene}
-                  onApply={closeApproval}
-                  onCancel={closeApproval}
-                />
-              )}
+              {showReasoning && <ReasoningSheet key="reasoning" />}
+              {showAction && <ActionConfirmationSheet key="action" scene={eveningScene} />}
             </AnimatePresence>
           </div>
           <TabBar active={activeTab} />
         </div>
       </div>
 
-      <div className="demo-chapters">
-        <span className="demo-live"><span className="demo-live-dot" />Auto-playing</span>
-        <div className="chapter-strip">
-          {chapters.map((label, i) => (
-            <button
-              key={label}
-              className={step === i ? 'active' : ''}
-              onClick={() => { setStep(i); setPaused(false); }}
-            >
-              <span className="chapter-num">0{i + 1}</span>
-              {label}
-            </button>
-          ))}
-        </div>
-      </div>
+      <p className="demo-caption">{demoCaptions[step]}</p>
     </div>
   );
 }
@@ -912,33 +893,22 @@ function ActionFlowSection() {
     >
       <FadeIn className="section-copy centered">
         <p className="eyebrow">How Lumen thinks</p>
-        <h2>One loop,<br /><em>four modes.</em></h2>
-        <p className="section-note">Every suggestion moves through the same loop, in order, every time.</p>
+        <h2>The same calm loop,<br /><em>every suggestion.</em></h2>
+        <p className="section-note">Every suggestion moves through the same calm loop, in order, every time.</p>
       </FadeIn>
 
       <div className="flow-row">
         {actionFlowModes.map(({ tag, icon: Icon, headline, description }, i) => (
           <FadeIn key={tag} delay={i * 0.06}>
-            <button
-              type="button"
-              className={`flow-card ${active === i ? 'active' : ''}`}
-              onClick={() => setActive(i)}
-            >
+            <div className={`flow-card ${active === i ? 'active' : ''}`}>
               <div className="flow-card-top">
-                <span className="flow-num">0{i + 1}</span>
                 <Icon size={16} />
               </div>
               <b className="flow-tag">{tag}</b>
               <span className="flow-headline">{headline}</span>
               <p className="flow-description">{description}</p>
-            </button>
+            </div>
           </FadeIn>
-        ))}
-      </div>
-
-      <div className="flow-progress">
-        {actionFlowModes.map((_, i) => (
-          <span key={i} className={active === i ? 'active' : ''} />
         ))}
       </div>
     </section>
@@ -963,21 +933,21 @@ function AIChatScreen() {
           <div className="chat-msg ai">
             Dimming to 30%, warming colour to 2700K.
             <div className="chat-chips">
-              <button className="chat-chip apply">Apply</button>
-              <button className="chat-chip">Edit</button>
+              <span className="chat-chip apply">Apply</span>
+              <span className="chat-chip">Edit</span>
             </div>
           </div>
           <div className="chat-msg user">Also turn off the hallway</div>
           <div className="chat-msg ai">
             Hallway off. Ready when you are.
             <div className="chat-chips">
-              <button className="chat-chip apply">Apply</button>
+              <span className="chat-chip apply">Apply</span>
             </div>
           </div>
         </div>
         <div className="chat-input-bar">
           <span className="chat-input-placeholder">Ask Lumen...</span>
-          <button className="chat-send-btn"><Send size={12} /></button>
+          <span className="chat-send-icon"><Send size={12} /></span>
         </div>
         <TabBar active="Home" />
       </div>
@@ -1140,9 +1110,9 @@ export function App() {
         {menuOpen && (
           <div className="mobile-menu" onClick={close}>
             <div className="mobile-menu-inner" onClick={e => e.stopPropagation()}>
-              <a href="#product" onClick={close}><span>01</span>The App</a>
-              <a href="#ai" onClick={close}><span>02</span>AI</a>
-              <a href="/privacy" onClick={close} className="privacy-link"><span>03</span>Privacy</a>
+              <a href="#product" onClick={close}>The App</a>
+              <a href="#ai" onClick={close}>AI</a>
+              <a href="/privacy" onClick={close} className="privacy-link">Privacy</a>
               <a href="#access" onClick={close} className="mobile-cta">
                 Request Access <ArrowRight size={14} />
               </a>
@@ -1167,7 +1137,6 @@ export function App() {
               <a className="primary" href="#access">
                 Request Early Access <ArrowRight size={15} />
               </a>
-              <a className="ghost" href="#product">See the whole app</a>
             </div>
           </FadeIn>
 
