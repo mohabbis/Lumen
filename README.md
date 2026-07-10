@@ -16,7 +16,7 @@ Lumen is designed for low cognitive load: calm surfaces, clear explanations, and
 
 ## Status
 
-Native SwiftUI / SwiftData app, iPhone + iPad. Local-first; CloudKit sync is gated off pending final provisioning. 90 unit tests, build clean.
+Native SwiftUI / SwiftData app, iPhone + iPad. Local-first; CloudKit sync is gated off pending final provisioning. 145 unit tests, build clean.
 
 ## Preview
 

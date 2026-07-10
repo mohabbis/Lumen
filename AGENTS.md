@@ -203,7 +203,7 @@ The flag defaults to `true`. Tests rely on it indirectly: `DeviceService.addPlan
 
 The `LumenTests` target uses XCTest with an in-memory `ModelContainer` via `PersistenceCoordinator.makeInMemoryContainer()`. Tests are `@MainActor` where they touch services or view models.
 
-Coverage groups (112 tests at time of writing):
+Coverage groups (145 tests at time of writing):
 
 | File | Covers |
 |------|--------|
@@ -214,6 +214,7 @@ Coverage groups (112 tests at time of writing):
 | `LocationServiceTests` | At-home detection, geofence event emission, no-spurious-arrival on first check |
 | `SceneServiceTests` | Scene CRUD, default seeding idempotency, execute records ExecutionEvent |
 | `SceneApprovalTests` | Approval flow (request/cancel/confirm), `SceneActionDescription` humanization |
+| `SceneActionBuilderTests` | Eligible-device filtering (read-only exclusion), sorted controllable-capability options, default payload per capability |
 | `GeofenceRoutingTests` | `scenesMatching` routes events to correctly-triggered scenes |
 | `RhythmTests` | `RhythmTiming` block math, midnight wrap |
 | `ReasoningTests` | `ReasoningCalculator` signal generation, suggestion labels, confidence/habit signals from the scored layer |
