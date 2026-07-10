@@ -1,11 +1,21 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="canonical" href="https://lumen.muharafiq.com/" />
-    <meta name="theme-color" content="#f5a623" />
+    <meta name="theme-color" content="#0c0814" />
+    <script>
+      (function () {
+        var key = 'lumen-theme';
+        var stored = localStorage.getItem(key);
+        var theme = stored === 'light' || stored === 'dark'
+          ? stored
+          : (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+        document.documentElement.dataset.theme = theme;
+      })();
+    </script>
     <meta name="author" content="Muhammad Rafiq" />
     <meta name="publish-date" content="2026-06-03" />
     <meta property="article:author" content="Muhammad Rafiq" />

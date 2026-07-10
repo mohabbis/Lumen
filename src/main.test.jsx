@@ -15,6 +15,11 @@ describe('Lumen landing page', () => {
     expect(screen.getByText(/built for neurodivergent minds/i)).toBeInTheDocument();
   });
 
+  it('renders a light/dark theme toggle', () => {
+    render(<App />);
+    expect(screen.getByRole('button', { name: /switch to light mode/i })).toBeInTheDocument();
+  });
+
   it('states Tiimo-inspired neurodivergent positioning', () => {
     render(<App />);
     expect(screen.getAllByText(/tiimo/i).length).toBeGreaterThan(0);

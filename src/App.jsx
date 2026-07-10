@@ -2,9 +2,10 @@ import React, { createContext, useCallback, useContext, useEffect, useRef, useSt
 import { motion } from 'framer-motion';
 import {
   Activity, ArrowRight, Blinds, Brain, DoorClosed, Droplets, Eye, Hand, Home, Lightbulb, Lock,
-  Menu, MessageCircle, Sparkle, Sparkles, SunMedium, Thermometer, X, Zap,
+  Menu, MessageCircle, Moon, Sparkle, Sparkles, Sun, SunMedium, Thermometer, X, Zap,
 } from 'lucide-react';
 import { PhoneProvider, InteractivePhone, favoriteRooms, usePhone } from './InteractivePhone.jsx';
+import './theme.css';
 import './App.css';
 
 const aiCallouts = [
@@ -79,6 +80,36 @@ const actionFlowModes = [
 const FLOW_AMBIENT = ['111,219,168', '160,108,240', '232,160,32', '212,130,90'];
 const FLOW_ADVANCE_MS = 4200;
 const AMBIENT_IDLE = '200,184,154';
+const THEME_STORAGE_KEY = 'lumen-theme';
+
+function resolveTheme() {
+  if (typeof window === 'undefined') return 'dark';
+  const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
+  if (stored === 'light' || stored === 'dark') return stored;
+  if (typeof window.matchMedia !== 'function') return 'dark';
+  return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+}
+
+function applyTheme(theme) {
+  document.documentElement.dataset.theme = theme;
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', theme === 'light' ? '#faf8f5' : '#0c0814');
+}
+
+function useSiteTheme() {
+  const [theme, setTheme] = useState(resolveTheme);
+
+  useEffect(() => {
+    applyTheme(theme);
+    window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+  }, [theme]);
+
+  const toggleTheme = useCallback(() => {
+    setTheme(current => (current === 'dark' ? 'light' : 'dark'));
+  }, []);
+
+  return { theme, toggleTheme };
+}
 
 const AmbientContext = createContext(() => {});
 
@@ -188,7 +219,7 @@ function WhyLumenSection() {
   useAmbientRegion(sectionRef, '150,120,235');
 
   return (
-    <section className="why-lumen-section" id="why" ref={sectionRef}>
+    <section className="why-lumen-section surface-alt" id="why" ref={sectionRef}>
       <FadeIn className="section-copy centered">
         <p className="eyebrow">Why Lumen</p>
         <h2>Calm enough<br /><em>to stay open.</em></h2>
@@ -265,7 +296,7 @@ function RoomShowcaseSection() {
   useAmbientRegion(sectionRef, '196,154,108');
 
   return (
-    <section className="room-show-section" id="showcase" ref={sectionRef}>
+    <section className="room-show-section surface-alt" id="showcase" ref={sectionRef}>
       <FadeIn className="section-copy centered">
         <p className="eyebrow">Your home at a glance</p>
         <h2>Every room,<br /><em>one glance.</em></h2>
@@ -334,7 +365,7 @@ function AIChatSection() {
   useAmbientRegion(sectionRef, '150,120,235');
 
   return (
-    <section className="ai-chat-section" id="ai" ref={sectionRef}>
+    <section className="ai-chat-section surface-alt" id="ai" ref={sectionRef}>
       <div className="ai-chat-inner">
         <FadeIn className="ai-chat-copy">
           <p className="eyebrow">Coming soon · Built-in AI</p>
@@ -432,6 +463,7 @@ function Waitlist() {
 
 function SiteShell() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { theme, toggleTheme } = useSiteTheme();
   const close = () => setMenuOpen(false);
   const ambient = useAmbientController(AMBIENT_IDLE);
 
@@ -453,6 +485,14 @@ function SiteShell() {
               <a href="/privacy">Privacy</a>
             </div>
             <div className="nav-actions">
+              <button
+                type="button"
+                className="theme-toggle"
+                onClick={toggleTheme}
+                aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+              >
+                {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+              </button>
               <a href="#access">Request Access</a>
               <button
                 aria-label={menuOpen ? 'Close menu' : 'Open menu'}
