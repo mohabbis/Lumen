@@ -5,6 +5,7 @@ import {
   Menu, MessageCircle, Moon, Sparkle, Sparkles, Sun, SunMedium, Thermometer, X, Zap,
 } from 'lucide-react';
 import { PhoneProvider, InteractivePhone, usePhone } from './InteractivePhone.jsx';
+import { submitWaitlist } from './waitlistSubmit.js';
 import {
   FeaturesOverviewSection,
   RhythmFeatureSection,
@@ -383,23 +384,9 @@ function Waitlist() {
     e.preventDefault();
     const email = new FormData(e.currentTarget).get('email');
     setStatus('loading');
-    const endpoint = import.meta.env.VITE_WAITLIST_ENDPOINT || '/api/waitlist';
     try {
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, source: 'lumen-site' }),
-      });
-      let delivered = res.ok;
-      if (delivered) {
-        try {
-          const data = await res.json();
-          delivered = data.ok !== false;
-        } catch {
-          // non-JSON 2xx still counts
-        }
-      }
-      if (!delivered) throw new Error('Waitlist endpoint rejected the request');
+      const delivered = await submitWaitlist(email, 'lumen-site');
+      if (!delivered) throw new Error('Waitlist submission failed');
       setStatus('success');
       e.target.reset();
     } catch {
