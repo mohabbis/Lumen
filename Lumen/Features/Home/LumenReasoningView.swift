@@ -155,6 +155,12 @@ struct ReasoningCalculator: Equatable {
     let distanceToHome: Double?
     let reachableDevices: Int
     let suggestedSceneName: String?
+    // Optional output of the scored heuristic layer (`SuggestionEngine`). When
+    // present, they surface the confidence and learned-habit signals behind the
+    // suggestion so the explainability list reflects the scored layer, not just
+    // the raw ambient state.
+    var confidence: Double? = nil
+    var habitRuns: Int? = nil
 
     var reasoning: LumenReasoning {
         LumenReasoning(
@@ -213,6 +219,30 @@ struct ReasoningCalculator: Equatable {
                     label: "Matching scene",
                     value: sceneName,
                     weight: .high
+                )
+            )
+        }
+
+        if let habitRuns, habitRuns > 0 {
+            result.append(
+                ReasoningSignal(
+                    id: "habit",
+                    label: "Usual routine",
+                    value: "\(habitRuns)× around now",
+                    weight: .medium
+                )
+            )
+        }
+
+        if let confidence {
+            let percent = Int((confidence * 100).rounded())
+            let weight: SignalWeight = confidence >= 0.6 ? .high : (confidence >= 0.3 ? .medium : .low)
+            result.append(
+                ReasoningSignal(
+                    id: "confidence",
+                    label: "Confidence",
+                    value: "\(percent)%",
+                    weight: weight
                 )
             )
         }

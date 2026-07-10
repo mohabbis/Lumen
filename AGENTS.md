@@ -127,10 +127,21 @@ A convention: when view code carries non-trivial logic, lift it into a pure `str
 |--------|---------|-----------------|
 | `RhythmTiming` | `NowNextCard` | Current-block progress + next-block start date (handles midnight wrap) |
 | `SceneActionDescription` | `SceneApprovalSheet` | Humanized (capability, value) pair for a `SceneAction` |
-| `ReasoningCalculator` | `LumenReasoningView` | Signal list + suggestion label from ambient state |
+| `ReasoningCalculator` | `LumenReasoningView` | Signal list + suggestion label from ambient state (incl. confidence / habit signals from the scored layer) |
+| `SuggestionEngine` | `HomeDashboardView` | Scored-heuristic ranking of scenes → the "Lumen noticed" suggestion + explainable factors (see below) |
 | `SceneService.scenesMatching(event:in:)` | `SceneService.handleGeofenceEvent` | Pure routing — which scenes fire for a given event |
 
 Follow this pattern for new feature work.
+
+#### Scored suggestion layer (`Services/Intelligence/SuggestionEngine.swift`)
+
+The "Lumen noticed" dashboard suggestion is produced by `SuggestionEngine`, a pure, testable scored-heuristic layer (ROADMAP Phase 1 — "move `ReasoningCalculator` toward a scored heuristic layer, staying explainable"). It replaced the old hardcoded time-of-day → scene switch in `HomeDashboardView`.
+
+- **Inputs** (all value types, no SwiftData/SwiftUI): `timeOfDay`, `presence` (`PresenceState`), `reachableDevices`, `hourOfDay`, and `[SuggestionCandidate]`. The dashboard builds candidates from `@Query`'d `Scene`s + `ExecutionEvent` history (runs bucketed by `hourOfDay`, matched by denormalized `sceneName`).
+- **Scoring** is additive and capped at 1.0: time-of-day keyword affinity (`0.45`), habit strength from history in a ±1h wrap-around window (`0.12 × runs`, capped `0.4`), presence/geofence alignment (away+`onDeparture` `0.3`, home+`onArrival` `0.2`), favorite (`0.1`), device readiness (`0.1`).
+- **Output**: `topSuggestion()` returns the highest-confidence `SceneSuggestion` (name + confidence + `habitRuns` + `[SuggestionFactor]`), or `nil` when nothing clears `surfaceThreshold` (`0.2`) — so Lumen stays quiet rather than nudge on a hunch. `rankedSuggestions()` is deterministic (confidence, then run volume, then name).
+- **Explainability**: the top suggestion's `confidence` and `habitRuns` flow into `ReasoningCalculator` as extra signals, so `LumenReasoningView` shows the scored layer's reasoning, not just raw ambient state. Every factor is a human-readable reason.
+- Tested by `SuggestionEngineTests` (scoring, threshold, midnight wrap, presence, determinism, explainability).
 
 #### SwiftData persistence (`Services/Persistence/`)
 
@@ -192,7 +203,7 @@ The flag defaults to `true`. Tests rely on it indirectly: `DeviceService.addPlan
 
 The `LumenTests` target uses XCTest with an in-memory `ModelContainer` via `PersistenceCoordinator.makeInMemoryContainer()`. Tests are `@MainActor` where they touch services or view models.
 
-Coverage groups (91 tests at time of writing):
+Coverage groups (112 tests at time of writing):
 
 | File | Covers |
 |------|--------|
@@ -205,7 +216,8 @@ Coverage groups (91 tests at time of writing):
 | `SceneApprovalTests` | Approval flow (request/cancel/confirm), `SceneActionDescription` humanization |
 | `GeofenceRoutingTests` | `scenesMatching` routes events to correctly-triggered scenes |
 | `RhythmTests` | `RhythmTiming` block math, midnight wrap |
-| `ReasoningTests` | `ReasoningCalculator` signal generation, suggestion labels |
+| `ReasoningTests` | `ReasoningCalculator` signal generation, suggestion labels, confidence/habit signals from the scored layer |
+| `SuggestionEngineTests` | `SuggestionEngine` scoring, surface threshold, ±1h midnight-wrap habit window, presence/geofence boost, deterministic ranking, explainable factors |
 | `RoomViewModelTests` | RoomVM CRUD wrapper |
 | `RemoteIRTests` | IR endpoint normalization, HTTP request building, `RemoteService` transport routing + learn-capability (fake transports), `RemoteViewModel` command/hostname/transport CRUD |
 | `BroadlinkTests` | Broadlink codec vs crafted vectors (checksum, AES round-trip, packet framing, auth, IR/learn/discovery payloads) + `BroadlinkTransport` actor flow vs a fake `UDPChannel` (send, learn, timeout) |

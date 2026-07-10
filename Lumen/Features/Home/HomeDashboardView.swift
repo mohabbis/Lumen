@@ -9,6 +9,7 @@ struct HomeDashboardView: View {
 
     @State var viewModel: HomeViewModel
     @Query private var scenes: [Scene]
+    @Query private var executions: [ExecutionEvent]
     @Environment(\.horizontalSizeClass) private var sizeClass
     @Environment(LocationService.self) private var locationService
     @State private var isRenamingHome = false
@@ -379,16 +380,37 @@ struct HomeDashboardView: View {
         scenes.first { $0.name.lowercased() == name.lowercased() }
     }
 
-    private var suggestedSceneName: String? {
-        let candidate: String?
-        switch timeOfDay {
-        case .dawn, .morning: candidate = "Morning"
-        case .afternoon:      candidate = nil
-        case .evening:        candidate = "Evening"
-        case .night:          candidate = "Sleep"
+    // MARK: - Scored suggestion (SuggestionEngine)
+
+    // Value-type view of every scene + its run history, fed to the pure engine.
+    private var suggestionCandidates: [SuggestionCandidate] {
+        scenes.map { scene in
+            var runsByHour: [Int: Int] = [:]
+            for event in executions where event.sceneName.lowercased() == scene.name.lowercased() {
+                runsByHour[event.hourOfDay, default: 0] += 1
+            }
+            return SuggestionCandidate(
+                sceneName: scene.name,
+                geofenceTrigger: scene.geofenceTrigger,
+                isFavorite: scene.isFavorite,
+                runsByHour: runsByHour
+            )
         }
-        guard let name = candidate, let scene = findScene(named: name) else { return nil }
-        return scene.name
+    }
+
+    private var suggestion: SceneSuggestion? {
+        SuggestionEngine(
+            timeOfDay: timeOfDay,
+            presence: locationService.isAtHome ? .home : .away,
+            reachableDevices: viewModel.reachableDeviceCount,
+            hourOfDay: Calendar.current.component(.hour, from: Date()),
+            candidates: suggestionCandidates
+        ).topSuggestion()
+    }
+
+    private var suggestedSceneName: String? {
+        guard let name = suggestion?.sceneName, findScene(named: name) != nil else { return nil }
+        return name
     }
 
     private var errorAlertBinding: Binding<Bool> {
@@ -404,7 +426,9 @@ struct HomeDashboardView: View {
             isAtHome: locationService.isAtHome,
             distanceToHome: locationService.distanceToHome,
             reachableDevices: viewModel.reachableDeviceCount,
-            suggestedSceneName: suggestedSceneName
+            suggestedSceneName: suggestedSceneName,
+            confidence: suggestion?.confidence,
+            habitRuns: suggestion?.habitRuns
         ).reasoning
     }
 
@@ -419,6 +443,11 @@ struct HomeDashboardView: View {
     }
 
     private var noticedSuggestion: String {
+        // Prefer the scored engine's actual pick so the card, the reasoning
+        // list, and the Action sheet all name the same scene.
+        if let name = suggestedSceneName {
+            return "Run \(name) scene"
+        }
         switch timeOfDay {
         case .dawn:      return "Run Morning scene"
         case .morning:   return "Check room status"
