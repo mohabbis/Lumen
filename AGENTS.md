@@ -61,7 +61,7 @@ Protocol-driven MVVM using Swift Observation (`@Observable`) and SwiftData.
 
 #### Services (`Services/`)
 
-Most services are `@Observable @MainActor` classes passed through the SwiftUI environment from `MuhomeApp` (see the `.environment(...)` chain in `MuhomeApp.body`). They are the only places that touch `ModelContext`. Services are grouped into subfolders (`Home/`, `Device/`, `Scene/`, `Intelligence/`, `Persistence/`); `LocationService`, `NotificationService`, and `KeychainService` sit at the `Services/` root.
+Most services are `@Observable @MainActor` classes passed through the SwiftUI environment from `LumenApp` (see the `.environment(...)` chain in `LumenApp.body`). They are the only places that touch `ModelContext`. Services are grouped into subfolders (`Home/`, `Device/`, `Scene/`, `Intelligence/`, `Persistence/`); `LocationService`, `NotificationService`, and `KeychainService` sit at the `Services/` root.
 
 | Service | Path | Owns |
 |---------|------|------|
@@ -134,7 +134,7 @@ Follow this pattern for new feature work.
 
 #### SwiftData persistence (`Services/Persistence/`)
 
-- Schema is versioned in `MuhomeSchema.swift`: `MuhomeSchemaV1` → `V2` → `V3`, with a lightweight `MuhomeSchemaMigrationPlan`. `PersistenceCoordinator` always uses `MuhomeSchemaV3`.
+- Schema is versioned in `LumenSchema.swift`: `LumenSchemaV1` → `V2` → `V3`, with a lightweight `LumenSchemaMigrationPlan`. `PersistenceCoordinator` always uses `LumenSchemaV3`.
 - The registered `@Model` types (identical across V1–V3 except `ExecutionEvent`, added in V2) are: `Home`, `Room`, `Zone`, `PlannedDevice`, `Scene`, `SceneAction`, `RemoteProfile`, `IRCommand`, `ExecutionEvent`. V2→V3 only drops `@Attribute(.unique)` from `id` fields for CloudKit compatibility; `Home.latitude`/`longitude`, and later `RemoteProfile.transportKindRaw`/`broadlinkMAC`/`broadlinkDeviceType`, were added via SwiftData's inferred nullable-column migration (no new version).
 - CloudKit sync is **off** (`PersistenceCoordinator.enableCloudKitSync = false`). The flag is guarded by a test (`PersistenceTests.testCloudKitSyncIsGatedOffForBeta`). Flip only after provisioning `iCloud.com.muhome.app` in the Apple Developer portal.
 - The old `MuhomeDataModels.swift` / `SceneModels.swift` legacy-struct files (`MuhaScene`, `MuhaSceneRecord`, etc.) have been **removed**. `TimeOfDay` — the one enum from that era still in use — now lives in its own file, `Lumen/Models/TimeOfDay.swift`. There is no dead legacy schema to avoid anymore.
@@ -239,7 +239,7 @@ Single-page React/Vite app — no router, anchor-scroll only. Entry is `src/main
 
 - New service surfaces and view models should follow the `@Observable @MainActor` pattern.
 - New views that carry math or rules should extract a pure helper `struct` for testing. See "Testable helper structs" above.
-- New SwiftData models live under `Lumen/Models/` (spatial/analytics types) or `Lumen/Domain/Models/` (automation/remote types). One model per file; register it in **all three** schema versions in `MuhomeSchema.swift` (or add a new versioned schema + migration stage if the change isn't lightweight).
+- New SwiftData models live under `Lumen/Models/` (spatial/analytics types) or `Lumen/Domain/Models/` (automation/remote types). One model per file; register it in **all three** schema versions in `LumenSchema.swift` (or add a new versioned schema + migration stage if the change isn't lightweight).
 - Errors surface through `viewModel.error: (any Error)?`. The dashboard already has an alert binding pattern (`errorAlertBinding`); reuse it on new views rather than swallowing with `try?`.
 - Default `AppState.enableLocalPreviewControls = true` should be respected — many tests rely on the local-preview state store path.
 - Keep consent-before-action. New tap → action paths route through a confirmation surface (sheet/alert), not direct execution.

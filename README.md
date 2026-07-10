@@ -146,7 +146,7 @@ Full architecture notes — including the consent-first data flow for scene exec
 
 ## Bundle
 
-- Bundle ID: `com.muharafiq.lumen`
+- Bundle ID: `com.muhome.app`
 - Team: `CU67F9EY3Q`
 - Minimum: iOS 17+ (uses `@Observable`, SwiftData, modern SwiftUI sheet APIs)
 

@@ -7,7 +7,7 @@ import SwiftData
 final class PersistenceTests: XCTestCase {
 
     func testCloudKitSyncIsGatedOffForBeta() {
-        // `.automatic` CloudKit init runs synchronously in MuhomeApp.init(); pointing
+        // `.automatic` CloudKit init runs synchronously in LumenApp.init(); pointing
         // it at a non-existent container hangs the main thread (black screen on launch).
         // This must stay false until iCloud.com.muhome.app exists in the portal.
         XCTAssertFalse(PersistenceCoordinator.enableCloudKitSync)

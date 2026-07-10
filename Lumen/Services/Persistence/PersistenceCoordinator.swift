@@ -13,7 +13,7 @@ enum PersistenceCoordinator {
     ///
     /// Why this gate exists: `cloudKitDatabase: .automatic` initializes the CloudKit
     /// mirroring stack synchronously during `ModelContainer` creation — which runs on
-    /// the main thread in `MuhomeApp.init()`. If the named container doesn't exist
+    /// the main thread in `LumenApp.init()`. If the named container doesn't exist
     /// server-side, that setup blocks the main thread and the app launches to a black
     /// screen (process alive, UI never drawn — not a crash). Flip this to `true` only
     /// once the container is provisioned; the app works fully local-only until then.
@@ -33,8 +33,8 @@ enum PersistenceCoordinator {
         )
 
         let schema = Schema(
-            MuhomeSchemaV3.models,
-            version: MuhomeSchemaV3.versionIdentifier
+            LumenSchemaV3.models,
+            version: LumenSchemaV3.versionIdentifier
         )
 
         // When CloudKit is enabled, prefer the synced store but degrade to local-only
@@ -49,7 +49,7 @@ enum PersistenceCoordinator {
             return try makeContainer(schema: schema, cloudKit: .none)
         } catch {
             reportFatalError(error)
-            fatalError("[Muhome] Unrecoverable persistence failure: \(error)")
+            fatalError("[Lumen] Unrecoverable persistence failure: \(error)")
         }
     }
 
@@ -66,7 +66,7 @@ enum PersistenceCoordinator {
         )
         return try ModelContainer(
             for: schema,
-            migrationPlan: MuhomeSchemaMigrationPlan.self,
+            migrationPlan: LumenSchemaMigrationPlan.self,
             configurations: config
         )
     }
@@ -75,8 +75,8 @@ enum PersistenceCoordinator {
 
     static func makeInMemoryContainer() -> ModelContainer {
         let schema = Schema(
-            MuhomeSchemaV3.models,
-            version: MuhomeSchemaV3.versionIdentifier
+            LumenSchemaV3.models,
+            version: LumenSchemaV3.versionIdentifier
         )
         // cloudKitDatabase: .none is required — without it SwiftData defaults to
         // .automatic, detects the host app's iCloud entitlement, and tries to set up
@@ -95,6 +95,6 @@ enum PersistenceCoordinator {
 
     private static func reportFatalError(_ error: Error) {
         // Forward to crash reporter (Crashlytics / Sentry) before aborting.
-        print("[Muhome] FATAL: \(error)")
+        print("[Lumen] FATAL: \(error)")
     }
 }

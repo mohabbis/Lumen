@@ -2,7 +2,7 @@ import SwiftUI
 import SwiftData
 
 @main
-struct MuhomeApp: App {
+struct LumenApp: App {
 
     // Container is a stored property — created exactly once at app init.
     // Never constructed inside body or any computed property.
