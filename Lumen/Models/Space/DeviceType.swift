@@ -1,6 +1,6 @@
 //
 //  DeviceType.swift
-//  Muhome
+//  Lumen
 //
 //  Created by Muhammad Rafiq on 20/05/2026.
 //

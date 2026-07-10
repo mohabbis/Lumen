@@ -3,7 +3,7 @@ import SwiftData
 
 // MARK: - Versioned Schema V1
 
-enum MuhomeSchemaV1: VersionedSchema {
+enum LumenSchemaV1: VersionedSchema {
     static var versionIdentifier = Schema.Version(1, 0, 0)
 
     static var models: [any PersistentModel.Type] = [
@@ -20,7 +20,7 @@ enum MuhomeSchemaV1: VersionedSchema {
 
 // MARK: - Versioned Schema V2
 
-enum MuhomeSchemaV2: VersionedSchema {
+enum LumenSchemaV2: VersionedSchema {
     static var versionIdentifier = Schema.Version(2, 0, 0)
 
     static var models: [any PersistentModel.Type] = [
@@ -38,7 +38,7 @@ enum MuhomeSchemaV2: VersionedSchema {
 
 // MARK: - Versioned Schema V3
 
-enum MuhomeSchemaV3: VersionedSchema {
+enum LumenSchemaV3: VersionedSchema {
     static var versionIdentifier = Schema.Version(3, 0, 0)
 
     // Identical model set to V2 — the only change is dropping @Attribute(.unique)
@@ -58,26 +58,26 @@ enum MuhomeSchemaV3: VersionedSchema {
 
 // MARK: - Migration Plan
 
-enum MuhomeSchemaMigrationPlan: SchemaMigrationPlan {
+enum LumenSchemaMigrationPlan: SchemaMigrationPlan {
     static var schemas: [any VersionedSchema.Type] = [
-        MuhomeSchemaV1.self,
-        MuhomeSchemaV2.self,
-        MuhomeSchemaV3.self,
+        LumenSchemaV1.self,
+        LumenSchemaV2.self,
+        LumenSchemaV3.self,
     ]
 
     static var stages: [MigrationStage] = [
         // V1 → V2: add ExecutionEvent model.
         MigrationStage.lightweight(
-            fromVersion: MuhomeSchemaV1.self,
-            toVersion:   MuhomeSchemaV2.self
+            fromVersion: LumenSchemaV1.self,
+            toVersion:   LumenSchemaV2.self
         ),
         // V2 → V3: drop @Attribute(.unique) from all id fields for CloudKit compatibility.
         // Note: Home.latitude and Home.longitude (optional Double, added later) are handled
         // by SwiftData's inferred migration — nullable column additions don't require a
         // new schema version.
         MigrationStage.lightweight(
-            fromVersion: MuhomeSchemaV2.self,
-            toVersion:   MuhomeSchemaV3.self
+            fromVersion: LumenSchemaV2.self,
+            toVersion:   LumenSchemaV3.self
         ),
     ]
 }
