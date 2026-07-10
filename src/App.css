@@ -516,7 +516,7 @@ p {
 
 .phone-screen {
   flex: 1;
-  background: #0c0c0c;
+  background: #0E0819;
   border: 8px solid #181818;
   border-radius: 40px;
   overflow: hidden;
@@ -1015,6 +1015,17 @@ p {
   color: rgba(232,224,212,0.25);
 }
 
+.chat-send-icon {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(200,184,154,0.15);
+  color: rgba(200,184,154,0.65);
+  flex-shrink: 0;
+}
+
 .chat-send-btn {
   display: grid;
   place-items: center;
@@ -1190,7 +1201,17 @@ p {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 24px;
+  gap: 20px;
+}
+
+.demo-caption {
+  max-width: 340px;
+  text-align: center;
+  font-size: 13px;
+  line-height: 1.55;
+  color: rgba(232,224,212,0.42);
+  margin: 0;
+  min-height: 2.8em;
 }
 
 .demo-chapters {
@@ -1331,6 +1352,23 @@ p {
 
 .app-greeting.small {
   font-size: 12px;
+}
+
+.app-greeting.serif {
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.05;
+}
+
+.app-greeting.home-name {
+  margin-bottom: 6px;
+}
+
+.noticed-section-label {
+  margin-top: 4px;
+  margin-bottom: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
 }
 
 .app-subtitle {
@@ -1781,6 +1819,32 @@ p {
   flex-shrink: 0;
 }
 
+.sheet-apply-static {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin-top: 6px;
+  padding: 8px 14px;
+  border-radius: 99px;
+  background: #C49A6C;
+  color: #0e0819;
+  font-size: 9.5px;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.sheet-dismiss-static {
+  text-align: center;
+  color: rgba(232,224,212,0.28);
+  font-size: 8.5px;
+  margin: 3px 0 0;
+  flex-shrink: 0;
+}
+
 .sheet-dismiss {
   border: none;
   background: transparent;
@@ -2071,8 +2135,6 @@ p {
   background: rgba(255,255,255,0.022);
   border: 1px solid rgba(255,255,255,0.065);
   text-align: left;
-  cursor: pointer;
-  font-family: inherit;
   transition: border-color 0.3s, background 0.3s, transform 0.3s;
 }
 
