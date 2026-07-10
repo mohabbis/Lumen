@@ -4,71 +4,71 @@
    ===================================================== */
 
 html[data-theme='dark'] {
-  --bg-base: #0c0814;
-  --bg-shell-top: #0e0818;
-  --bg-shell-mid: #090612;
-  --bg-shell-bottom: #070410;
-  --bg-nav: rgba(10, 6, 18, 0.88);
-  --bg-surface-alt: rgba(255, 255, 255, 0.028);
-  --bg-card: rgba(255, 255, 255, 0.04);
-  --bg-card-hover: rgba(200, 184, 154, 0.05);
-  --border-subtle: rgba(255, 255, 255, 0.07);
-  --border-accent: rgba(200, 184, 154, 0.18);
-  --text-primary: #f2ece4;
-  --text-heading: #f0eae2;
-  --text-body: rgba(232, 224, 212, 0.78);
-  --text-muted: rgba(232, 224, 212, 0.58);
-  --text-faint: rgba(232, 224, 212, 0.42);
-  --text-eyebrow: rgba(200, 184, 154, 0.72);
-  --accent-gold: #e8a020;
-  --accent-warm: #c8b89a;
-  --accent-purple: rgba(160, 100, 255, 0.35);
-  --pill-bg: rgba(120, 60, 220, 0.12);
-  --pill-text: rgba(200, 180, 255, 0.85);
-  --cta-bg: #c8b89a;
-  --cta-text: #0d0804;
-  --grain-opacity: 0.025;
-  --hero-lede: rgba(220, 210, 240, 0.72);
-  --hero-hint: rgba(196, 154, 108, 0.82);
-  --nav-link: rgba(232, 224, 212, 0.55);
-  --nav-link-hover: #f2ece4;
-  --theme-toggle-bg: rgba(255, 255, 255, 0.06);
+  --bg-base: #08090d;
+  --bg-shell-top: #0a0c12;
+  --bg-shell-mid: #08090d;
+  --bg-shell-bottom: #060709;
+  --bg-nav: rgba(9, 11, 16, 0.72);
+  --bg-surface-alt: rgba(255, 255, 255, 0.022);
+  --bg-card: rgba(255, 255, 255, 0.045);
+  --bg-card-hover: rgba(138, 180, 248, 0.06);
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-accent: rgba(138, 180, 248, 0.3);
+  --text-primary: #f4f6fb;
+  --text-heading: #f7f9fc;
+  --text-body: rgba(226, 231, 242, 0.74);
+  --text-muted: rgba(214, 221, 236, 0.56);
+  --text-faint: rgba(214, 221, 236, 0.4);
+  --text-eyebrow: rgba(160, 190, 250, 0.82);
+  --accent-gold: #8ab4f8;
+  --accent-warm: #c58af9;
+  --accent-purple: rgba(197, 138, 249, 0.35);
+  --pill-bg: rgba(138, 180, 248, 0.1);
+  --pill-text: rgba(196, 214, 255, 0.9);
+  --cta-bg: #8ab4f8;
+  --cta-text: #0a0c12;
+  --grain-opacity: 0.02;
+  --hero-lede: rgba(214, 224, 245, 0.72);
+  --hero-hint: rgba(160, 190, 250, 0.85);
+  --nav-link: rgba(226, 231, 242, 0.56);
+  --nav-link-hover: #f4f6fb;
+  --theme-toggle-bg: rgba(255, 255, 255, 0.05);
   --theme-toggle-border: rgba(255, 255, 255, 0.1);
-  --ambient-opacity: 0.3;
+  --ambient-opacity: 0.32;
 }
 
 html[data-theme='light'] {
-  --bg-base: #faf8f5;
-  --bg-shell-top: #faf8f5;
-  --bg-shell-mid: #f5f1ea;
-  --bg-shell-bottom: #efe9df;
-  --bg-nav: rgba(250, 248, 245, 0.92);
-  --bg-surface-alt: #f0ebe3;
-  --bg-card: rgba(255, 255, 255, 0.88);
+  --bg-base: #f7f8fb;
+  --bg-shell-top: #f8f9fc;
+  --bg-shell-mid: #f2f4f9;
+  --bg-shell-bottom: #eceff6;
+  --bg-nav: rgba(248, 249, 252, 0.82);
+  --bg-surface-alt: #eef1f7;
+  --bg-card: rgba(255, 255, 255, 0.9);
   --bg-card-hover: #ffffff;
-  --border-subtle: rgba(26, 20, 32, 0.08);
-  --border-accent: rgba(180, 130, 60, 0.22);
-  --text-primary: #1a1420;
-  --text-heading: #15101a;
-  --text-body: #3d3548;
-  --text-muted: #5c5468;
-  --text-faint: #7a7285;
-  --text-eyebrow: #8a6d42;
-  --accent-gold: #c47a12;
-  --accent-warm: #9a7348;
-  --accent-purple: rgba(120, 80, 200, 0.15);
-  --pill-bg: rgba(196, 154, 108, 0.14);
-  --pill-text: #6b5428;
-  --cta-bg: #1a1420;
-  --cta-text: #faf8f5;
-  --grain-opacity: 0.04;
-  --hero-lede: #4a4258;
-  --hero-hint: #7a5c30;
-  --nav-link: #5c5468;
-  --nav-link-hover: #1a1420;
-  --theme-toggle-bg: rgba(26, 20, 32, 0.05);
-  --theme-toggle-border: rgba(26, 20, 32, 0.1);
-  --ambient-opacity: 0.14;
+  --border-subtle: rgba(20, 24, 40, 0.09);
+  --border-accent: rgba(80, 120, 220, 0.28);
+  --text-primary: #14182a;
+  --text-heading: #0f1322;
+  --text-body: #3a4056;
+  --text-muted: #565d72;
+  --text-faint: #757c90;
+  --text-eyebrow: #4f6fd0;
+  --accent-gold: #4f6fd0;
+  --accent-warm: #8a5cd0;
+  --accent-purple: rgba(120, 90, 220, 0.16);
+  --pill-bg: rgba(80, 120, 220, 0.12);
+  --pill-text: #3a58b8;
+  --cta-bg: #14182a;
+  --cta-text: #f7f8fb;
+  --grain-opacity: 0.03;
+  --hero-lede: #414863;
+  --hero-hint: #4f6fd0;
+  --nav-link: #565d72;
+  --nav-link-hover: #14182a;
+  --theme-toggle-bg: rgba(20, 24, 40, 0.05);
+  --theme-toggle-border: rgba(20, 24, 40, 0.1);
+  --ambient-opacity: 0.12;
 }
 
 html[data-theme='dark'] .surface-alt,
@@ -132,7 +132,11 @@ html[data-theme='light'] h3 {
 
 html[data-theme='light'] h1 em,
 html[data-theme='light'] h2 em {
-  color: var(--accent-gold);
+  background: linear-gradient(100deg, #4f6fd0 0%, #8a5cd0 60%, #4f6fd0 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
   text-shadow: none;
 }
 
@@ -163,6 +167,19 @@ html[data-theme='light'] .pill {
 html[data-theme='light'] .hero-actions .primary {
   background: var(--cta-bg);
   color: var(--cta-text);
+}
+
+html[data-theme='light'] .hero-actions a:not(.primary),
+html[data-theme='light'] .hero-actions .secondary {
+  border-color: rgba(20, 24, 40, 0.14);
+  background: rgba(20, 24, 40, 0.02);
+  color: var(--text-body);
+}
+
+html[data-theme='light'] .hero-actions .secondary:hover {
+  border-color: rgba(80, 120, 220, 0.45);
+  background: rgba(80, 120, 220, 0.06);
+  color: var(--text-primary);
 }
 
 html[data-theme='light'] .nav-actions a[href='#access'] {
@@ -234,10 +251,55 @@ html[data-theme='light'] .waitlist-copy p:not(.eyebrow) {
 html[data-theme='light'] .waitlist-form button {
   background: var(--cta-bg);
   color: var(--cta-text);
+  box-shadow: 0 14px 40px -20px rgba(20, 24, 40, 0.5);
 }
 
 html[data-theme='light'] .waitlist-checks {
   color: var(--text-faint);
+}
+
+/* Sign-up card on light */
+html[data-theme='light'] .signup-card {
+  background: linear-gradient(180deg, rgba(80, 120, 220, 0.06) 0%, #ffffff 46%);
+  border-color: var(--border-subtle);
+  box-shadow: 0 44px 120px -60px rgba(80, 120, 220, 0.4), 0 2px 8px rgba(20, 24, 40, 0.05);
+}
+
+html[data-theme='light'] .signup-steps {
+  background: rgba(20, 24, 40, 0.03);
+  border-color: rgba(20, 24, 40, 0.07);
+}
+
+html[data-theme='light'] .signup-step + .signup-step {
+  border-top-color: rgba(20, 24, 40, 0.07);
+}
+
+html[data-theme='light'] .signup-step-icon {
+  background: rgba(80, 120, 220, 0.1);
+  color: var(--accent-gold);
+}
+
+html[data-theme='light'] .signup-step-num {
+  color: var(--accent-gold);
+}
+
+html[data-theme='light'] .waitlist-form input {
+  background: #ffffff;
+  border-color: rgba(20, 24, 40, 0.14);
+  color: var(--text-primary);
+}
+
+html[data-theme='light'] .waitlist-form input:focus {
+  border-color: rgba(80, 120, 220, 0.55);
+  background: #ffffff;
+}
+
+html[data-theme='light'] .hero-platform-note {
+  color: var(--text-muted);
+}
+
+html[data-theme='light'] .hero-platform-note svg {
+  color: var(--text-body);
 }
 
 html[data-theme='light'] .site-footer {

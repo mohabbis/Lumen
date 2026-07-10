@@ -36,30 +36,30 @@ describe('Lumen landing page', () => {
 
   it('renders the hero CTA pointing at the access section', () => {
     render(<App />);
-    const ctas = screen.getAllByRole('link', { name: /request early access/i });
+    const ctas = screen.getAllByRole('link', { name: /(get|request) early access/i });
     expect(ctas.length).toBeGreaterThan(0);
     expect(ctas[0]).toHaveAttribute('href', '#access');
   });
 
-  it('renders the waitlist email input', () => {
+  it('renders the sign-up email input', () => {
     render(<App />);
-    const input = screen.getByPlaceholderText(/your email address/i);
+    const input = screen.getByPlaceholderText(/you@example\.com/i);
     expect(input).toBeInTheDocument();
     expect(input).toHaveAttribute('type', 'email');
     expect(input).toHaveAttribute('name', 'email');
   });
 
-  it('accepts email input in the waitlist form', async () => {
+  it('accepts email input in the sign-up form', async () => {
     render(<App />);
     const user = userEvent.setup();
-    const input = screen.getByPlaceholderText(/your email address/i);
+    const input = screen.getByPlaceholderText(/you@example\.com/i);
     await user.type(input, 'muha@example.com');
     expect(input).toHaveValue('muha@example.com');
   });
 
-  it('renders the waitlist submit button', () => {
+  it('renders the sign-up submit button', () => {
     render(<App />);
-    expect(screen.getByRole('button', { name: /request access/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /continue/i })).toBeInTheDocument();
   });
 
   it('renders interactive phone tabs', () => {

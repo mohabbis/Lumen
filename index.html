@@ -5,14 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="canonical" href="https://lumen.muharafiq.com/" />
-    <meta name="theme-color" content="#0c0814" />
+    <meta name="theme-color" content="#08090d" />
     <script>
       (function () {
         var key = 'lumen-theme';
         var stored = localStorage.getItem(key);
-        var theme = stored === 'light' || stored === 'dark'
-          ? stored
-          : (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+        var theme = stored === 'light' || stored === 'dark' ? stored : 'dark';
         document.documentElement.dataset.theme = theme;
       })();
     </script>
