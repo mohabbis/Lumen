@@ -79,6 +79,14 @@ final class SceneServiceTests: XCTestCase {
         XCTAssertEqual(scene.name, "Stable")
     }
 
+    func testUpdateSceneGeofenceTrigger() throws {
+        let (service, _) = makeFixture()
+        let scene = try service.createScene(name: "Away")
+        XCTAssertEqual(scene.geofenceTrigger, .none)
+        try service.updateScene(scene, geofenceTrigger: .onDeparture)
+        XCTAssertEqual(scene.geofenceTrigger, .onDeparture)
+    }
+
     // MARK: - deleteScene
 
     func testDeleteSceneRemovesFromStore() throws {

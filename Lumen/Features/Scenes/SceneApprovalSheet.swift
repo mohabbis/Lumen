@@ -142,12 +142,14 @@ struct SceneActionDescription: Equatable {
 
     private static func capabilityName(for raw: String) -> String {
         switch raw {
-        case "power":       return "Power"
+        case "onOff", "power": return "Power"
         case "brightness":  return "Brightness"
-        case "color":       return "Color"
-        case "temperature": return "Temperature"
+        case "color", "colorHue": return "Color"
+        case "colorTemperature": return "Color Temperature"
+        case "temperature", "targetTemperature": return "Temperature"
         case "hvacMode":    return "Mode"
-        case "lockState":   return "Lock"
+        case "lock", "lockState": return "Lock"
+        case "position":    return "Position"
         default:
             guard let first = raw.first else { return raw }
             return first.uppercased() + raw.dropFirst()
@@ -174,7 +176,7 @@ struct SceneActionDescription: Equatable {
             return "\(Int(value.rounded()))°C"
         case "hvacMode":
             return "Mode"
-        case "lockState":
+        case "lockState", "lock":
             return action.payloadInt == 0 ? "Locked" : "Unlocked"
         default:
             return "Set"

@@ -57,3 +57,5 @@ final class Scene {
             .compactMap { $0.asSnapshot() }
     }
 }
+
+extension Scene: Identifiable {}

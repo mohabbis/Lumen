@@ -33,6 +33,28 @@ struct SceneListView: View {
                 onCancel: { viewModel.cancelPending() }
             )
         }
+        .sheet(item: $viewModel.editingScene) { scene in
+            NavigationStack {
+                SceneDetailView(scene: scene, viewModel: viewModel)
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button("Done") { viewModel.editingScene = nil }
+                        }
+                    }
+            }
+        }
+        .alert("Something went wrong", isPresented: errorBinding) {
+            Button("OK", role: .cancel) { viewModel.error = nil }
+        } message: {
+            Text(viewModel.error?.localizedDescription ?? "Please try again.")
+        }
+    }
+
+    private var errorBinding: Binding<Bool> {
+        Binding(
+            get: { viewModel.error != nil },
+            set: { if !$0 { viewModel.error = nil } }
+        )
     }
 
     // MARK: - Scroll Content
@@ -278,12 +300,57 @@ private struct SceneDarkRow: View {
         .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 16))
         .contentShape(RoundedRectangle(cornerRadius: 16))
         .onTapGesture { viewModel.requestApproval(scene) }
+        .contextMenu {
+            Button {
+                viewModel.requestApproval(scene)
+            } label: {
+                Label("Run Scene", systemImage: "play.fill")
+            }
+            Button {
+                viewModel.editingScene = scene
+            } label: {
+                Label("Edit Scene", systemImage: "pencil")
+            }
+            Button {
+                viewModel.toggleFavorite(scene)
+            } label: {
+                Label(
+                    scene.isFavorite ? "Remove Favorite" : "Favorite",
+                    systemImage: scene.isFavorite ? "star.slash" : "star"
+                )
+            }
+            Divider()
+            Button(role: .destructive) {
+                viewModel.deleteScene(scene)
+            } label: {
+                Label("Delete", systemImage: "trash")
+            }
+        }
+        .overlay(alignment: .trailing) {
+            Button {
+                viewModel.editingScene = scene
+            } label: {
+                Image(systemName: "slider.horizontal.3")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundStyle(Color.white.opacity(0.35))
+                    .padding(.trailing, 40)
+            }
+            .buttonStyle(.plain)
+        }
     }
 
     private var rowSubtitle: String {
         let count = scene.actions.count
         let mood = moodFor(scene.iconName)
-        return count > 0 ? "\(count) device\(count == 1 ? "" : "s") · \(mood)" : mood
+        var parts: [String] = []
+        if count > 0 {
+            parts.append("\(count) device\(count == 1 ? "" : "s")")
+        }
+        if scene.geofenceTrigger != .none {
+            parts.append(scene.geofenceTrigger.displayName)
+        }
+        if parts.isEmpty { return mood }
+        return parts.joined(separator: " · ")
     }
 
     private func moodFor(_ icon: String) -> String {
