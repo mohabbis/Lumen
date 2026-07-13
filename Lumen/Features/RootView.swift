@@ -28,6 +28,11 @@ struct RootView: View {
             }
         }
         .tint(Color("MuhaBrown"))
+        .transaction { transaction in
+            if appState.sensoryProfile.shouldReduceMotion {
+                transaction.animation = nil
+            }
+        }
         .task { await bootstrap() }
     }
 
