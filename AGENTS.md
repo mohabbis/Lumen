@@ -203,11 +203,16 @@ The flag defaults to `true`. Tests rely on it indirectly: `DeviceService.addPlan
 
 The `LumenTests` target uses XCTest with an in-memory `ModelContainer` via `PersistenceCoordinator.makeInMemoryContainer()`. Tests are `@MainActor` where they touch services or view models.
 
-Coverage groups (~160 tests at time of writing):
+Coverage groups (~195 tests at time of writing):
+
+`TestDoubles.swift` holds the shared test doubles — `FakeSmartHomeBridge` (in-memory `SmartHomeBridge` actor: records executed actions, vends a device set, feeds a live state stream), `TestSmartDevice` (configurable `bridgeID`/`reachability`, unlike `LocalSmartDevice`), stream-driven `FakeMotionCapability`/`FakeContactCapability`, and async polling helpers (`waitUntil`, `settle`, `waitForStreamOpen`). Use these rather than re-rolling bridge/device fakes per suite.
 
 | File | Covers |
 |------|--------|
 | `CommissioningTests` | PlannedDevice ↔ live device link/unlink |
+| `DeviceStateStoreTests` | `applyLocalAction` value clamping + implicit power, scene-preset mapping (`applyLocalScenePreset`), `syncLocalPreviewDevices` stale cleanup, and bridge lifecycle (discover→merge→notify, disconnect, live state stream, authorization failure) |
+| `DeviceServiceRoutingTests` | `send(action:)` routing — bridge forwarding when reachable, `.localPreview` short-circuit, and the `deviceUnreachable` / `bridgeNotFound` / `deviceNotFound` error branches |
+| `SensorObservationServiceTests` | Motion/contact event recording, 200-event ring-buffer cap, per-capability subscription dedup, targeted/global cancellation, re-subscription after stream termination |
 | `PersistenceTests` | CloudKit gate, schema round-trip |
 | `HomeServiceTests` | Home/Room CRUD, primary promotion, home coordinates |
 | `HomeViewModelTests` | VM derived state, executeScene error surfacing |
