@@ -14,9 +14,14 @@ struct LumenReasoningView: View {
     var body: some View {
         VStack(spacing: 0) {
             handle
-            header
-            signalList
-            Spacer(minLength: 24)
+            ScrollView {
+                VStack(spacing: 0) {
+                    header
+                    signalList
+                }
+                .padding(.bottom, 24)
+            }
+            .scrollIndicators(.hidden)
             footer
         }
         .padding(.horizontal, 24)
@@ -75,21 +80,48 @@ struct LumenReasoningView: View {
     }
 
     private func signalRow(_ signal: ReasoningSignal) -> some View {
-        HStack {
+        HStack(alignment: .top, spacing: 10) {
             Circle()
                 .fill(signal.weight.tint)
                 .frame(width: 6, height: 6)
-            Text(signal.label)
-                .font(.system(size: 14, weight: .medium))
-                .foregroundStyle(Color.white.opacity(0.85))
-            Spacer()
-            Text(signal.value)
-                .font(.system(size: 14))
-                .foregroundStyle(Color.white.opacity(0.55))
+                .padding(.top, 6)
+
+            ViewThatFits(in: .horizontal) {
+                HStack(alignment: .firstTextBaseline, spacing: 12) {
+                    signalLabel(signal)
+                        .lineLimit(1)
+                        .layoutPriority(1)
+                    Spacer(minLength: 8)
+                    signalValue(signal)
+                        .lineLimit(1)
+                        .multilineTextAlignment(.trailing)
+                }
+
+                VStack(alignment: .leading, spacing: 4) {
+                    signalLabel(signal)
+                        .fixedSize(horizontal: false, vertical: true)
+                    signalValue(signal)
+                        .multilineTextAlignment(.leading)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 16)
         .padding(.vertical, 14)
         .background(Color.white.opacity(0.05), in: RoundedRectangle(cornerRadius: 14))
+    }
+
+    private func signalLabel(_ signal: ReasoningSignal) -> some View {
+        Text(signal.label)
+            .font(.system(size: 14, weight: .medium))
+            .foregroundStyle(Color.white.opacity(0.85))
+    }
+
+    private func signalValue(_ signal: ReasoningSignal) -> some View {
+        Text(signal.value)
+            .font(.system(size: 14))
+            .foregroundStyle(Color.white.opacity(0.55))
     }
 
     @ViewBuilder
