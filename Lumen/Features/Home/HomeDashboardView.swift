@@ -25,6 +25,17 @@ struct HomeDashboardView: View {
     private var dashboardTopPadding: CGFloat { isRegularLayout ? 28 : 8 }
     private var greetingTitleSize: CGFloat { isRegularLayout ? 48 : 36 }
     private var roomLimit: Int { isRegularLayout ? 6 : 4 }
+    private var dashboardSetupPresentation: DashboardSetupPresentation {
+        DashboardSetupPresentation(
+            roomCount: viewModel.rooms.count,
+            installedDeviceCount: viewModel.installedDeviceCount,
+            sceneCount: scenes.count
+        )
+    }
+
+    private var locationPermissionPresentation: LocationPermissionPresentation? {
+        LocationPermissionPresentation(status: locationService.authorizationStatus)
+    }
 
     private var roomGridColumns: [GridItem] {
         if isRegularLayout {
@@ -134,9 +145,17 @@ struct HomeDashboardView: View {
         VStack(alignment: .leading, spacing: 28) {
             topBar
             greeting
+            if let locationPermissionPresentation {
+                LocationPermissionCard(
+                    presentation: locationPermissionPresentation,
+                    action: openAppSettings
+                )
+            }
             compactStats
             NowNextCard(now: timeOfDay)
-            if !viewModel.rooms.isEmpty {
+            if dashboardSetupPresentation.shouldShow {
+                dashboardSetupSection
+            } else {
                 favoriteRoomsSection
             }
             lumenNoticedSection
@@ -150,9 +169,17 @@ struct HomeDashboardView: View {
             HStack(alignment: .top, spacing: 28) {
                 VStack(alignment: .leading, spacing: 28) {
                     greeting
+                    if let locationPermissionPresentation {
+                        LocationPermissionCard(
+                            presentation: locationPermissionPresentation,
+                            action: openAppSettings
+                        )
+                    }
                     compactStats
                     NowNextCard(now: timeOfDay)
-                    if !viewModel.rooms.isEmpty {
+                    if dashboardSetupPresentation.shouldShow {
+                        dashboardSetupSection
+                    } else {
                         favoriteRoomsSection
                     }
                 }
@@ -304,6 +331,15 @@ struct HomeDashboardView: View {
         }
     }
 
+    // MARK: - First-Run Setup
+
+    private var dashboardSetupSection: some View {
+        FirstRunSetupCard(
+            presentation: dashboardSetupPresentation,
+            action: { viewModel.isShowingAddRoom = true }
+        )
+    }
+
     // MARK: - Lumen Noticed Section
 
     private var lumenNoticedSection: some View {
@@ -405,6 +441,11 @@ struct HomeDashboardView: View {
                 isStatusOverlayVisible = false
             }
         }
+    }
+
+    private func openAppSettings() {
+        guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
+        UIApplication.shared.open(url)
     }
 
     private func findScene(named name: String) -> Scene? {
@@ -528,23 +569,25 @@ private struct StatusOverlay: View {
     }
 
     private var banner: some View {
+        let presentation = StatusOverlayPresentation(isAtHome: isAtHome)
+
         HStack(spacing: 12) {
             ZStack {
                 Circle()
                     .fill(tint.opacity(0.15))
                     .frame(width: 36, height: 36)
-                Image(systemName: iconName)
+                Image(systemName: presentation.iconName)
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundStyle(tint)
             }
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(title)
+                Text(presentation.title)
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(.white)
                     .lineLimit(1)
                     .minimumScaleFactor(0.85)
-                Text(subtitle)
+                Text(presentation.subtitle)
                     .font(.system(size: 12))
                     .foregroundStyle(Color.white.opacity(0.52))
                     .lineLimit(2)
@@ -564,20 +607,9 @@ private struct StatusOverlay: View {
         .accessibilityElement(children: .combine)
     }
 
-    private var title: String {
-        isAtHome ? "Welcome home" : "Away mode"
-    }
-
-    private var subtitle: String {
-        isAtHome ? "Lumen is following the home rhythm." : "Home status stays visible while you are away."
-    }
-
-    private var iconName: String {
-        isAtHome ? "house.fill" : "location.fill"
-    }
-
     private var tint: Color {
-        isAtHome ? Color(hex: "#C49A6C") : Color.white.opacity(0.72)
+        let presentation = StatusOverlayPresentation(isAtHome: isAtHome)
+        return Color(hex: presentation.tintHex).opacity(presentation.tintOpacity)
     }
 }
 

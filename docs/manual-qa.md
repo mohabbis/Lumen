@@ -13,6 +13,14 @@ Use this before each TestFlight upload. The automated XCTest suite covers core l
 - Confirm the dashboard shows rooms, devices, Now / Next rhythm, and the Lumen noticed card.
 - Open Settings and confirm version/build, preview controls, haptics, and debug-details toggles render correctly.
 
+## First-Run Dashboard
+
+- Create a home with no rooms.
+- Confirm the dashboard shows a setup path card after the Now / Next rhythm card.
+- Confirm the first step is creating a room and the primary action opens the Add Room sheet.
+- Add a room and confirm the setup card is replaced by the favorite rooms section.
+- Confirm long home names and setup copy wrap without overlapping the Lumen noticed card.
+
 ## Consent-First Scenes
 
 - Tap a scene row from the Scenes tab.
@@ -61,6 +69,7 @@ Lumen controls Matter accessories through the same path as HomeKit: iOS surfaces
 - Confirm the dashboard home/away state updates without repeated prompts.
 - If testing background geofence behavior, grant always permission after the when-in-use prompt.
 - Revoke location access from iOS Settings.
+- Return to Lumen and confirm the dashboard shows a location-off card with an Open Settings action.
 - Return to Lumen and confirm the dashboard remains usable and does not repeatedly prompt.
 
 ## Notification Permission
