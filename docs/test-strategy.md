@@ -4,7 +4,7 @@ Lumen's test suite covers core product logic without requiring HomeKit hardware 
 
 ## Test Layers
 
-- Pure helpers cover rhythm timing, scene action descriptions, reasoning signals, and geofence routing.
+- Pure helpers cover rhythm timing, scene action descriptions, reasoning signals, dashboard presentation, and geofence routing.
 - Service tests use an in-memory SwiftData `ModelContainer`.
 - View model tests cover derived state and visible error paths.
 - Persistence tests guard the CloudKit gate and schema round trips.
