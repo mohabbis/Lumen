@@ -155,12 +155,33 @@ struct ReasoningCalculator: Equatable {
     let distanceToHome: Double?
     let reachableDevices: Int
     let suggestedSceneName: String?
+    let expectedSceneName: String?
     // Optional output of the scored heuristic layer (`SuggestionEngine`). When
     // present, they surface the confidence and learned-habit signals behind the
     // suggestion so the explainability list reflects the scored layer, not just
     // the raw ambient state.
-    var confidence: Double? = nil
-    var habitRuns: Int? = nil
+    let confidence: Double?
+    let habitRuns: Int?
+
+    init(
+        timeOfDay: TimeOfDay,
+        isAtHome: Bool,
+        distanceToHome: Double?,
+        reachableDevices: Int,
+        suggestedSceneName: String?,
+        expectedSceneName: String? = nil,
+        confidence: Double? = nil,
+        habitRuns: Int? = nil
+    ) {
+        self.timeOfDay = timeOfDay
+        self.isAtHome = isAtHome
+        self.distanceToHome = distanceToHome
+        self.reachableDevices = reachableDevices
+        self.suggestedSceneName = suggestedSceneName
+        self.expectedSceneName = expectedSceneName
+        self.confidence = confidence
+        self.habitRuns = habitRuns
+    }
 
     var reasoning: LumenReasoning {
         LumenReasoning(
@@ -221,6 +242,15 @@ struct ReasoningCalculator: Equatable {
                     weight: .high
                 )
             )
+        } else if let sceneName = expectedSceneName {
+            result.append(
+                ReasoningSignal(
+                    id: "scene",
+                    label: "Matching scene",
+                    value: "\(sceneName) not set up",
+                    weight: .low
+                )
+            )
         }
 
         if let habitRuns, habitRuns > 0 {
@@ -257,5 +287,63 @@ struct ReasoningCalculator: Equatable {
             return String(format: "%.1f km away", km)
         }
         return "Away"
+    }
+}
+
+// MARK: - LumenNoticePresentation
+// Pure presentation logic for the dashboard's awareness card.
+
+struct LumenNoticePresentation: Equatable {
+
+    let message: String
+    let suggestion: String
+    let detail: String
+    let iconName: String
+    let isActionable: Bool
+
+    init(
+        timeOfDay: TimeOfDay,
+        isAtHome: Bool,
+        reachableDevices: Int,
+        expectedSceneName: String?,
+        suggestedSceneName: String?
+    ) {
+        self.message = Self.message(
+            for: timeOfDay,
+            isAtHome: isAtHome,
+            hasReachableDevices: reachableDevices > 0
+        )
+        self.iconName = isAtHome ? "sparkles" : "location.fill"
+        self.isActionable = suggestedSceneName != nil
+
+        if let sceneName = suggestedSceneName {
+            self.suggestion = "Review \(sceneName) scene"
+            self.detail = "Confirm before anything changes"
+        } else if let sceneName = expectedSceneName {
+            self.suggestion = "\(sceneName) scene not set up"
+            self.detail = reachableDevices > 0 ? "Signals available, no action queued" : "Add devices or a scene to apply it"
+        } else {
+            self.suggestion = "No scene suggested now"
+            self.detail = "Review the current signals"
+        }
+    }
+
+    private static func message(for timeOfDay: TimeOfDay, isAtHome: Bool, hasReachableDevices: Bool) -> String {
+        if !isAtHome {
+            return "Away mode is active. Lumen is keeping the home state visible."
+        }
+
+        switch timeOfDay {
+        case .dawn:
+            return hasReachableDevices ? "It's early. Your home is quiet and the lights are dim." : "It's early. Lumen is tracking the home rhythm."
+        case .morning:
+            return hasReachableDevices ? "Good morning. Devices are ready for the day." : "Good morning. Your daily rhythm is in view."
+        case .afternoon:
+            return "Afternoon is steady. Lumen is staying quiet unless something needs attention."
+        case .evening:
+            return "Sunset detected. Warm lighting may fit this moment."
+        case .night:
+            return hasReachableDevices ? "Your home is winding down. Devices are ready for rest." : "Your home is winding down for the night."
+        }
     }
 }

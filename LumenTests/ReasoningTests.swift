@@ -77,6 +77,21 @@ final class ReasoningTests: XCTestCase {
         XCTAssertFalse(r.signals.contains(where: { $0.id == "scene" }))
     }
 
+    func testSceneSignalShowsMissingExpectedScene() {
+        let r = ReasoningCalculator(
+            timeOfDay: .evening,
+            isAtHome: true,
+            distanceToHome: nil,
+            reachableDevices: 2,
+            suggestedSceneName: nil,
+            expectedSceneName: "Evening"
+        ).reasoning
+
+        let signal = r.signals.first(where: { $0.id == "scene" })
+        XCTAssertEqual(signal?.value, "Evening not set up")
+        XCTAssertEqual(signal?.weight, .low)
+    }
+
     func testSceneSignalShownWithSuggestion() {
         let r = ReasoningCalculator(
             timeOfDay: .evening,
@@ -212,5 +227,63 @@ final class ReasoningTests: XCTestCase {
         ).reasoning
 
         XCTAssertFalse(r.signals.contains(where: { $0.id == "habit" }))
+    }
+
+    // MARK: - Notice presentation
+
+    func testNoticePresentationIsActionableWhenSuggestedSceneExists() {
+        let presentation = LumenNoticePresentation(
+            timeOfDay: .evening,
+            isAtHome: true,
+            reachableDevices: 3,
+            expectedSceneName: "Evening",
+            suggestedSceneName: "Evening"
+        )
+
+        XCTAssertTrue(presentation.isActionable)
+        XCTAssertEqual(presentation.suggestion, "Review Evening scene")
+        XCTAssertEqual(presentation.detail, "Confirm before anything changes")
+        XCTAssertEqual(presentation.iconName, "sparkles")
+    }
+
+    func testNoticePresentationExplainsMissingExpectedScene() {
+        let presentation = LumenNoticePresentation(
+            timeOfDay: .evening,
+            isAtHome: true,
+            reachableDevices: 3,
+            expectedSceneName: "Evening",
+            suggestedSceneName: nil
+        )
+
+        XCTAssertFalse(presentation.isActionable)
+        XCTAssertEqual(presentation.suggestion, "Evening scene not set up")
+        XCTAssertEqual(presentation.detail, "Signals available, no action queued")
+    }
+
+    func testNoticePresentationUsesInformationalStateWhenNoSceneExpected() {
+        let presentation = LumenNoticePresentation(
+            timeOfDay: .afternoon,
+            isAtHome: true,
+            reachableDevices: 0,
+            expectedSceneName: nil,
+            suggestedSceneName: nil
+        )
+
+        XCTAssertFalse(presentation.isActionable)
+        XCTAssertEqual(presentation.suggestion, "No scene suggested now")
+        XCTAssertEqual(presentation.detail, "Review the current signals")
+    }
+
+    func testNoticePresentationUsesAwayModeMessage() {
+        let presentation = LumenNoticePresentation(
+            timeOfDay: .night,
+            isAtHome: false,
+            reachableDevices: 1,
+            expectedSceneName: "Sleep",
+            suggestedSceneName: "Sleep"
+        )
+
+        XCTAssertEqual(presentation.message, "Away mode is active. Lumen is keeping the home state visible.")
+        XCTAssertEqual(presentation.iconName, "location.fill")
     }
 }

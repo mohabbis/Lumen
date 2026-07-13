@@ -14,8 +14,7 @@ struct HomeDashboardView: View {
     @Environment(LocationService.self) private var locationService
     @State private var isRenamingHome = false
     @State private var renameText = ""
-    @State private var isShowingReasoning = false
-    @State private var isShowingAction = false
+    @State private var lumenSheet: LumenDashboardSheet?
     @State private var statusOverlayID = UUID()
     @State private var isStatusOverlayVisible = false
 
@@ -66,39 +65,8 @@ struct HomeDashboardView: View {
                 viewModel.addRoom(name: name, type: type, level: level)
             }
         }
-        .sheet(isPresented: $isShowingReasoning) {
-            LumenReasoningView(
-                reasoning: reasoning,
-                onApply: { isShowingAction = true },
-                onDismiss: { isShowingReasoning = false }
-            )
-        }
-        .sheet(isPresented: $isShowingAction) {
-            if let sceneName = suggestedSceneName, let scene = findScene(named: sceneName) {
-                LumenActionView(
-                    scene: scene,
-                    onConfirm: { handleLumenSuggestion() },
-                    onCancel: { isShowingAction = false }
-                )
-            } else {
-                // Fallback if the suggested scene becomes unavailable mid-flow.
-                VStack(spacing: 12) {
-                    Text("Scene not available")
-                        .font(.title2)
-                        .foregroundStyle(.white)
-                    Button("Done") {
-                        isShowingAction = false
-                        isShowingReasoning = false
-                    }
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
-                    .background(Color(hex: "#C49A6C"), in: RoundedRectangle(cornerRadius: 18))
-                }
-                .padding(24)
-                .background(Color(hex: "#0E0819").ignoresSafeArea())
-            }
+        .sheet(item: $lumenSheet) { sheet in
+            lumenSheetContent(sheet)
         }
         .onAppear {
             viewModel.load()
@@ -355,10 +323,12 @@ struct HomeDashboardView: View {
 
             VStack(spacing: 8) {
                 LumenNoticedCard(
-                    message: noticedMessage,
-                    suggestion: noticedSuggestion,
-                    icon: "sparkles",
-                    action: { isShowingReasoning = true }
+                    message: noticePresentation.message,
+                    suggestion: noticePresentation.suggestion,
+                    detail: noticePresentation.detail,
+                    icon: noticePresentation.iconName,
+                    isActionable: noticePresentation.isActionable,
+                    action: { lumenSheet = .reasoning }
                 )
             }
         }
@@ -366,9 +336,62 @@ struct HomeDashboardView: View {
 
     // MARK: - Lumen Suggestion Handler
 
+    @ViewBuilder
+    private func lumenSheetContent(_ sheet: LumenDashboardSheet) -> some View {
+        switch sheet {
+        case .reasoning:
+            LumenReasoningView(
+                reasoning: reasoning,
+                onApply: reasoningApplyAction,
+                onDismiss: { lumenSheet = nil }
+            )
+        case .action:
+            lumenActionSheet
+        }
+    }
+
+    @ViewBuilder
+    private var lumenActionSheet: some View {
+        if let sceneName = suggestedSceneName, let scene = findScene(named: sceneName) {
+            LumenActionView(
+                scene: scene,
+                onConfirm: { handleLumenSuggestion() },
+                onCancel: { lumenSheet = nil }
+            )
+        } else {
+            // Fallback if the suggested scene becomes unavailable mid-flow.
+            VStack(spacing: 12) {
+                Text("Scene not available")
+                    .font(.title2)
+                    .foregroundStyle(.white)
+                Button("Done") {
+                    lumenSheet = nil
+                }
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundStyle(.white)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
+                .background(Color(hex: "#C49A6C"), in: RoundedRectangle(cornerRadius: 18))
+            }
+            .padding(24)
+            .background(Color(hex: "#0E0819").ignoresSafeArea())
+        }
+    }
+
+    private var reasoningApplyAction: (() -> Void)? {
+        if noticePresentation.isActionable {
+            return showLumenActionIfAvailable
+        }
+        return nil
+    }
+
+    private func showLumenActionIfAvailable() {
+        guard noticePresentation.isActionable else { return }
+        lumenSheet = .action
+    }
+
     private func handleLumenSuggestion() {
-        isShowingAction = false
-        isShowingReasoning = false
+        lumenSheet = nil
 
         // Execute the same scene the Action sheet displayed — single source of truth.
         if let sceneName = suggestedSceneName, let scene = findScene(named: sceneName) {
@@ -408,9 +431,30 @@ struct HomeDashboardView: View {
         ).topSuggestion()
     }
 
-    private var suggestedSceneName: String? {
-        guard let name = suggestion?.sceneName, findScene(named: name) != nil else { return nil }
+    private var expectedSceneName: String? {
+        if let name = suggestion?.sceneName {
+            return name
+        }
+
+        guard let name = defaultExpectedSceneName, findScene(named: name) == nil else {
+            return nil
+        }
+
         return name
+    }
+
+    private var defaultExpectedSceneName: String? {
+        switch timeOfDay {
+        case .dawn, .morning: return "Morning"
+        case .afternoon:      return nil
+        case .evening:        return "Evening"
+        case .night:          return "Sleep"
+        }
+    }
+
+    private var suggestedSceneName: String? {
+        guard let name = suggestion?.sceneName, let scene = findScene(named: name) else { return nil }
+        return scene.name
     }
 
     private var errorAlertBinding: Binding<Bool> {
@@ -427,35 +471,28 @@ struct HomeDashboardView: View {
             distanceToHome: locationService.distanceToHome,
             reachableDevices: viewModel.reachableDeviceCount,
             suggestedSceneName: suggestedSceneName,
+            expectedSceneName: expectedSceneName,
             confidence: suggestion?.confidence,
             habitRuns: suggestion?.habitRuns
         ).reasoning
     }
 
-    private var noticedMessage: String {
-        switch timeOfDay {
-        case .dawn:      return "It's early. Your home is quiet and the lights are dim."
-        case .morning:   return "Good morning. All devices are ready for the day."
-        case .afternoon: return "Afternoon light is bright. Consider lowering your shades."
-        case .evening:   return "Sunset detected. Warm lighting mode is available."
-        case .night:     return "Your home is winding down. All devices are in standby."
-        }
+    private var noticePresentation: LumenNoticePresentation {
+        LumenNoticePresentation(
+            timeOfDay: timeOfDay,
+            isAtHome: locationService.isAtHome,
+            reachableDevices: viewModel.reachableDeviceCount,
+            expectedSceneName: expectedSceneName,
+            suggestedSceneName: suggestedSceneName
+        )
     }
+}
 
-    private var noticedSuggestion: String {
-        // Prefer the scored engine's actual pick so the card, the reasoning
-        // list, and the Action sheet all name the same scene.
-        if let name = suggestedSceneName {
-            return "Run \(name) scene"
-        }
-        switch timeOfDay {
-        case .dawn:      return "Run Morning scene"
-        case .morning:   return "Check room status"
-        case .afternoon: return "Adjust brightness"
-        case .evening:   return "Run Evening scene"
-        case .night:     return "Prepare night mode"
-        }
-    }
+private enum LumenDashboardSheet: String, Identifiable {
+    case reasoning
+    case action
+
+    var id: String { rawValue }
 }
 
 private struct StatusOverlay: View {
@@ -508,7 +545,9 @@ private struct StatusOverlay: View {
 private struct LumenNoticedCard: View {
     let message: String
     let suggestion: String
+    let detail: String
     let icon: String
+    let isActionable: Bool
     let action: () -> Void
 
     var body: some View {
@@ -534,14 +573,14 @@ private struct LumenNoticedCard: View {
                         Text(suggestion)
                             .font(.system(size: 13, weight: .medium))
                             .foregroundStyle(Color.white.opacity(0.6))
-                        Text("Suggested by Lumen")
+                        Text(detail)
                             .font(.system(size: 11))
                             .foregroundStyle(Color.white.opacity(0.28))
                     }
                     Spacer()
-                    Image(systemName: "chevron.right")
+                    Image(systemName: isActionable ? "chevron.right" : "info.circle")
                         .font(.system(size: 12, weight: .semibold))
-                        .foregroundStyle(Color(hex: "#C49A6C"))
+                        .foregroundStyle(isActionable ? Color(hex: "#C49A6C") : Color.white.opacity(0.35))
                 }
             }
             .padding(18)
