@@ -2,7 +2,7 @@
 
 Last updated: June 2026.
 
-Lumen is a solo/small-team indie iOS project (team `CU67F9EY3Q`, bundle ID `com.muhome.app`). This roadmap is intentionally conservative — phases can slip, and that's fine; shipping a calm, trustworthy app matters more than hitting a date.
+Lumen is a solo/small-team indie iOS project (team `CU67F9EY3Q`, bundle ID `com.muharafiq.lumen`). This roadmap is intentionally conservative — phases can slip, and that's fine; shipping a calm, trustworthy app matters more than hitting a date.
 
 ## Phase 1 — Close out the "Not yet" list (June – August 2026)
 

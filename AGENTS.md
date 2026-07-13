@@ -45,7 +45,7 @@ xcodebuild test -project Lumen.xcodeproj -scheme Lumen \
   -destination 'platform=iOS Simulator,name=iPhone 17 Pro Max'
 ```
 
-**Easier path:** open `Lumen.xcodeproj` in Xcode and press **Cmd+R** with a simulator selected. Signing is set to automatic (team `CU67F9EY3Q`, bundle ID `com.muhome.app`); the simulator does not need provisioning.
+**Easier path:** open `Lumen.xcodeproj` in Xcode and press **Cmd+R** with a simulator selected. Signing is set to automatic (team `CU67F9EY3Q`, bundle ID `com.muharafiq.lumen`); the simulator does not need provisioning.
 
 **Note:** `xcodebuild` CLI builds fail with a "database is locked" error while Xcode is open on the same project. Close Xcode first or build from inside Xcode directly.
 
@@ -147,7 +147,7 @@ The "Lumen noticed" dashboard suggestion is produced by `SuggestionEngine`, a pu
 
 - Schema is versioned in `LumenSchema.swift`: `LumenSchemaV1` → `V2` → `V3`, with a lightweight `LumenSchemaMigrationPlan`. `PersistenceCoordinator` always uses `LumenSchemaV3`.
 - The registered `@Model` types (identical across V1–V3 except `ExecutionEvent`, added in V2) are: `Home`, `Room`, `Zone`, `PlannedDevice`, `Scene`, `SceneAction`, `RemoteProfile`, `IRCommand`, `ExecutionEvent`. V2→V3 only drops `@Attribute(.unique)` from `id` fields for CloudKit compatibility; `Home.latitude`/`longitude`, and later `RemoteProfile.transportKindRaw`/`broadlinkMAC`/`broadlinkDeviceType`, were added via SwiftData's inferred nullable-column migration (no new version).
-- CloudKit sync is **off** (`PersistenceCoordinator.enableCloudKitSync = false`). The flag is guarded by a test (`PersistenceTests.testCloudKitSyncIsGatedOffForBeta`). Flip only after provisioning `iCloud.com.muhome.app` in the Apple Developer portal.
+- CloudKit sync is **off** (`PersistenceCoordinator.enableCloudKitSync = false`). The flag is guarded by a test (`PersistenceTests.testCloudKitSyncIsGatedOffForBeta`). Flip only after provisioning `iCloud.com.muharafiq.lumen` in the Apple Developer portal.
 - The old `MuhomeDataModels.swift` / `SceneModels.swift` legacy-struct files (`MuhaScene`, `MuhaSceneRecord`, etc.) have been **removed**. `TimeOfDay` — the one enum from that era still in use — now lives in its own file, `Lumen/Models/TimeOfDay.swift`. There is no dead legacy schema to avoid anymore.
 
 #### Data models & their homes

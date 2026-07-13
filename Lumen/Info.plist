@@ -21,7 +21,7 @@
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>NSHomeKitUsageDescription</key>
-	<string>Lumen uses HomeKit to discover and control your smart home devices.</string>
+	<string>Lumen uses HomeKit to discover and control accessories you choose to connect, so it can show rooms, devices, scenes, and approval-based routines.</string>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>Lumen controls your smart home accessories over your local network: through Apple Home, and by sending IR codes directly to a bridge you configure. Changes stay on-device with no Lumen cloud in between.</string>
 	<key>NSAppTransportSecurity</key>
@@ -30,9 +30,9 @@
 		<true/>
 	</dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Lumen uses your location to detect when you're home and show "Welcome Home" greeting.</string>
+	<string>Lumen uses your location to understand whether you are home or away and show relevant home status in the app.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Lumen uses your location to detect when you're home and provide location-aware automation.</string>
+	<string>Lumen uses background location to detect home arrival and departure so configured scene routines and local alerts can respond to those changes.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>

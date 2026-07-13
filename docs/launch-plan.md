@@ -16,7 +16,7 @@ The beta scope is intentionally narrow:
 
 | Area | Status | Launch decision |
 | --- | --- | --- |
-| Bundle identity | `com.muhome.app`, version `1.0`, build `7` | Ready for App Store Connect setup |
+| Bundle identity | `com.muharafiq.lumen`, version `1.0`, build `7` | Ready for App Store Connect setup |
 | Minimum OS | iOS 17.0 in Xcode project | Market as iOS 17+ |
 | Local preview | Enabled by default | Primary demo and reviewer path |
 | HomeKit | Entitlement present; discovery and control implemented | Beta-supported with real-home testing |
@@ -32,7 +32,7 @@ Internal TestFlight can start when:
 
 - `xcodebuild test -project Lumen.xcodeproj -scheme Lumen -destination 'platform=iOS Simulator,name=iPhone 17 Pro Max'` passes from a clean checkout.
 - A simulator smoke test covers first launch, local preview dashboard, scene approval, reasoning sheet, and settings.
-- App Store Connect has the `com.muhome.app` record, HomeKit capability, privacy labels, and beta app information.
+- App Store Connect has the `com.muharafiq.lumen` record, HomeKit capability, privacy labels, and beta app information.
 - The first tester guide explains local preview first, then HomeKit connection.
 - Screenshots exist for dashboard, scene approval, reasoning view, settings, and HomeKit discovery.
 

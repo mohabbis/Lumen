@@ -22,7 +22,7 @@ final class LocationService: NSObject, CLLocationManagerDelegate {
 
     private let locationManager = CLLocationManager()
     private let homeRadiusMeter: Double = 100 // 100m radius around home
-    nonisolated static let homeRegionIdentifier = "com.muhome.app.home"
+    nonisolated static let homeRegionIdentifier = "com.muharafiq.lumen.home"
     private var homeRegion: CLCircularRegion?
 
     override init() {
