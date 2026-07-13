@@ -52,7 +52,7 @@ const calmPillars = [
     glyph: '♥',
     title: 'waits for your tap',
     description:
-      'Nothing runs on its own. A second sheet lists exactly what will change. Lights, locks, and scenes fire only after you approve.',
+      'Suggestions always ask first. A second sheet lists exactly what will change. Scene taps, locks, and ambient Apply wait for your approval — only opted-in arrival or departure scenes can run on their own, with a notification.',
   },
 ];
 

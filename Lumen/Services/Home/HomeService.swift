@@ -77,6 +77,18 @@ final class HomeService {
         try modelContext.save()
     }
 
+    /// Persists the home geofence center on the SwiftData `Home` record.
+    /// Callers should also forward the same coords to `LocationService.updateHomeCoordinates`.
+    func updateCoordinates(_ home: Home, latitude: Double, longitude: Double) throws {
+        guard (-90...90).contains(latitude), (-180...180).contains(longitude) else {
+            throw AppError.invalidConfiguration(reason: "Home coordinates are out of range.")
+        }
+        home.latitude = latitude
+        home.longitude = longitude
+        home.updatedAt = Date()
+        try modelContext.save()
+    }
+
     func deleteHome(_ home: Home) throws {
         let wasPrimary = home.isPrimary
         modelContext.delete(home)

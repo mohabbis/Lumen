@@ -54,6 +54,27 @@ final class HomeServiceTests: XCTestCase {
         XCTAssertEqual(home.name, "Stable")
     }
 
+    // MARK: - updateCoordinates
+
+    func testUpdateCoordinatesPersistsLatLong() throws {
+        let (service, _) = makeService()
+        let home = try service.createHome(name: "Geo")
+        XCTAssertNil(home.latitude)
+        XCTAssertNil(home.longitude)
+
+        try service.updateCoordinates(home, latitude: 42.28, longitude: -83.74)
+
+        XCTAssertEqual(home.latitude!, 42.28, accuracy: 0.0001)
+        XCTAssertEqual(home.longitude!, -83.74, accuracy: 0.0001)
+    }
+
+    func testUpdateCoordinatesRejectsOutOfRange() throws {
+        let (service, _) = makeService()
+        let home = try service.createHome(name: "Geo")
+        XCTAssertThrowsError(try service.updateCoordinates(home, latitude: 120, longitude: 0))
+        XCTAssertNil(home.latitude)
+    }
+
     // MARK: - load
 
     func testLoadPromotesFirstHomeWhenNoPrimaryFlag() throws {
