@@ -13,3 +13,14 @@ global.IntersectionObserver = class {
   unobserve() {}
   disconnect() {}
 };
+
+global.matchMedia = global.matchMedia || function matchMedia(query) {
+  return {
+    matches: false,
+    media: query,
+    addEventListener() {},
+    removeEventListener() {},
+    addListener() {},
+    removeListener() {},
+  };
+};

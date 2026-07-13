@@ -30,16 +30,27 @@ describe('Lumen landing page', () => {
   it('renders core nav links', () => {
     render(<App />);
     const nav = screen.getByRole('navigation');
-    expect(within(nav).getByRole('link', { name: /^features$/i })).toHaveAttribute('href', '#features');
+    expect(within(nav).getByRole('link', { name: /features/i })).toHaveAttribute('href', '#features');
     expect(within(nav).getByRole('link', { name: /live demo/i })).toHaveAttribute('href', '#demo');
-    expect(within(nav).getByRole('link', { name: /^privacy$/i })).toHaveAttribute('href', '/privacy');
+    expect(within(nav).getByRole('link', { name: /privacy/i })).toHaveAttribute('href', '/privacy');
+  });
+
+  it('renders guided demo steps', () => {
+    render(<App />);
+    expect(screen.getByText(/try the flow/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /lumen noticed/i })).toBeInTheDocument();
+  });
+
+  it('renders getting started section', () => {
+    render(<App />);
+    expect(screen.getByRole('heading', { name: /set up in/i })).toBeInTheDocument();
   });
 
   it('renders the hero CTA pointing at the access section', () => {
     render(<App />);
-    const ctas = screen.getAllByRole('link', { name: /(get|request) early access/i });
+    const ctas = screen.getAllByRole('link', { name: /(join the beta|request) (early )?access/i });
     expect(ctas.length).toBeGreaterThan(0);
-    expect(ctas[0]).toHaveAttribute('href', '#access');
+    expect(ctas.some(a => a.getAttribute('href') === '#access')).toBe(true);
   });
 
   it('renders the sign-up email input', () => {

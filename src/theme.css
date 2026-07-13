@@ -386,6 +386,40 @@ html[data-theme='light'] .signup-platform {
   color: var(--text-faint);
 }
 
+html[data-theme='light'] .guided-demo-step,
+html[data-theme='light'] .getting-started-steps,
+html[data-theme='light'] .ai-teaser-callout {
+  background: var(--bg-card);
+  border-color: var(--border-subtle);
+}
+
+html[data-theme='light'] .guided-demo-step.active {
+  background: rgba(80, 120, 220, 0.08);
+  border-color: var(--border-accent);
+}
+
+html[data-theme='light'] .guided-demo-text b,
+html[data-theme='light'] .getting-started-text b,
+html[data-theme='light'] .ai-teaser-callout b {
+  color: var(--text-primary);
+}
+
+html[data-theme='light'] .guided-demo-text span,
+html[data-theme='light'] .getting-started-text span,
+html[data-theme='light'] .ai-teaser-callout span {
+  color: var(--text-muted);
+}
+
+html[data-theme='light'] .getting-started-cta,
+html[data-theme='light'] .hero-testflight a,
+html[data-theme='light'] .signup-testflight a {
+  color: var(--accent-gold);
+}
+
+html[data-theme='light'] .mobile-demo-fab {
+  color: var(--cta-text);
+}
+
 .theme-toggle {
   display: inline-flex;
   align-items: center;

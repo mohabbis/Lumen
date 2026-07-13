@@ -11,7 +11,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "e2e": "playwright test",
-    "ci": "npm run lint && npm run test && npm run build"
+    "ci": "npm run lint && npm run test && npm run build && npm run e2e"
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",
