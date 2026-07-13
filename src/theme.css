@@ -355,6 +355,37 @@ html[data-theme='light'] .feature-demo-link {
   color: var(--accent-warm);
 }
 
+html[data-theme='light'] .calm-pillar-card,
+html[data-theme='light'] .app-showcase-highlight {
+  background: var(--bg-card);
+  border-color: var(--border-subtle);
+}
+
+html[data-theme='light'] .calm-pillar-card h3,
+html[data-theme='light'] .app-showcase-highlight {
+  color: var(--text-primary);
+}
+
+html[data-theme='light'] .calm-pillar-card p {
+  color: var(--text-muted);
+}
+
+html[data-theme='light'] .app-showcase-cta {
+  border-color: var(--border-accent);
+  background: rgba(80, 120, 220, 0.08);
+  color: var(--accent-gold);
+}
+
+html[data-theme='light'] .demo-live-badge {
+  border-color: rgba(60, 160, 110, 0.3);
+  background: rgba(60, 160, 110, 0.08);
+  color: #2d7a52;
+}
+
+html[data-theme='light'] .signup-platform {
+  color: var(--text-faint);
+}
+
 .theme-toggle {
   display: inline-flex;
   align-items: center;

@@ -1,29 +1,21 @@
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
-  Activity, Apple, ArrowRight, Blinds, Brain, Check, DoorClosed, Droplets, Eye, Hand, Home, Lightbulb, Lock,
-  Mail, Menu, MessageCircle, Moon, Send, Sparkle, Sparkles, Sun, SunMedium, Thermometer, X, Zap,
+  Activity, Apple, ArrowRight, Blinds, Check, DoorClosed, Droplets, Home, Lightbulb, Lock,
+  Mail, Menu, Moon, Send, Sparkle, Sun, SunMedium, Thermometer, X, Zap,
 } from 'lucide-react';
 import { PhoneProvider, InteractivePhone, usePhone } from './InteractivePhone.jsx';
 import { submitWaitlist } from './waitlistSubmit.js';
 import {
+  BuiltForCalmSection,
+  AppShowcaseSection,
   FeaturesOverviewSection,
   RhythmFeatureSection,
   ScenesFeatureSection,
   DevicesFeatureSection,
-  RoomsFeatureSection,
-  PresenceFeatureSection,
-  MoreCapabilitiesSection,
-  PlatformsSection,
 } from './FeatureSections.jsx';
 import './theme.css';
 import './App.css';
-
-const aiCallouts = [
-  { icon: MessageCircle, label: 'Plain language', sub: 'Say it your way' },
-  { icon: Sparkles, label: 'Lumen proposes', sub: 'Never acts on its own' },
-  { icon: Zap, label: 'You decide', sub: 'One tap to approve' },
-];
 
 const supportedCategories = [
   { label: 'Lights', icon: Lightbulb },
@@ -37,29 +29,6 @@ const supportedCategories = [
 ];
 
 const exampleBrands = ['Philips Hue', 'Eve', 'Aqara', 'Nanoleaf', 'Matter-enabled Cync'];
-
-const calmPrinciples = [
-  {
-    icon: Brain,
-    headline: 'Low cognitive load',
-    description: 'One gentle suggestion at a time. No dense grids of toggles fighting for attention.',
-  },
-  {
-    icon: Hand,
-    headline: 'Consent before action',
-    description: 'Lumen proposes. You read the reasoning, see what will change, and approve.',
-  },
-  {
-    icon: Eye,
-    headline: 'Sensory-aware rhythm',
-    description: 'Morning and evening blocks that match how your day actually feels, not alarm clocks.',
-  },
-  {
-    icon: Sparkle,
-    headline: 'Plain language',
-    description: 'Every suggestion shows its signals in words you can question or dismiss.',
-  },
-];
 
 const actionFlowModes = [
   {
@@ -97,8 +66,6 @@ function resolveTheme() {
   if (typeof window === 'undefined') return 'dark';
   const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
   if (stored === 'light' || stored === 'dark') return stored;
-  // Dark-first: the calm, high-contrast look is the intended first impression.
-  // Visitors can still switch to light, and that choice is remembered.
   return 'dark';
 }
 
@@ -209,62 +176,26 @@ function HeroCopy() {
     <FadeIn className="hero-copy">
       <div className="pill">
         <span />
-        Calm home companion
+        Now in private beta
       </div>
-      <h1>Your home,<br /><em>understood.</em></h1>
+      <h1>when your home shifts,<br /><em>you stay calm.</em></h1>
       <p className="hero-lede">
-        Smart home apps can feel loud. Lumen notices the moment, explains why,
-        and waits for your tap before anything changes.
+        Lumen reads the moment — time, presence, your devices — and surfaces one
+        gentle suggestion. You read why, approve what changes, nothing runs on its own.
       </p>
-      <p className="hero-hint">{phone.hint}</p>
       <div className="hero-actions">
         <a className="primary" href="#access">
-          Get early access <ArrowRight size={15} />
+          Join the beta <ArrowRight size={15} />
         </a>
         <a className="secondary" href="#flow">
           See how it works
         </a>
       </div>
       <p className="hero-platform-note">
-        <Apple size={13} /> Private iOS beta · invite by TestFlight · free
+        <Apple size={13} /> iPhone &amp; iPad · TestFlight · free
       </p>
+      <p className="hero-hint">{phone.hint}</p>
     </FadeIn>
-  );
-}
-
-function WhyLumenSection() {
-  const sectionRef = useRef(null);
-  useAmbientRegion(sectionRef, '150,130,250');
-
-  return (
-    <section className="why-lumen-section surface-alt" id="why" ref={sectionRef}>
-      <FadeIn className="section-copy centered">
-        <p className="eyebrow">Why Lumen</p>
-        <h2>Calm enough<br /><em>to stay open.</em></h2>
-        <p className="section-note">
-          HomeKit dashboards pack every toggle onto one screen. Lumen brings
-          low-stress clarity to your home. The design is focused. The welcome is open.
-        </p>
-      </FadeIn>
-      <div className="calm-principles-grid">
-        {calmPrinciples.map(({ icon: Icon, headline, description }, i) => (
-          <FadeIn key={headline} delay={i * 0.06}>
-            <div className="calm-principle-card">
-              <div className="calm-principle-icon"><Icon size={18} /></div>
-              <b>{headline}</b>
-              <p>{description}</p>
-            </div>
-          </FadeIn>
-        ))}
-      </div>
-      <FadeIn className="why-lumen-contrast centered">
-        <p>
-          Lumen is not a tinkerer tool or a power-user controller. Anyone can use it.
-          Building for calm first just makes it easier to keep open than dashboards
-          built for everyone and optimised for no one.
-        </p>
-      </FadeIn>
-    </section>
   );
 }
 
@@ -275,12 +206,15 @@ function CompatibilitySection() {
   return (
     <section className="app-tour-section compat-section" id="product" ref={sectionRef}>
       <FadeIn className="section-copy centered">
-        <p className="eyebrow">Works with your home</p>
-        <h2>Your Apple Home,<br /><em>HomeKit &amp; Matter.</em></h2>
-        <p className="section-note">Lumen controls whatever lives in your Apple Home: every HomeKit accessory, plus the Matter ones you have added. No extra hubs, no brand logins.</p>
+        <p className="eyebrow">works with your home</p>
+        <h2>your Apple Home,<br /><em>HomeKit &amp; Matter.</em></h2>
+        <p className="section-note">
+          Lumen controls whatever lives in your Apple Home: every HomeKit accessory,
+          plus the Matter ones you have added. No extra hubs, no brand logins.
+        </p>
       </FadeIn>
       <FadeIn className="capability-chips-wrap">
-        <p className="eyebrow">Controls these accessories</p>
+        <p className="eyebrow">controls these accessories</p>
         <div className="capability-chips">
           {supportedCategories.map(({ label, icon: Icon }) => (
             <span className="capability-chip" key={label}>
@@ -300,7 +234,8 @@ function CompatibilitySection() {
           ))}
         </p>
         <p className="compat-note">
-          Lumen rides on Apple Home instead of each brand cloud. The calm rhythm layer keeps working with no smart hardware at all.
+          Lumen rides on Apple Home instead of each brand cloud. The calm rhythm layer
+          keeps working with no smart hardware at all.
         </p>
       </FadeIn>
     </section>
@@ -326,12 +261,12 @@ function ActionFlowSection() {
   return (
     <section className="action-flow-section" id="flow" ref={sectionRef}>
       <FadeIn className="section-copy centered">
-        <p className="eyebrow">How Lumen thinks</p>
-        <h2>The same calm loop,<br /><em>every suggestion.</em></h2>
+        <p className="eyebrow">how lumen thinks</p>
+        <h2>the same calm loop,<br /><em>every suggestion.</em></h2>
         <p className="section-note">
           {phone.touched
-            ? 'The cards below follow what you are doing in the phone.'
-            : 'Use the phone above, or watch the loop cycle on its own.'}
+            ? 'The cards below follow what you are doing in the live demo.'
+            : 'Tap through the iPhone demo above, or watch the loop cycle on its own.'}
         </p>
       </FadeIn>
       <div className="flow-row">
@@ -345,38 +280,6 @@ function ActionFlowSection() {
             </div>
           </FadeIn>
         ))}
-      </div>
-    </section>
-  );
-}
-
-function AIChatSection() {
-  const sectionRef = useRef(null);
-  useAmbientRegion(sectionRef, '150,130,250');
-
-  return (
-    <section className="ai-chat-section surface-alt" id="ai" ref={sectionRef}>
-      <div className="ai-chat-inner">
-        <FadeIn className="ai-chat-copy">
-          <p className="eyebrow">Coming soon · Built-in AI</p>
-          <h2>Describe it.<br /><em>You approve it.</em></h2>
-          <p className="ai-chat-lede">
-            A conversational layer is on the way. Describe what you want in
-            plain language, and Lumen proposes the scene, shows its
-            reasoning, and waits for your tap.
-          </p>
-          <div className="ai-callouts">
-            {aiCallouts.map(({ icon: Icon, label, sub }) => (
-              <div className="ai-callout" key={label}>
-                <Icon size={16} />
-                <div>
-                  <b>{label}</b>
-                  <span>{sub}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </FadeIn>
       </div>
     </section>
   );
@@ -412,11 +315,11 @@ function Waitlist() {
       <FadeIn className="signup-card">
         <div className="signup-head">
           <div className="signup-logo"><SunMedium size={20} /></div>
-          <p className="eyebrow">Get Lumen</p>
-          <h2>Set up your <em>calm home</em>.</h2>
+          <p className="eyebrow">open beta</p>
+          <h2>try <em>lumen.</em></h2>
           <p className="signup-sub">
-            Getting started takes one step. Join the private iOS beta — open to everyone,
-            no spam, no fake urgency.
+            We&apos;re inviting testers now. Free to install via TestFlight — open to everyone,
+            no spam, no strings.
           </p>
         </div>
 
@@ -449,6 +352,8 @@ function Waitlist() {
           <span><Check size={12} /> Open to everyone</span>
           <span><Check size={12} /> No spam</span>
         </div>
+
+        <p className="signup-platform">Requires iPhone · iOS 17 or later</p>
 
         {status === 'success' && (
           <p className="form-note">You&apos;re in. We&apos;ll email your TestFlight invite when a spot opens.</p>
@@ -484,8 +389,8 @@ function SiteShell() {
             </a>
             <div className="links">
               <a href="#features">Features</a>
+              <a href="#demo">Live demo</a>
               <a href="#flow">How it works</a>
-              <a href="#ai">AI</a>
               <a href="/privacy">Privacy</a>
             </div>
             <div className="nav-actions">
@@ -511,12 +416,9 @@ function SiteShell() {
           {menuOpen && (
             <div className="mobile-menu" onClick={close}>
               <div className="mobile-menu-inner" onClick={e => e.stopPropagation()}>
+                <a href="#demo" onClick={close}>Live demo</a>
                 <a href="#features" onClick={close}>Features</a>
-                <a href="#rhythm" onClick={close}>Rhythm</a>
-                <a href="#scenes" onClick={close}>Scenes</a>
-                <a href="#devices" onClick={close}>Devices</a>
                 <a href="#flow" onClick={close}>How it works</a>
-                <a href="#ai" onClick={close}>AI</a>
                 <a href="/privacy" onClick={close} className="privacy-link">Privacy</a>
                 <a href="#access" onClick={close} className="mobile-cta">
                   Request Access <ArrowRight size={14} />
@@ -525,27 +427,29 @@ function SiteShell() {
             </div>
           )}
 
-          <section className="hero" id="top">
+          <section className="hero hero-split" id="top">
             <div className="hero-bg" />
-            <HeroCopy />
-            <div className="hero-demo">
-              <div className="hero-glow" />
-              <InteractivePhone />
+            <div className="hero-inner">
+              <HeroCopy />
+              <div className="hero-demo" id="demo">
+                <div className="demo-live-badge">
+                  <span className="demo-live-dot" />
+                  Live interactive demo
+                </div>
+                <div className="hero-glow" />
+                <InteractivePhone />
+              </div>
             </div>
           </section>
 
-          <WhyLumenSection />
+          <BuiltForCalmSection />
+          <AppShowcaseSection />
           <FeaturesOverviewSection />
           <RhythmFeatureSection />
           <ScenesFeatureSection />
           <DevicesFeatureSection />
-          <RoomsFeatureSection />
-          <PresenceFeatureSection />
           <CompatibilitySection />
           <ActionFlowSection />
-          <MoreCapabilitiesSection />
-          <PlatformsSection />
-          <AIChatSection />
           <Waitlist />
 
           <footer className="site-footer">
@@ -557,6 +461,7 @@ function SiteShell() {
               <a href="#access" className="footer-cta">
                 Request Early Access <ArrowRight size={13} />
               </a>
+              <a href="#demo">Live demo</a>
               <a href="/privacy">Privacy</a>
               <a href="https://github.com/mohabbis/lumen" target="_blank" rel="noopener noreferrer">GitHub</a>
               <a href="mailto:m.rafiq2006@icloud.com">Contact</a>

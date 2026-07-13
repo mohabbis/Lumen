@@ -7,12 +7,13 @@ describe('Lumen landing page', () => {
   it('renders the hero heading', () => {
     render(<App />);
     const h1 = screen.getByRole('heading', { level: 1 });
-    expect(h1).toHaveTextContent(/your home/i);
+    expect(h1).toHaveTextContent(/when your home shifts/i);
+    expect(h1).toHaveTextContent(/you stay calm/i);
   });
 
-  it('renders the calm hero pill', () => {
+  it('renders the beta pill', () => {
     render(<App />);
-    expect(screen.getByText(/calm home companion/i)).toBeInTheDocument();
+    expect(screen.getByText(/now in private beta/i)).toBeInTheDocument();
   });
 
   it('renders a light/dark theme toggle', () => {
@@ -22,7 +23,7 @@ describe('Lumen landing page', () => {
 
   it('states calm consent-first positioning', () => {
     render(<App />);
-    expect(screen.getByText(/waits for your tap before anything changes/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/nothing runs on its own/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/open to everyone/i).length).toBeGreaterThan(0);
   });
 
@@ -30,7 +31,7 @@ describe('Lumen landing page', () => {
     render(<App />);
     const nav = screen.getByRole('navigation');
     expect(within(nav).getByRole('link', { name: /^features$/i })).toHaveAttribute('href', '#features');
-    expect(within(nav).getByRole('link', { name: /^ai$/i })).toHaveAttribute('href', '#ai');
+    expect(within(nav).getByRole('link', { name: /live demo/i })).toHaveAttribute('href', '#demo');
     expect(within(nav).getByRole('link', { name: /^privacy$/i })).toHaveAttribute('href', '/privacy');
   });
 
@@ -62,8 +63,9 @@ describe('Lumen landing page', () => {
     expect(screen.getByRole('button', { name: /continue/i })).toBeInTheDocument();
   });
 
-  it('renders interactive phone tabs', () => {
+  it('renders the live interactive demo', () => {
     render(<App />);
+    expect(screen.getByText(/live interactive demo/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /auto tab/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /home tab/i })).toBeInTheDocument();
   });
