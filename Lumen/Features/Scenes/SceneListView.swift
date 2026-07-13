@@ -9,8 +9,12 @@ struct SceneListView: View {
     @Query(sort: \Scene.sortOrder) private var scenes: [Scene]
     @State private var newSceneName = ""
     @Environment(\.horizontalSizeClass) private var sizeClass
+    @FocusState private var isSceneNameFocused: Bool
 
     private var isIPad: Bool { sizeClass == .regular }
+    private var trimmedSceneName: String {
+        newSceneName.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
 
     var body: some View {
         ZStack {
@@ -162,10 +166,17 @@ struct SceneListView: View {
             Form {
                 Section {
                     TextField("Scene Name", text: $newSceneName)
+                        .textInputAutocapitalization(.words)
+                        .focused($isSceneNameFocused)
+                        .submitLabel(.done)
+                        .onSubmit(addScene)
+                } footer: {
+                    Text("Use an intent name like Evening or Away. Scene runs still open the approval sheet before anything changes.")
                 }
             }
             .navigationTitle("New Scene")
             .navigationBarTitleDisplayMode(.inline)
+            .scrollDismissesKeyboard(.interactively)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
@@ -174,15 +185,19 @@ struct SceneListView: View {
                     }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Add") {
-                        viewModel.createScene(name: newSceneName)
-                        newSceneName = ""
-                    }
-                    .disabled(newSceneName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    Button("Add", action: addScene)
+                        .disabled(trimmedSceneName.isEmpty)
                 }
             }
+            .onAppear { isSceneNameFocused = true }
         }
-        .presentationDetents([.height(200)])
+        .presentationDetents([.height(240)])
+    }
+
+    private func addScene() {
+        guard !trimmedSceneName.isEmpty else { return }
+        viewModel.createScene(name: trimmedSceneName)
+        newSceneName = ""
     }
 }
 
