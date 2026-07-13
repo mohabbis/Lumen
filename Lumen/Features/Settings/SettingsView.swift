@@ -25,6 +25,7 @@ struct SettingsView: View {
                 bridgesSection
                 remotesSection
                 preferencesSection
+                sensoryProfileSection
                 aboutSection
             }
             .padding(.horizontal, 20)
@@ -130,6 +131,53 @@ struct SettingsView: View {
         }
     }
 
+    // MARK: - Sensory Profile Section
+
+    private var sensoryProfileSection: some View {
+        @Bindable var state = appState
+
+        return SettingsDarkCard(title: "SENSORY PROFILE") {
+            VStack(spacing: 0) {
+                SettingsRow(label: "Profile", value: appState.sensoryProfile.summaryTitle, isLast: false)
+                SettingsToggleRow(label: "Calm Mode", isOn: $state.sensoryProfile.calmModeEnabled, isLast: false)
+                    .onChange(of: appState.sensoryProfile.calmModeEnabled) { _, enabled in
+                        if enabled {
+                            appState.sensoryProfile.applyCalmModeDefaults()
+                        }
+                    }
+                SettingsOptionRow(
+                    label: "Suggestions",
+                    selection: $state.sensoryProfile.suggestionCadence,
+                    options: SensorySuggestionCadence.allCases,
+                    title: \.title,
+                    isLast: false
+                )
+                SettingsOptionRow(
+                    label: "Motion",
+                    selection: $state.sensoryProfile.motionPreference,
+                    options: SensoryMotionPreference.allCases,
+                    title: \.title,
+                    isLast: false
+                )
+                SettingsOptionRow(
+                    label: "Contrast",
+                    selection: $state.sensoryProfile.contrastPreference,
+                    options: SensoryContrastPreference.allCases,
+                    title: \.title,
+                    isLast: false
+                )
+                SettingsStepperRow(
+                    label: "Transitions",
+                    value: $state.sensoryProfile.transitionWarningMinutes,
+                    range: 0...30,
+                    step: 5,
+                    displayValue: appState.sensoryProfile.transitionWarningLabel,
+                    isLast: true
+                )
+            }
+        }
+    }
+
     // MARK: - About Section
 
     private var aboutSection: some View {
@@ -143,6 +191,72 @@ struct SettingsView: View {
                 value: Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "–",
                 isLast: true
             )
+        }
+    }
+}
+
+// MARK: - Settings Option Row
+
+private struct SettingsOptionRow<Option: CaseIterable & Hashable & Identifiable>: View where Option.AllCases: RandomAccessCollection {
+    let label: String
+    @Binding var selection: Option
+    let options: Option.AllCases
+    let title: KeyPath<Option, String>
+    var isLast: Bool = false
+
+    var body: some View {
+        HStack {
+            Text(label)
+                .font(.system(size: 15))
+                .foregroundStyle(.white)
+            Spacer()
+            Picker(label, selection: $selection) {
+                ForEach(options, id: \.self) { option in
+                    Text(option[keyPath: title]).tag(option)
+                }
+            }
+            .tint(Color(hex: "#C49A6C"))
+            .labelsHidden()
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .overlay(alignment: .bottom) {
+            if !isLast {
+                Rectangle().fill(Color.white.opacity(0.06)).frame(height: 1).padding(.leading, 16)
+            }
+        }
+    }
+}
+
+// MARK: - Settings Stepper Row
+
+private struct SettingsStepperRow: View {
+    let label: String
+    @Binding var value: Int
+    let range: ClosedRange<Int>
+    let step: Int
+    let displayValue: String
+    var isLast: Bool = false
+
+    var body: some View {
+        Stepper(value: $value, in: range, step: step) {
+            HStack {
+                Text(label)
+                    .font(.system(size: 15))
+                    .foregroundStyle(.white)
+                Spacer()
+                Text(displayValue)
+                    .font(.system(size: 14))
+                    .foregroundStyle(Color.white.opacity(0.45))
+            }
+        }
+        .tint(Color(hex: "#C49A6C"))
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .overlay(alignment: .bottom) {
+            if !isLast {
+                Rectangle().fill(Color.white.opacity(0.06)).frame(height: 1).padding(.leading, 16)
+            }
         }
     }
 }

@@ -1,3 +1,4 @@
+import Foundation
 import SwiftUI
 import Observation
 
@@ -7,11 +8,22 @@ import Observation
 @MainActor
 @Observable
 final class AppState {
+    @ObservationIgnored private static let sensoryProfileDefaultsKey = "lumen.sensoryProfile.v1"
+    @ObservationIgnored private let userDefaults: UserDefaults
+
     var selectedTab: Tab = .home
     var isShowingOnboarding: Bool = false
     var enableLocalPreviewControls: Bool = true
     var showDebugDetails: Bool = false
     var hapticFeedbackEnabled: Bool = true
+    var sensoryProfile: SensoryProfile {
+        didSet { saveSensoryProfile() }
+    }
+
+    init(userDefaults: UserDefaults = .standard) {
+        self.userDefaults = userDefaults
+        self.sensoryProfile = Self.loadSensoryProfile(from: userDefaults)
+    }
 
     enum Tab: String, CaseIterable, Hashable {
         case home     = "Home"
@@ -31,5 +43,20 @@ final class AppState {
             case .settings: return "gearshape.fill"
             }
         }
+    }
+
+    private static func loadSensoryProfile(from userDefaults: UserDefaults) -> SensoryProfile {
+        guard
+            let data = userDefaults.data(forKey: sensoryProfileDefaultsKey),
+            let profile = try? JSONDecoder().decode(SensoryProfile.self, from: data)
+        else {
+            return .standard
+        }
+        return profile
+    }
+
+    private func saveSensoryProfile() {
+        guard let data = try? JSONEncoder().encode(sensoryProfile) else { return }
+        userDefaults.set(data, forKey: Self.sensoryProfileDefaultsKey)
     }
 }
