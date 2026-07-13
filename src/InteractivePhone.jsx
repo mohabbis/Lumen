@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import {
   Activity, BedDouble, ChevronRight, Home, Laptop, Lightbulb, Lock, Settings, Sofa, Sparkle, Sparkles, SunMedium, Thermometer, Utensils,
 } from 'lucide-react';
@@ -194,6 +194,42 @@ export function PhoneProvider({ children, onAmbientChange, onFlowModeChange }) {
     setSelectedRoom(name);
   }, [markTouched]);
 
+  const runGuidedStep = useCallback(stepId => {
+    markTouched();
+    setToast(null);
+    switch (stepId) {
+      case 'home':
+        setTab('Home');
+        setSheet(null);
+        setApprovalScene(null);
+        setSelectedRoom(null);
+        break;
+      case 'noticed':
+        setTab('Home');
+        setSheet('reasoning');
+        setApprovalScene(null);
+        break;
+      case 'reasoning':
+        setTab('Home');
+        setSheet('reasoning');
+        setApprovalScene(null);
+        break;
+      case 'action':
+        setTab('Home');
+        setSheet('action');
+        setApprovalScene(null);
+        break;
+      case 'scenes':
+        setTab('Auto');
+        setApprovalScene(eveningScene);
+        setSheet('approval');
+        break;
+      default:
+        break;
+    }
+    document.getElementById('demo')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, [eveningScene, markTouched]);
+
   useEffect(() => {
     const ambient = sheet ? SHEET_AMBIENT[sheet] : TAB_AMBIENT[tab];
     onAmbientChange?.(ambient);
@@ -229,6 +265,7 @@ export function PhoneProvider({ children, onAmbientChange, onFlowModeChange }) {
     setBrightness,
     setColorTemp,
     markTouched,
+    runGuidedStep,
   };
 
   return <PhoneContext.Provider value={value}>{children}</PhoneContext.Provider>;
@@ -336,10 +373,25 @@ function DashboardScreen() {
   );
 }
 
+function SheetMotion({ children, className }) {
+  const reducedMotion = useReducedMotion();
+  return (
+    <motion.div
+      className={className}
+      initial={reducedMotion ? false : { y: '100%' }}
+      animate={{ y: 0 }}
+      exit={reducedMotion ? { opacity: 0 } : { y: '100%' }}
+      transition={reducedMotion ? { duration: 0.15 } : { type: 'spring', stiffness: 320, damping: 34 }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
 function ReasoningSheet() {
   const phone = usePhone();
   return (
-    <motion.div className="reason-sheet" initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ type: 'spring', stiffness: 320, damping: 34 }}>
+    <SheetMotion className="reason-sheet">
       <span className="sheet-handle" />
       <div className="sheet-icon"><Sparkles size={22} /></div>
       <p className="sheet-kicker">Why Lumen noticed</p>
@@ -356,14 +408,14 @@ function ReasoningSheet() {
       </div>
       <button type="button" className="sheet-apply" onClick={phone.openAction}>Apply Evening</button>
       <button type="button" className="sheet-dismiss" onClick={phone.dismissSheet}>Not now</button>
-    </motion.div>
+    </SheetMotion>
   );
 }
 
 function ActionConfirmationSheet({ scene }) {
   const phone = usePhone();
   return (
-    <motion.div className="reason-sheet" initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ type: 'spring', stiffness: 320, damping: 34 }}>
+    <SheetMotion className="reason-sheet">
       <span className="sheet-handle" />
       <div className="sheet-icon"><scene.icon size={22} /></div>
       <p className="sheet-kicker">Apply suggested scene</p>
@@ -379,14 +431,14 @@ function ActionConfirmationSheet({ scene }) {
       </div>
       <button type="button" className="sheet-apply" onClick={phone.applySuggestion}>Apply</button>
       <button type="button" className="sheet-dismiss" onClick={phone.dismissSheet}>Not now</button>
-    </motion.div>
+    </SheetMotion>
   );
 }
 
 function SceneApprovalSheet({ scene }) {
   const phone = usePhone();
   return (
-    <motion.div className="reason-sheet" initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ type: 'spring', stiffness: 320, damping: 34 }}>
+    <SheetMotion className="reason-sheet">
       <span className="sheet-handle" />
       <div className="sheet-icon"><scene.icon size={22} /></div>
       <p className="sheet-kicker">Apply scene</p>
@@ -402,7 +454,7 @@ function SceneApprovalSheet({ scene }) {
       </div>
       <button type="button" className="sheet-apply" onClick={phone.confirmScene}>Apply {scene.name}</button>
       <button type="button" className="sheet-dismiss" onClick={phone.dismissSheet}>Cancel</button>
-    </motion.div>
+    </SheetMotion>
   );
 }
 

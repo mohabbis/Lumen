@@ -1,23 +1,9 @@
-import { motion } from 'framer-motion';
 import {
   Activity, ArrowRight, MapPin, Shield,
   Smartphone, Sparkles, SunMedium, Tablet,
 } from 'lucide-react';
 import { usePhone } from './InteractivePhone.jsx';
-
-function FadeIn({ children, delay = 0, className = '' }) {
-  return (
-    <motion.div
-      className={className}
-      initial={{ opacity: 0, y: 18 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-60px' }}
-      transition={{ duration: 0.65, delay, ease: [0.21, 0.8, 0.32, 1] }}
-    >
-      {children}
-    </motion.div>
-  );
-}
+import { FadeIn } from './components/FadeIn.jsx';
 
 function DemoLink({ tab, label = 'Try in the phone' }) {
   const phone = usePhone();

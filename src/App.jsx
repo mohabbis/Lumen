@@ -1,11 +1,17 @@
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
-import { motion } from 'framer-motion';
 import {
-  Activity, Apple, ArrowRight, Blinds, Check, DoorClosed, Droplets, Home, Lightbulb, Lock,
-  Mail, Menu, Moon, Send, Sparkle, Sun, SunMedium, Thermometer, X, Zap,
+  Activity, Apple, ArrowRight, Blinds, Check, DoorClosed, Droplets, ExternalLink, Home, Lightbulb, Lock,
+  Mail, Menu, Moon, Sparkle, Sun, SunMedium, Thermometer, X, Zap,
 } from 'lucide-react';
 import { PhoneProvider, InteractivePhone, usePhone } from './InteractivePhone.jsx';
 import { submitWaitlist } from './waitlistSubmit.js';
+import { trackWaitlistEvent } from './waitlistAnalytics.js';
+import { TESTFLIGHT_URL } from './siteConfig.js';
+import { useReducedMotion } from './hooks/useReducedMotion.js';
+import { FadeIn } from './components/FadeIn.jsx';
+import { GuidedDemoSteps, MobileDemoFAB } from './components/GuidedDemoSteps.jsx';
+import { GettingStartedSection } from './components/GettingStartedSection.jsx';
+import { AIComingSoonSection } from './components/AIComingSoonSection.jsx';
 import {
   BuiltForCalmSection,
   AppShowcaseSection,
@@ -13,6 +19,9 @@ import {
   RhythmFeatureSection,
   ScenesFeatureSection,
   DevicesFeatureSection,
+  RoomsFeatureSection,
+  PresenceFeatureSection,
+  PlatformsSection,
 } from './FeatureSections.jsx';
 import './theme.css';
 import './App.css';
@@ -32,24 +41,28 @@ const exampleBrands = ['Philips Hue', 'Eve', 'Aqara', 'Nanoleaf', 'Matter-enable
 
 const actionFlowModes = [
   {
+    id: 'home',
     tag: 'Awareness',
     icon: Activity,
     headline: 'Notices the moment',
     description: 'Time of day, presence, and reachable devices are read quietly in the background.',
   },
   {
+    id: 'reasoning',
     tag: 'Reasoning',
     icon: Sparkle,
     headline: 'Explains the why',
     description: 'Signals turn into a plain language sheet you can read, question, or dismiss.',
   },
   {
+    id: 'action',
     tag: 'Action',
     icon: Lightbulb,
     headline: 'Shows what will change',
     description: 'A second sheet lists each device action and waits for your confirmation.',
   },
   {
+    id: 'scenes',
     tag: 'Execution',
     icon: Zap,
     headline: 'Runs when you approve',
@@ -156,20 +169,6 @@ function useAmbientRegion(ref, color) {
   }, [ref, setAmbient]);
 }
 
-function FadeIn({ children, delay = 0, className = '' }) {
-  return (
-    <motion.div
-      className={className}
-      initial={{ opacity: 0, y: 18 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-60px' }}
-      transition={{ duration: 0.65, delay, ease: [0.21, 0.8, 0.32, 1] }}
-    >
-      {children}
-    </motion.div>
-  );
-}
-
 function HeroCopy() {
   const phone = usePhone();
   return (
@@ -194,6 +193,13 @@ function HeroCopy() {
       <p className="hero-platform-note">
         <Apple size={13} /> iPhone &amp; iPad · TestFlight · free
       </p>
+      {TESTFLIGHT_URL ? (
+        <p className="hero-testflight">
+          <a href={TESTFLIGHT_URL} target="_blank" rel="noopener noreferrer">
+            Already invited? Open in TestFlight <ExternalLink size={12} />
+          </a>
+        </p>
+      ) : null}
       <p className="hero-hint">{phone.hint}</p>
     </FadeIn>
   );
@@ -244,6 +250,7 @@ function CompatibilitySection() {
 
 function ActionFlowSection() {
   const phone = usePhone();
+  const reducedMotion = useReducedMotion();
   const [idleActive, setIdleActive] = useState(0);
   const sectionRef = useRef(null);
   const active = phone.touched ? phone.flowMode : idleActive;
@@ -251,12 +258,14 @@ function ActionFlowSection() {
   useAmbientRegion(sectionRef, FLOW_AMBIENT[active]);
 
   useEffect(() => {
-    if (phone.touched) return undefined;
+    if (phone.touched || reducedMotion) return undefined;
     const id = setInterval(() => {
       setIdleActive(a => (a + 1) % actionFlowModes.length);
     }, FLOW_ADVANCE_MS);
     return () => clearInterval(id);
-  }, [phone.touched]);
+  }, [phone.touched, reducedMotion]);
+
+  const flowStepIds = ['home', 'reasoning', 'action', 'scenes'];
 
   return (
     <section className="action-flow-section" id="flow" ref={sectionRef}>
@@ -266,18 +275,22 @@ function ActionFlowSection() {
         <p className="section-note">
           {phone.touched
             ? 'The cards below follow what you are doing in the live demo.'
-            : 'Tap through the iPhone demo above, or watch the loop cycle on its own.'}
+            : 'Tap a card to drive the iPhone demo, or watch the loop cycle on its own.'}
         </p>
       </FadeIn>
       <div className="flow-row">
         {actionFlowModes.map(({ tag, icon: Icon, headline, description }, i) => (
           <FadeIn key={tag} delay={i * 0.06}>
-            <div className={`flow-card ${active === i ? 'active' : ''}`}>
+            <button
+              type="button"
+              className={`flow-card flow-card-btn ${active === i ? 'active' : ''}`}
+              onClick={() => phone.runGuidedStep(flowStepIds[i])}
+            >
               <div className="flow-card-top"><Icon size={16} /></div>
               <b className="flow-tag">{tag}</b>
               <span className="flow-headline">{headline}</span>
               <p className="flow-description">{description}</p>
-            </div>
+            </button>
           </FadeIn>
         ))}
       </div>
@@ -294,21 +307,18 @@ function Waitlist() {
     e.preventDefault();
     const email = new FormData(e.currentTarget).get('email');
     setStatus('loading');
+    trackWaitlistEvent('submit_start', { source: 'lumen-site' });
     try {
       const delivered = await submitWaitlist(email, 'lumen-site');
       if (!delivered) throw new Error('Waitlist submission failed');
       setStatus('success');
+      trackWaitlistEvent('submit_success', { source: 'lumen-site' });
       e.target.reset();
     } catch {
       setStatus('error');
+      trackWaitlistEvent('submit_error', { source: 'lumen-site' });
     }
   }
-
-  const steps = [
-    { icon: Mail, title: 'Enter your email', sub: 'One field. No account to create yet.' },
-    { icon: Send, title: 'Get your TestFlight invite', sub: 'We send an Apple TestFlight link when a spot opens.' },
-    { icon: Apple, title: 'Install on your iPhone', sub: 'Tap install and Lumen opens like any App Store app.' },
-  ];
 
   return (
     <section className="waitlist-section" id="access" ref={sectionRef}>
@@ -323,19 +333,6 @@ function Waitlist() {
           </p>
         </div>
 
-        <ol className="signup-steps">
-          {steps.map(({ icon: Icon, title, sub }, i) => (
-            <li className="signup-step" key={title}>
-              <span className="signup-step-num">{i + 1}</span>
-              <span className="signup-step-icon"><Icon size={16} /></span>
-              <span className="signup-step-text">
-                <b>{title}</b>
-                <span>{sub}</span>
-              </span>
-            </li>
-          ))}
-        </ol>
-
         <form className="waitlist-form" onSubmit={handleSubmit}>
           <div className="signup-field">
             <Mail size={15} className="signup-field-icon" />
@@ -346,6 +343,14 @@ function Waitlist() {
             <ArrowRight size={15} />
           </button>
         </form>
+
+        {TESTFLIGHT_URL ? (
+          <p className="signup-testflight">
+            <a href={TESTFLIGHT_URL} target="_blank" rel="noopener noreferrer">
+              Already have an invite? Open in TestFlight <ExternalLink size={12} />
+            </a>
+          </p>
+        ) : null}
 
         <div className="waitlist-checks">
           <span><Check size={12} /> Free during beta</span>
@@ -388,10 +393,10 @@ function SiteShell() {
               <span>LUMEN</span>
             </a>
             <div className="links">
-              <a href="#features">Features</a>
-              <a href="#demo">Live demo</a>
-              <a href="#flow">How it works</a>
-              <a href="/privacy">Privacy</a>
+              <a href="#features">features</a>
+              <a href="#demo">live demo</a>
+              <a href="#flow">how it works</a>
+              <a href="/privacy">privacy</a>
             </div>
             <div className="nav-actions">
               <button
@@ -402,7 +407,7 @@ function SiteShell() {
               >
                 {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
               </button>
-              <a href="#access">Request Access</a>
+              <a href="#access">request access</a>
               <button
                 aria-label={menuOpen ? 'Close menu' : 'Open menu'}
                 onClick={() => setMenuOpen(o => !o)}
@@ -416,12 +421,12 @@ function SiteShell() {
           {menuOpen && (
             <div className="mobile-menu" onClick={close}>
               <div className="mobile-menu-inner" onClick={e => e.stopPropagation()}>
-                <a href="#demo" onClick={close}>Live demo</a>
-                <a href="#features" onClick={close}>Features</a>
-                <a href="#flow" onClick={close}>How it works</a>
-                <a href="/privacy" onClick={close} className="privacy-link">Privacy</a>
+                <a href="#demo" onClick={close}>live demo</a>
+                <a href="#features" onClick={close}>features</a>
+                <a href="#flow" onClick={close}>how it works</a>
+                <a href="/privacy" onClick={close} className="privacy-link">privacy</a>
                 <a href="#access" onClick={close} className="mobile-cta">
-                  Request Access <ArrowRight size={14} />
+                  request access <ArrowRight size={14} />
                 </a>
               </div>
             </div>
@@ -438,6 +443,7 @@ function SiteShell() {
                 </div>
                 <div className="hero-glow" />
                 <InteractivePhone />
+                <GuidedDemoSteps />
               </div>
             </div>
           </section>
@@ -448,9 +454,16 @@ function SiteShell() {
           <RhythmFeatureSection />
           <ScenesFeatureSection />
           <DevicesFeatureSection />
+          <RoomsFeatureSection />
+          <PresenceFeatureSection />
           <CompatibilitySection />
           <ActionFlowSection />
+          <AIComingSoonSection />
+          <PlatformsSection />
+          <GettingStartedSection />
           <Waitlist />
+
+          <MobileDemoFAB />
 
           <footer className="site-footer">
             <a className="logo" href="#top">
@@ -459,12 +472,12 @@ function SiteShell() {
             <p>Calm by design · Open to everyone · Native iOS · Private beta</p>
             <div className="footer-links">
               <a href="#access" className="footer-cta">
-                Request Early Access <ArrowRight size={13} />
+                request early access <ArrowRight size={13} />
               </a>
-              <a href="#demo">Live demo</a>
-              <a href="/privacy">Privacy</a>
+              <a href="#demo">live demo</a>
+              <a href="/privacy">privacy</a>
               <a href="https://github.com/mohabbis/lumen" target="_blank" rel="noopener noreferrer">GitHub</a>
-              <a href="mailto:m.rafiq2006@icloud.com">Contact</a>
+              <a href="mailto:m.rafiq2006@icloud.com">contact</a>
             </div>
           </footer>
         </main>
