@@ -22,7 +22,7 @@ Scene execution is intentionally indirect:
 
 ## Local-First Behavior
 
-SwiftData stores homes, rooms, planned devices, scenes, and execution history locally. CloudKit sync is gated off until the `iCloud.com.muhome.app` container is provisioned and tested.
+SwiftData stores homes, rooms, planned devices, scenes, and execution history locally. CloudKit sync is gated off until the `iCloud.com.muharafiq.lumen` container is provisioned and tested.
 
 ## Hardware Boundaries
 

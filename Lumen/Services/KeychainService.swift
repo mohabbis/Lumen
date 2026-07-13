@@ -89,3 +89,19 @@ final class KeychainService {
         (try? retrieve(forKey: key)) != nil
     }
 }
+
+// MARK: - Well-known Keys
+
+extension KeychainService {
+    enum Keys {
+        static let goveeApiKey       = "lumen.govee.apiKey"
+        static let kasaUsername      = "lumen.kasa.username"
+        static let kasaPassword      = "lumen.kasa.password"
+        static let homebridgeBaseURL = "lumen.homebridge.baseURL"
+        static let homebridgeToken   = "lumen.homebridge.token"
+        static let hueApiKey             = "lumen.hue.apiKey"
+        static let hueBaseURL            = "lumen.hue.baseURL"
+        static let homebridgeUsername    = "lumen.homebridge.username"
+        static let homebridgePassword    = "lumen.homebridge.password"
+    }
+}

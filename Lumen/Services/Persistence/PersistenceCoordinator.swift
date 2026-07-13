@@ -7,7 +7,7 @@ enum PersistenceCoordinator {
 
     // MARK: - Configuration
 
-    /// CloudKit cross-device sync. Keep OFF until the `iCloud.com.muhome.app`
+    /// CloudKit cross-device sync. Keep OFF until the `iCloud.com.muharafiq.lumen`
     /// container actually exists in the Apple Developer portal (iCloud Containers)
     /// AND the App ID has the iCloud/CloudKit capability enabled.
     ///

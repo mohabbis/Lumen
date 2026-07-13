@@ -12,7 +12,7 @@
 	<key>NSPrivacyAccessedAPITypes</key>
 	<array>
 		<dict>
-			<!-- UserDefaults: used to persist user preferences (name, onboarding state, haptic setting) -->
+			<!-- UserDefaults: used to persist app-only home coordinates for local home/away status. -->
 			<key>NSPrivacyAccessedAPIType</key>
 			<string>NSPrivacyAccessedAPICategoryUserDefaults</string>
 			<key>NSPrivacyAccessedAPITypeReasons</key>
