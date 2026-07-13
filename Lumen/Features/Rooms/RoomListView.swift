@@ -91,27 +91,19 @@ struct RoomListView: View {
                 .padding(.horizontal, 20)
                 .padding(.top, 16)
             Spacer()
-            VStack(spacing: 14) {
-                Image(systemName: "door.left.hand.open")
-                    .font(.system(size: 36))
-                    .foregroundStyle(Color.white.opacity(0.25))
-                Text("No Rooms Yet")
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundStyle(Color.white.opacity(0.55))
-                Text("Add a room to start organising your devices.")
-                    .font(.system(size: 14))
-                    .foregroundStyle(Color.white.opacity(0.3))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 40)
-                Button("Add Room") { viewModel.isShowingAddRoom = true }
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 24)
-                    .padding(.vertical, 12)
-                    .background(Color.white.opacity(0.1), in: RoundedRectangle(cornerRadius: 24))
-                    .padding(.top, 4)
-            }
-            .frame(maxWidth: .infinity)
+            DarkEmptyStateView(
+                icon: "door.left.hand.open",
+                title: "Start with one room",
+                message: "Rooms give Lumen enough context to keep devices, scenes, and suggestions easy to review.",
+                guidance: [
+                    "Use the space you spend time in most.",
+                    "Add planned devices after the room exists.",
+                    "Lumen will keep suggestions tied to named spaces."
+                ],
+                actionTitle: "Add Room",
+                action: { viewModel.isShowingAddRoom = true }
+            )
+            .padding(.horizontal, 20)
             Spacer()
         }
     }

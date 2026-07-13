@@ -138,27 +138,19 @@ struct SceneListView: View {
                 .padding(.horizontal, 20)
                 .padding(.top, 16)
             Spacer()
-            VStack(spacing: 14) {
-                Image(systemName: "sparkles")
-                    .font(.system(size: 36))
-                    .foregroundStyle(Color.white.opacity(0.25))
-                Text("No Scenes")
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundStyle(Color.white.opacity(0.55))
-                Text("Create a scene to control multiple devices at once.")
-                    .font(.system(size: 14))
-                    .foregroundStyle(Color.white.opacity(0.3))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 40)
-                Button("Add Scene") { viewModel.isShowingAddScene = true }
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 24)
-                    .padding(.vertical, 12)
-                    .background(Color.white.opacity(0.1), in: RoundedRectangle(cornerRadius: 24))
-                    .padding(.top, 4)
-            }
-            .frame(maxWidth: .infinity)
+            DarkEmptyStateView(
+                icon: "sparkles",
+                title: "Create a calm scene",
+                message: "Scenes collect a few device changes into one reviewable action. Lumen will still ask before running them.",
+                guidance: [
+                    "Name the intent, like Evening or Away.",
+                    "Add device actions from the scene detail.",
+                    "Every run opens an approval sheet first."
+                ],
+                actionTitle: "Add Scene",
+                action: { viewModel.isShowingAddScene = true }
+            )
+            .padding(.horizontal, 20)
             Spacer()
         }
     }
