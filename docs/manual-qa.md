@@ -21,6 +21,14 @@ Use this before each TestFlight upload. The automated XCTest suite covers core l
 - Add a room and confirm the setup card is replaced by the favorite rooms section.
 - Confirm long home names and setup copy wrap without overlapping the Lumen noticed card.
 
+## Sparse Data States
+
+- Open Rooms with no rooms and confirm the empty state explains the setup path and opens Add Room.
+- Open a newly-created room with no devices and confirm the empty state explains preview controls and opens Add Device.
+- Open Intel with no live devices and confirm the empty state points to HomeKit access, planned preview devices, and refresh.
+- Open Scenes with no scenes and confirm the empty state explains consent-before-action and opens Add Scene.
+- Confirm empty-state cards stay centered, readable, and tappable on iPhone and iPad.
+
 ## Consent-First Scenes
 
 - Tap a scene row from the Scenes tab.

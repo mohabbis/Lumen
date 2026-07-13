@@ -127,26 +127,18 @@ struct RoomDetailView: View {
     // MARK: - Empty State
 
     private var emptyState: some View {
-        VStack(spacing: 14) {
-            Image(systemName: room.type.iconName)
-                .font(.system(size: 36))
-                .foregroundStyle(Color.white.opacity(0.2))
-            Text("No Devices")
-                .font(.system(size: 18, weight: .semibold))
-                .foregroundStyle(Color.white.opacity(0.45))
-            Text("Plan the devices you want in this room.")
-                .font(.system(size: 14))
-                .foregroundStyle(Color.white.opacity(0.28))
-                .multilineTextAlignment(.center)
-            Button("Add Device") { isShowingAddDevice = true }
-                .font(.system(size: 15, weight: .semibold))
-                .foregroundStyle(.white)
-                .padding(.horizontal, 24)
-                .padding(.vertical, 12)
-                .background(Color.white.opacity(0.1), in: RoundedRectangle(cornerRadius: 24))
-                .padding(.top, 4)
-        }
-        .frame(maxWidth: .infinity)
+        DarkEmptyStateView(
+            icon: room.type.iconName,
+            title: "Plan this room",
+            message: "Add the devices you expect here first. They can stay as preview controls until real hardware is linked.",
+            guidance: [
+                "Start with lights or the device you use most.",
+                "Preview controls appear immediately.",
+                "Discovered HomeKit devices can be linked later."
+            ],
+            actionTitle: "Add Device",
+            action: { isShowingAddDevice = true }
+        )
         .padding(.top, 32)
     }
 }
