@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import {
-  Activity, ArrowRight, Bell, Clock, MapPin, Moon, Radio, Shield,
-  Smartphone, Sparkles, SunMedium, Tablet, Thermometer, Zap,
+  Activity, ArrowRight, MapPin, Shield,
+  Smartphone, Sparkles, SunMedium, Tablet,
 } from 'lucide-react';
 import { usePhone } from './InteractivePhone.jsx';
 
@@ -49,6 +49,89 @@ function FeatureBullets({ items }) {
   );
 }
 
+const calmPillars = [
+  {
+    glyph: '◐',
+    title: 'notices the moment',
+    description:
+      'Time of day, presence, and reachable devices are read quietly. One gentle suggestion surfaces — not a wall of toggles.',
+  },
+  {
+    glyph: '✦',
+    title: 'explains before it acts',
+    description:
+      'Every suggestion opens a reasoning sheet in plain language. You see the signals, read the why, and decide.',
+  },
+  {
+    glyph: '♥',
+    title: 'waits for your tap',
+    description:
+      'Nothing runs on its own. A second sheet lists exactly what will change. Lights, locks, and scenes fire only after you approve.',
+  },
+];
+
+export function BuiltForCalmSection() {
+  return (
+    <section className="built-for-calm-section" id="features">
+      <FadeIn className="section-copy centered">
+        <p className="eyebrow">features</p>
+        <h2>built for<br /><em>calm.</em></h2>
+        <p className="section-note">
+          Lumen is a home companion, not a control panel. Three ideas shape every screen.
+        </p>
+      </FadeIn>
+      <div className="calm-pillars-grid">
+        {calmPillars.map(({ glyph, title, description }, i) => (
+          <FadeIn key={title} delay={i * 0.07}>
+            <article className="calm-pillar-card">
+              <span className="calm-pillar-glyph" aria-hidden="true">{glyph}</span>
+              <h3>{title}</h3>
+              <p>{description}</p>
+            </article>
+          </FadeIn>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+export function AppShowcaseSection() {
+  return (
+    <section className="app-showcase-section surface-alt" id="app">
+      <div className="app-showcase-inner centered">
+        <FadeIn className="section-copy centered">
+          <p className="eyebrow">the app</p>
+          <h2>simple by<br /><em>design.</em></h2>
+          <p className="section-note">
+            Five calm tabs — Home, Rooms, Intel, Auto, Settings — each with one job.
+            The live iPhone demo above is the real beta flow: rhythm, suggestions, scenes,
+            and consent sheets you can tap through right now.
+          </p>
+        </FadeIn>
+        <FadeIn className="app-showcase-highlights">
+          <div className="app-showcase-highlight">
+            <SunMedium size={16} />
+            <span>Daily rhythm with Now / Next transitions</span>
+          </div>
+          <div className="app-showcase-highlight">
+            <Sparkles size={16} />
+            <span>Scenes with approval before anything runs</span>
+          </div>
+          <div className="app-showcase-highlight">
+            <Activity size={16} />
+            <span>Every Apple Home device in one calm list</span>
+          </div>
+        </FadeIn>
+        <FadeIn>
+          <a className="app-showcase-cta" href="#demo">
+            Try the live demo <ArrowRight size={14} />
+          </a>
+        </FadeIn>
+      </div>
+    </section>
+  );
+}
+
 const featureOverview = [
   {
     id: 'rhythm',
@@ -81,19 +164,19 @@ const featureOverview = [
     summary: 'Arrival and departure scenes with plain notifications.',
   },
   {
-    id: 'more',
-    icon: Radio,
-    label: 'And more',
-    summary: 'IR remotes, local preview, iPad layout, AI on the way.',
+    id: 'platforms',
+    icon: Smartphone,
+    label: 'iPhone & iPad',
+    summary: 'Native SwiftUI on both form factors. Mac on the roadmap.',
   },
 ];
 
 export function FeaturesOverviewSection() {
   return (
-    <section className="features-overview-section" id="features">
+    <section className="features-overview-section" id="explore">
       <FadeIn className="section-copy centered">
-        <p className="eyebrow">What Lumen does</p>
-        <h2>Everything your home needs.<br /><em>Nothing extra.</em></h2>
+        <p className="eyebrow">explore</p>
+        <h2>everything your home needs.<br /><em>nothing extra.</em></h2>
         <p className="section-note">
           Each part of the app has one job. Tap a card to read more, or try it live in the phone above.
         </p>
@@ -118,8 +201,8 @@ export function RhythmFeatureSection() {
     <section className="feature-spotlight surface-alt" id="rhythm">
       <div className="feature-spotlight-inner">
         <FadeIn className="feature-spotlight-copy">
-          <p className="eyebrow">Daily rhythm</p>
-          <h2>Morning to night,<br /><em>without the noise.</em></h2>
+          <p className="eyebrow">daily rhythm</p>
+          <h2>morning to night,<br /><em>without the noise.</em></h2>
           <p className="section-note">
             Lumen reads the time of day and shows where you are in the daily rhythm.
             The Now / Next card tracks the current block and the next transition calmly.
@@ -149,8 +232,8 @@ export function ScenesFeatureSection() {
     <section className="feature-spotlight" id="scenes">
       <div className="feature-spotlight-inner reverse">
         <FadeIn className="feature-spotlight-copy">
-          <p className="eyebrow">Scenes</p>
-          <h2>Tap a scene.<br /><em>Read it first.</em></h2>
+          <p className="eyebrow">scenes</p>
+          <h2>tap a scene.<br /><em>read it first.</em></h2>
           <p className="section-note">
             Every scene run opens an approval sheet listing exactly what will change.
             Edit scenes, add device actions, and set geofence triggers in the beta app.
@@ -181,8 +264,8 @@ export function DevicesFeatureSection() {
     <section className="feature-spotlight surface-alt" id="devices">
       <div className="feature-spotlight-inner">
         <FadeIn className="feature-spotlight-copy">
-          <p className="eyebrow">Intel</p>
-          <h2>Every device.<br /><em>One calm list.</em></h2>
+          <p className="eyebrow">intel</p>
+          <h2>every device.<br /><em>one calm list.</em></h2>
           <p className="section-note">
             The Intel tab shows your Apple Home accessories with reachability at a glance.
             Lumen only renders controls for capabilities each device actually reports.
@@ -212,10 +295,10 @@ export function RoomsFeatureSection() {
     <section className="feature-spotlight" id="rooms">
       <div className="feature-spotlight-inner reverse">
         <FadeIn className="feature-spotlight-copy">
-          <p className="eyebrow">Rooms</p>
-          <h2>Your rooms,<br /><em>ready to try.</em></h2>
+          <p className="eyebrow">rooms</p>
+          <h2>your rooms,<br /><em>ready to try.</em></h2>
           <p className="section-note">
-            Favorite rooms on the dashboard jump straight into room detail.
+            Favorite rooms on the home screen jump straight into room detail.
             Planned devices let you rehearse controls before hardware arrives.
           </p>
           <FeatureBullets items={[
@@ -243,8 +326,8 @@ export function PresenceFeatureSection() {
     <section className="feature-spotlight surface-alt" id="presence">
       <div className="feature-spotlight-inner">
         <FadeIn className="feature-spotlight-copy">
-          <p className="eyebrow">Presence</p>
-          <h2>Arrive home.<br /><em>Know what ran.</em></h2>
+          <p className="eyebrow">presence</p>
+          <h2>arrive home.<br /><em>know what ran.</em></h2>
           <p className="section-note">
             Lumen watches your home radius and can run matching scenes when you arrive or leave.
             You get a notification and a welcome overlay, not a silent surprise.
@@ -253,9 +336,9 @@ export function PresenceFeatureSection() {
             'Geofence detection within your home radius',
             'Scenes tagged for arrival or departure',
             'Notifications when automation runs or needs attention',
-            'Welcome Home and Away Mode overlays on the dashboard',
+            'Welcome Home and Away Mode overlays on the home screen',
           ]} />
-          <DemoLink tab="Home" label="See the dashboard in the phone" />
+          <DemoLink tab="Home" label="See the home screen in the phone" />
         </FadeIn>
         <FadeIn delay={0.08} className="feature-spotlight-panel">
           <div className="feature-mock-card presence">
@@ -269,66 +352,31 @@ export function PresenceFeatureSection() {
   );
 }
 
-const moreCapabilities = [
-  { icon: Radio, label: 'IR remotes', detail: 'HTTP bridge or native Broadlink send and learn' },
-  { icon: Moon, label: 'Local preview', detail: 'Full UI with planned devices, no HomeKit required' },
-  { icon: Bell, label: 'Notifications', detail: 'Plain alerts when automations run' },
-  { icon: Clock, label: 'Execution history', detail: 'Scenes record what succeeded or failed' },
-  { icon: Thermometer, label: 'Sensor aware', detail: 'Motion and contact streams feed reasoning' },
-  { icon: Zap, label: 'AI layer', detail: 'Describe a scene in plain language, coming soon' },
-];
-
-export function MoreCapabilitiesSection() {
-  return (
-    <section className="more-capabilities-section surface-alt" id="more">
-      <FadeIn className="section-copy centered">
-        <p className="eyebrow">And more</p>
-        <h2>Calm details<br /><em>that add up.</em></h2>
-        <p className="section-note">
-          Lumen is not trying to match every power feature on day one.
-          These pieces are wired or on the way in the beta app today.
-        </p>
-      </FadeIn>
-      <div className="more-capabilities-grid">
-        {moreCapabilities.map(({ icon: Icon, label, detail }, i) => (
-          <FadeIn key={label} delay={i * 0.04}>
-            <div className="more-capability-card">
-              <Icon size={16} />
-              <b>{label}</b>
-              <p>{detail}</p>
-            </div>
-          </FadeIn>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-const platforms = [
-  { icon: Smartphone, label: 'iPhone', detail: 'Native SwiftUI, consent-first flows' },
-  { icon: Tablet, label: 'iPad', detail: 'Sidebar navigation on the same build' },
-];
-
 export function PlatformsSection() {
   return (
     <section className="platforms-section" id="platforms">
       <FadeIn className="section-copy centered">
-        <p className="eyebrow">Platforms</p>
-        <h2>Built for Apple.<br /><em>Calm everywhere.</em></h2>
+        <p className="eyebrow">platforms</p>
+        <h2>built for Apple.<br /><em>calm everywhere.</em></h2>
         <p className="section-note">
           Private beta on iPhone and iPad today. Mac is on the roadmap after the core loop is solid.
         </p>
       </FadeIn>
       <div className="platforms-row">
-        {platforms.map(({ icon: Icon, label, detail }, i) => (
-          <FadeIn key={label} delay={i * 0.06}>
-            <div className="platform-card">
-              <Icon size={22} />
-              <b>{label}</b>
-              <span>{detail}</span>
-            </div>
-          </FadeIn>
-        ))}
+        <FadeIn delay={0.04}>
+          <div className="platform-card">
+            <Smartphone size={22} />
+            <b>iPhone</b>
+            <span>Native SwiftUI, consent-first flows</span>
+          </div>
+        </FadeIn>
+        <FadeIn delay={0.08}>
+          <div className="platform-card">
+            <Tablet size={22} />
+            <b>iPad</b>
+            <span>Sidebar navigation on the same build</span>
+          </div>
+        </FadeIn>
       </div>
     </section>
   );
