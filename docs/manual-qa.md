@@ -29,6 +29,13 @@ Use this before each TestFlight upload. The automated XCTest suite covers core l
 - Open Scenes with no scenes and confirm the empty state explains consent-before-action and opens Add Scene.
 - Confirm empty-state cards stay centered, readable, and tappable on iPhone and iPad.
 
+## Setup Sheets
+
+- Open Add Room, Add Device, and Add Scene and confirm the name field is focused when the sheet appears.
+- Enter names with leading or trailing spaces and confirm the saved room, device, or scene name is trimmed.
+- Confirm each sheet includes a short helper note that explains how the new item affects Lumen.
+- Confirm the Add button remains disabled for blank or whitespace-only names.
+
 ## Consent-First Scenes
 
 - Tap a scene row from the Scenes tab.
