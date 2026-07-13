@@ -144,20 +144,16 @@ struct DeviceListView: View {
     // MARK: - Empty Devices
 
     private var emptyDevices: some View {
-        VStack(spacing: 14) {
-            Image(systemName: "sparkle")
-                .font(.system(size: 36))
-                .foregroundStyle(Color.white.opacity(0.2))
-            Text("No devices yet")
-                .font(.system(size: 18, weight: .semibold))
-                .foregroundStyle(Color.white.opacity(0.45))
-            Text("Once HomeKit connects, your devices will appear here automatically.")
-                .font(.system(size: 14))
-                .foregroundStyle(Color.white.opacity(0.28))
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 30)
-        }
-        .frame(maxWidth: .infinity)
+        DarkEmptyStateView(
+            icon: "sparkle",
+            title: "No live devices yet",
+            message: "Lumen stays useful while hardware is sparse. Live devices appear here after HomeKit access or local preview planning.",
+            guidance: [
+                "Grant HomeKit access when prompted.",
+                "Use Rooms to add planned preview devices.",
+                "Tap refresh after changing HomeKit permissions."
+            ]
+        )
         .padding(.top, 48)
     }
 
