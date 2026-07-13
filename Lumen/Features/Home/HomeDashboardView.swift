@@ -39,7 +39,7 @@ struct HomeDashboardView: View {
             if isStatusOverlayVisible {
                 StatusOverlay(isAtHome: locationService.isAtHome, id: statusOverlayID)
                     .transition(.asymmetric(insertion: .move(edge: .top).combined(with: .opacity),
-                                          removal: .move(edge: .bottom).combined(with: .opacity)))
+                                            removal: .move(edge: .top).combined(with: .opacity)))
                     .zIndex(2)
             }
             ambientBackground.ignoresSafeArea()
@@ -75,18 +75,10 @@ struct HomeDashboardView: View {
             if let home = viewModel.home, let lat = home.latitude, let lon = home.longitude {
                 locationService.updateHomeCoordinates(latitude: lat, longitude: lon)
             }
-            statusOverlayID = UUID()
-            isStatusOverlayVisible = true
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                withAnimation(.easeInOut(duration: 0.5)) { isStatusOverlayVisible = false }
-            }
+            showStatusOverlay()
         }
         .onChange(of: locationService.isAtHome) { _, _ in
-            statusOverlayID = UUID()
-            isStatusOverlayVisible = true
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                withAnimation(.easeInOut(duration: 0.5)) { isStatusOverlayVisible = false }
-            }
+            showStatusOverlay()
         }
         .onDisappear {
             locationService.stopMonitoringLocation()
@@ -399,6 +391,22 @@ struct HomeDashboardView: View {
         }
     }
 
+    private func showStatusOverlay() {
+        let id = UUID()
+        statusOverlayID = id
+
+        withAnimation(.spring(response: 0.42, dampingFraction: 0.86)) {
+            isStatusOverlayVisible = true
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.2) {
+            guard statusOverlayID == id else { return }
+            withAnimation(.easeInOut(duration: 0.35)) {
+                isStatusOverlayVisible = false
+            }
+        }
+    }
+
     private func findScene(named name: String) -> Scene? {
         scenes.first { $0.name.lowercased() == name.lowercased() }
     }
@@ -499,46 +507,77 @@ private struct StatusOverlay: View {
     let isAtHome: Bool
     let id: UUID
     @State private var animate = false
+
     var body: some View {
         VStack {
-            Spacer()
-            if isAtHome {
-                Text("🏠 Welcome Home!")
-                    .font(.system(size: 28, weight: .bold, design: .serif))
-                    .foregroundStyle(Color(hex: "#C49A6C"))
-                    .padding(.horizontal, 36)
-                    .padding(.vertical, 18)
-                    .background(
-                        RoundedRectangle(cornerRadius: 22)
-                            .fill(Color.white.opacity(0.12))
-                            .blur(radius: 0.5)
-                    )
-                    .shadow(color: .black.opacity(0.12), radius: 20, y: 4)
-                    .scaleEffect(animate ? 1 : 0.85)
-                    .opacity(animate ? 1 : 0.5)
-                    .onAppear { withAnimation(.spring(response: 0.7, dampingFraction: 0.8)) { animate = true } }
-            } else {
-                Text("🌙 Away Mode")
-                    .font(.system(size: 28, weight: .bold, design: .serif))
-                    .foregroundStyle(Color.white.opacity(0.85))
-                    .padding(.horizontal, 36)
-                    .padding(.vertical, 18)
-                    .background(
-                        RoundedRectangle(cornerRadius: 22)
-                            .fill(Color.white.opacity(0.09))
-                            .blur(radius: 0.5)
-                    )
-                    .shadow(color: .black.opacity(0.14), radius: 20, y: 4)
-                    .scaleEffect(animate ? 1 : 0.85)
-                    .opacity(animate ? 1 : 0.5)
-                    .onAppear { withAnimation(.spring(response: 0.7, dampingFraction: 0.8)) { animate = true } }
-            }
+            banner
+                .scaleEffect(animate ? 1 : 0.96)
+                .opacity(animate ? 1 : 0)
+                .padding(.horizontal, 20)
+                .padding(.top, 14)
             Spacer()
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .id(id)
-        .transition(.move(edge: .top).combined(with: .opacity))
-        .animation(.easeInOut(duration: 0.7), value: isAtHome)
-        .ignoresSafeArea()
+        .allowsHitTesting(false)
+        .onAppear {
+            withAnimation(.spring(response: 0.42, dampingFraction: 0.84)) {
+                animate = true
+            }
+        }
+    }
+
+    private var banner: some View {
+        HStack(spacing: 12) {
+            ZStack {
+                Circle()
+                    .fill(tint.opacity(0.15))
+                    .frame(width: 36, height: 36)
+                Image(systemName: iconName)
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(tint)
+            }
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.85)
+                Text(subtitle)
+                    .font(.system(size: 12))
+                    .foregroundStyle(Color.white.opacity(0.52))
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .layoutPriority(1)
+        }
+        .frame(maxWidth: 360, alignment: .leading)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .background(Color(hex: "#140D1F").opacity(0.96), in: RoundedRectangle(cornerRadius: 18))
+        .overlay(
+            RoundedRectangle(cornerRadius: 18)
+                .strokeBorder(Color.white.opacity(0.08), lineWidth: 1)
+        )
+        .shadow(color: .black.opacity(0.22), radius: 18, y: 10)
+        .accessibilityElement(children: .combine)
+    }
+
+    private var title: String {
+        isAtHome ? "Welcome home" : "Away mode"
+    }
+
+    private var subtitle: String {
+        isAtHome ? "Lumen is following the home rhythm." : "Home status stays visible while you are away."
+    }
+
+    private var iconName: String {
+        isAtHome ? "house.fill" : "location.fill"
+    }
+
+    private var tint: Color {
+        isAtHome ? Color(hex: "#C49A6C") : Color.white.opacity(0.72)
     }
 }
 
@@ -568,20 +607,7 @@ private struct LumenNoticedCard: View {
                     .foregroundStyle(Color.white.opacity(0.7))
                     .fixedSize(horizontal: false, vertical: true)
 
-                HStack(alignment: .bottom) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(suggestion)
-                            .font(.system(size: 13, weight: .medium))
-                            .foregroundStyle(Color.white.opacity(0.6))
-                        Text(detail)
-                            .font(.system(size: 11))
-                            .foregroundStyle(Color.white.opacity(0.28))
-                    }
-                    Spacer()
-                    Image(systemName: isActionable ? "chevron.right" : "info.circle")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundStyle(isActionable ? Color(hex: "#C49A6C") : Color.white.opacity(0.35))
-                }
+                cardFooter
             }
             .padding(18)
             .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 18))
@@ -590,5 +616,48 @@ private struct LumenNoticedCard: View {
                     .strokeBorder(Color.white.opacity(0.06), lineWidth: 1)
             )
         }
+        .buttonStyle(.plain)
+        .contentShape(RoundedRectangle(cornerRadius: 18))
+        .accessibilityElement(children: .combine)
+        .accessibilityHint(isActionable ? "Opens reasoning before confirmation." : "Opens the current signal details.")
+    }
+
+    private var cardFooter: some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(alignment: .center, spacing: 12) {
+                footerText
+                    .layoutPriority(1)
+                Spacer(minLength: 8)
+                footerIcon
+            }
+
+            VStack(alignment: .leading, spacing: 8) {
+                footerText
+                footerIcon
+                    .frame(maxWidth: .infinity, alignment: .trailing)
+            }
+        }
+    }
+
+    private var footerText: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(suggestion)
+                .font(.system(size: 13, weight: .medium))
+                .foregroundStyle(Color.white.opacity(0.6))
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
+            Text(detail)
+                .font(.system(size: 11))
+                .foregroundStyle(Color.white.opacity(0.28))
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private var footerIcon: some View {
+        Image(systemName: isActionable ? "chevron.right" : "info.circle")
+            .font(.system(size: 12, weight: .semibold))
+            .foregroundStyle(isActionable ? Color(hex: "#C49A6C") : Color.white.opacity(0.35))
+            .frame(width: 24, height: 24)
     }
 }
