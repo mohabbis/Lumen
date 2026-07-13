@@ -203,13 +203,13 @@ The flag defaults to `true`. Tests rely on it indirectly: `DeviceService.addPlan
 
 The `LumenTests` target uses XCTest with an in-memory `ModelContainer` via `PersistenceCoordinator.makeInMemoryContainer()`. Tests are `@MainActor` where they touch services or view models.
 
-Coverage groups (145 tests at time of writing):
+Coverage groups (~160 tests at time of writing):
 
 | File | Covers |
 |------|--------|
 | `CommissioningTests` | PlannedDevice ↔ live device link/unlink |
 | `PersistenceTests` | CloudKit gate, schema round-trip |
-| `HomeServiceTests` | Home/Room CRUD, primary promotion |
+| `HomeServiceTests` | Home/Room CRUD, primary promotion, home coordinates |
 | `HomeViewModelTests` | VM derived state, executeScene error surfacing |
 | `LocationServiceTests` | At-home detection, geofence event emission, no-spurious-arrival on first check |
 | `SceneServiceTests` | Scene CRUD, default seeding idempotency, execute records ExecutionEvent |
@@ -222,6 +222,8 @@ Coverage groups (145 tests at time of writing):
 | `RoomViewModelTests` | RoomVM CRUD wrapper |
 | `RemoteIRTests` | IR endpoint normalization, HTTP request building, `RemoteService` transport routing + learn-capability (fake transports), `RemoteViewModel` command/hostname/transport CRUD |
 | `BroadlinkTests` | Broadlink codec vs crafted vectors (checksum, AES round-trip, packet framing, auth, IR/learn/discovery payloads) + `BroadlinkTransport` actor flow vs a fake `UDPChannel` (send, learn, timeout) |
+| `DashboardPresentationTests` | Dashboard notice / presentation helpers |
+| `SensoryProfileTests` | Sensory profile defaults and persistence helpers |
 
 Run from inside Xcode (Cmd+U) or via the xcodebuild test command above.
 
@@ -239,12 +241,10 @@ npm run build      # production build → dist/
 npm run lint       # ESLint
 npm run test       # Vitest (single run)
 npm run e2e        # Playwright end-to-end tests
-npm run ci         # lint + test + build
+npm run ci         # lint + test + build + e2e
 ```
 
-Single-page React/Vite app — no router, anchor-scroll only. Entry is `src/main.jsx`, which mounts `src/App.jsx` into `#root` in the top-level `index.html` and imports the page styles (`App.css`, `lumen-overrides.css`, `mobile-polish.css`, `architecture-actions.css`). `src/styles.css` is unused. Unit tests run on Vitest (`src/main.test.jsx`, setup in `src/test/setup.js`); end-to-end coverage uses Playwright (`playwright.config.js`). `public/privacy/index.html` is fully self-contained (no React); the `vercel.json` rewrite maps `/privacy` → `/privacy/index.html`.
-
-> The `src/pages/*.astro` files and `src/styles/global.css` are exploratory and **not** part of the Vite build (there is no `astro` dependency or config) — the production site is the React entry above.
+Single-page React/Vite app — no router, anchor-scroll only. Entry is `src/main.jsx`, which mounts `src/App.jsx` into `#root` in the top-level `index.html` and imports the page styles (`App.css`, `lumen-overrides.css`, `mobile-polish.css`; `App.jsx` also imports `theme.css`). `src/styles.css` is unused if present. Unit tests run on Vitest (`src/main.test.jsx`, setup in `src/test/setup.js`); end-to-end coverage uses Playwright (`playwright.config.js`, `testDir: ./e2e`). `public/privacy/index.html` is fully self-contained (no React); the `vercel.json` rewrite maps `/privacy` → `/privacy/index.html`.
 
 Waitlist validation/delivery logic (`normalizeWaitlistPayload`, `isValidWaitlistEmail`, `postWebhook`/`deliverWaitlist`) is factored into `lib/waitlist.js` and shared by both sides of the submit path: `api/waitlist.js` (the Vercel serverless handler) imports it server-side, and `src/waitlistSubmit.js` (the browser-side submit + provider-fallback chain) imports `DEFAULT_TO_EMAIL` from it. `lib/waitlist.test.js` covers the shared module directly.
 
@@ -268,4 +268,4 @@ Cloud agents run on **Linux**, so the **iOS app (`Lumen/`, `LumenTests/`) cannot
 - **Runtime:** Node 22 is pre-installed. Dependencies install with `npm install` (npm + `package-lock.json`; deps are pinned to `latest`, so a fresh install may drift from the lockfile). The startup update script already runs `npm install`.
 - **Web commands** are the ones in `package.json` (`dev`, `build`, `preview`, `lint`, `test`, `e2e`, `ci`) and are documented in the "Web app" section above. `npm run dev` serves on `0.0.0.0:5173`.
 - **Waitlist form does not fully work under `npm run dev`.** The form POSTs to `/api/waitlist`, a Vercel serverless function (`api/waitlist.js`) that Vite does **not** run; the client fallbacks (`web3forms`/`formsubmit.co`) need external network egress + secrets. Locally the form shows its error state after submitting — this is expected, not a bug. Use the theme toggle (nav icon left of "Request Access", persists to `localStorage`) or anchor-nav for an offline, reliable end-to-end interaction check.
-- **`npm run e2e` has no tests.** Playwright's `testDir: ./tests` does not exist and browsers aren't installed (`npx playwright install` would be needed). Use `npm run test` (Vitest) for the web unit suite instead.
+- **`npm run e2e`** runs Playwright tests under `e2e/` (live demo flows). Browsers are not necessarily preinstalled locally — run `npx playwright install chromium` first (CI does this). Use `npm run test` (Vitest) for the web unit suite without browsers.

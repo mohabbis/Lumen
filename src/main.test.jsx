@@ -23,7 +23,7 @@ describe('Lumen landing page', () => {
 
   it('states calm consent-first positioning', () => {
     render(<App />);
-    expect(screen.getAllByText(/nothing runs on its own/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/suggestions always ask first/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/open to everyone/i).length).toBeGreaterThan(0);
   });
 

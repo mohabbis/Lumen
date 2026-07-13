@@ -10,13 +10,13 @@ Lumen is a local-first iOS smart-home companion that turns rooms, scenes, presen
 
 Lumen builds a local model of your home — rooms, devices, presence, time of day — and surfaces gentle, explainable suggestions instead of silent automations. It controls HomeKit devices when they're present and stays useful when they aren't.
 
-Lumen is designed for low cognitive load: calm surfaces, clear explanations, and confirmation before meaningful actions. Nothing fires from a tap without a confirmation surface.
+Lumen is designed for low cognitive load: calm surfaces, clear explanations, and confirmation before meaningful scene actions. Manual scene runs and ambient suggestions go through a confirmation surface; opted-in geofence scenes can still auto-run with a notification.
 
 ---
 
 ## Status
 
-Native SwiftUI / SwiftData app, iPhone + iPad. Local-first; CloudKit sync is gated off pending final provisioning. 145 unit tests, build clean.
+Native SwiftUI / SwiftData app, iPhone + iPad. Local-first; CloudKit sync is gated off pending final provisioning. ~160 unit tests, build clean.
 
 ## Preview
 
@@ -40,11 +40,11 @@ The app also ships with a React/Vite marketing preview in `src/` that recreates 
 **Shipped**
 
 - Location-aware dashboard ("Welcome Home" / Away Mode with distance)
-- Time-of-day ambient palette + "Lumen noticed" contextual cards
+- Time-of-day ambient palette + "Lumen noticed" contextual cards (scored `SuggestionEngine` with explainable confidence/habit signals)
 - **Now / Next** rhythm card (calm daily-rhythm structure, works without smart devices)
 - **Scene approval sheet** (consent before any scene executes, with humanized action list)
 - **Lumen reasoning view** (signals behind every suggestion — time, presence, devices, matching scene)
-- Geofence-triggered scene automations (arrival/departure, 100 m radius)
+- Geofence-triggered scene automations (arrival/departure, 100 m radius; set home location in Settings)
 - HomeKit device discovery, control, and a local preview mode that runs the UI with mock devices
 - SwiftData persistence with versioned schema (V1 → V2 → V3)
 - Local notifications for automation triggers
@@ -53,7 +53,8 @@ The app also ships with a React/Vite marketing preview in `src/` that recreates 
 
 - Multi-home support
 - In-app Matter commissioning (pairing Matter accessories from inside Lumen). Note: Lumen already *controls* Matter accessories that are in your Apple Home today, because iOS surfaces them through the same HomeKit framework Lumen uses; this item is only about adding them directly rather than through the Apple Home app.
-- On-device reasoning engine (the current "Lumen noticed" surface is rule-based)
+- Conversational AI assistant ("describe it, Lumen proposes")
+- Heavier on-device model beyond the shipped scored heuristic layer
 - TestFlight beta
 
 ---
@@ -62,7 +63,7 @@ The app also ships with a React/Vite marketing preview in `src/` that recreates 
 
 Lumen is on a deliberately gradual path from "Not yet" to public release:
 
-1. **Close remaining gaps** — on-device reasoning engine, conversational AI assistant, CloudKit sync hardening.
+1. **Close remaining gaps** — conversational AI assistant, CloudKit sync hardening, deepen on-device reasoning beyond the shipped scored layer.
 2. **TestFlight beta** — internal, then external via the marketing site waitlist.
 3. **App Store submission** — after beta feedback is incorporated.
 4. **Public launch** — iOS App Store, with site copy updated accordingly.

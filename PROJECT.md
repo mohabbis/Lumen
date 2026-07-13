@@ -1,100 +1,37 @@
-# Car Wash Guys Website
+# Lumen
 
-Cloudflare-deployed Astro website for **Car Wash Guys** in Kenosha, Wisconsin.
+Local-first iOS smart-home companion (bundle ID `com.muharafiq.lumen`, team `CU67F9EY3Q`) plus a React/Vite marketing site at `lumen.muharafiq.com`.
 
-## Business context
+## What this repo is
 
-- Business: Car Wash Guys
-- Address: 2918 Washington Rd, Kenosha, WI
-- Domain: https://carwashguys.us
-- Deployment target: Cloudflare Workers / Cloudflare-managed domain
-- Current status: landing page / launch placeholder while services, hours, pricing, and photos are finalized
+| Path | Role |
+|------|------|
+| `Lumen/` | Native SwiftUI / SwiftData iOS app |
+| `Lumen.xcodeproj/` | Xcode project |
+| `LumenTests/` | XCTest suite |
+| `src/`, `public/`, `api/`, `lib/` | Marketing waitlist site (Vercel) |
 
-## Current site state
-
-This repo contains a branded Astro landing page rather than the default Astro blog starter. The home page includes:
-
-- Hero section with Car Wash Guys branding
-- Location CTA for 2918 Washington Rd
-- Coming-soon / launch status messaging
-- Services teaser cards without inventing unconfirmed pricing or package names
-- Branded placeholder pages for `/about` and `/blog`
-- Disabled starter blog post routes
-- Disabled starter RSS feed
-- Sitemap configured for `https://carwashguys.us`
+The iOS app and marketing site are independent lanes. Prefer `AGENTS.md` / `CLAUDE.md` for architecture and conventions, `ROADMAP.md` for phased launch planning, and `docs/product-brief.md` for product framing.
 
 ## Local development
 
+**iOS (macOS / Xcode):** open `Lumen.xcodeproj`, run on iPhone or iPad Simulator.
+
+**Web:**
+
 ```bash
 npm install
-npm run dev
+npm run dev      # http://0.0.0.0:5173
+npm run ci       # lint + Vitest + build + Playwright e2e
 ```
 
-Astro usually starts at:
+Playwright browsers: `npx playwright install chromium` (also done in GitHub Actions CI).
 
-```txt
-http://localhost:4321
-```
+## Authoritative docs
 
-## Build
+- [`AGENTS.md`](AGENTS.md) — agent / contributor guide (mirrored by `CLAUDE.md`)
+- [`ROADMAP.md`](ROADMAP.md) — launch phases
+- [`docs/full-audit-2026-07.md`](docs/full-audit-2026-07.md) — latest full audit snapshot
+- [`docs/`](docs/) — product brief, design principles, manual QA, launch plan
 
-```bash
-npm run build
-```
-
-A successful build writes output to:
-
-```txt
-dist/
-```
-
-The full-clone build succeeded locally on June 10, 2026 after the starter cleanup.
-
-## Deploy
-
-Use Cloudflare credentials locally, then run:
-
-```bash
-npm run deploy
-```
-
-The repo uses `@astrojs/cloudflare` and Wrangler. The domain `carwashguys.us` is managed through Cloudflare.
-
-## Content rules
-
-Do not invent public business details. Only add these when confirmed:
-
-- Phone number
-- Hours
-- Wash package names
-- Pricing
-- Reviews or testimonials
-- Membership checkout links
-- Final service list
-- Grand opening date
-
-Use placeholders until those details are provided.
-
-## Future DRB / membership integration
-
-The site should be ready for future membership workflows. Possible approaches:
-
-- Link to a DRB-hosted checkout
-- Add a configurable membership CTA URL
-- Add a provider handoff page
-- Add iframe or redirect flow if approved by the provider
-- Add future API routes for member lookup or account management only after provider details are confirmed
-
-## Recommended dependency cleanup
-
-The site no longer needs the starter RSS or MDX features. Run this locally so `package-lock.json` is regenerated correctly:
-
-```bash
-npm uninstall @astrojs/mdx @astrojs/rss
-npm run build
-git add package.json package-lock.json
-git commit -m "Remove unused starter dependencies"
-git push origin main
-```
-
-Manual lockfile surgery is how small websites acquire cursed artifacts. Let npm do the boring part.
+Do not use stale Astro / unrelated business placeholders; the production web entry is `index.html` → `src/main.jsx` → `src/App.jsx`.

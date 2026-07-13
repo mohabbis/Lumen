@@ -20,6 +20,10 @@ final class LocationService: NSObject, CLLocationManagerDelegate {
     // spurious "arrival" before the user has actually moved.
     private var hasCompletedFirstCheck = false
 
+    // While (re)registering the home region, iOS may immediately deliver
+    // didEnterRegion if the device is already inside. Suppress that synthetic event.
+    private var suppressRegionEventsUntil: Date?
+
     private let locationManager = CLLocationManager()
     private let homeRadiusMeter: Double = 100 // 100m radius around home
     nonisolated static let homeRegionIdentifier = "com.muharafiq.lumen.home"
@@ -67,6 +71,9 @@ final class LocationService: NSObject, CLLocationManagerDelegate {
         if let prior = homeRegion {
             locationManager.stopMonitoring(for: prior)
         }
+        // Swallow the immediate enter callback often delivered on startMonitoring
+        // when already inside the region (would look like a fresh arrival).
+        suppressRegionEventsUntil = Date().addingTimeInterval(2)
         let region = CLCircularRegion(
             center: CLLocationCoordinate2D(latitude: latitude, longitude: longitude),
             radius: homeRadiusMeter,
@@ -79,6 +86,13 @@ final class LocationService: NSObject, CLLocationManagerDelegate {
         // and only in background once it's always. We register either way —
         // the OS queues delivery for whenever the auth state allows it.
         locationManager.startMonitoring(for: region)
+    }
+
+    private var shouldEmitRegionGeofenceEvent: Bool {
+        if let until = suppressRegionEventsUntil, Date() < until {
+            return false
+        }
+        return hasCompletedFirstCheck
     }
     
     func getHomeCoordinates() -> (latitude: Double, longitude: Double)? {
@@ -155,8 +169,10 @@ final class LocationService: NSObject, CLLocationManagerDelegate {
         Task { @MainActor in
             self.isAtHome = true
             self.wasAtHome = true
+            if self.shouldEmitRegionGeofenceEvent {
+                self.lastGeofenceEvent = GeofenceEvent(type: .arrival, timestamp: Date())
+            }
             self.hasCompletedFirstCheck = true
-            self.lastGeofenceEvent = GeofenceEvent(type: .arrival, timestamp: Date())
         }
     }
 
@@ -165,8 +181,10 @@ final class LocationService: NSObject, CLLocationManagerDelegate {
         Task { @MainActor in
             self.isAtHome = false
             self.wasAtHome = false
+            if self.shouldEmitRegionGeofenceEvent {
+                self.lastGeofenceEvent = GeofenceEvent(type: .departure, timestamp: Date())
+            }
             self.hasCompletedFirstCheck = true
-            self.lastGeofenceEvent = GeofenceEvent(type: .departure, timestamp: Date())
         }
     }
 

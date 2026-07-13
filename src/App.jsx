@@ -180,7 +180,8 @@ function HeroCopy() {
       <h1>when your home shifts,<br /><em>you stay calm.</em></h1>
       <p className="hero-lede">
         Lumen reads the moment — time, presence, your devices — and surfaces one
-        gentle suggestion. You read why, approve what changes, nothing runs on its own.
+        gentle suggestion. You read why and approve what changes. Opted-in arrival
+        and departure scenes can still run with a notification.
       </p>
       <div className="hero-actions">
         <a className="primary" href="#access">

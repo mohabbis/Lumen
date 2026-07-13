@@ -6,9 +6,10 @@ Lumen is a solo/small-team indie iOS project (team `CU67F9EY3Q`, bundle ID `com.
 
 ## Phase 1 — Close out the "Not yet" list (June – August 2026)
 
-- **On-device reasoning engine** — move "Lumen noticed" from rule-based (`ReasoningCalculator`) toward a lightweight on-device model or scored heuristic layer. Must stay explainable: every suggestion still needs a signal list a person can read and disagree with.
+- **On-device reasoning engine** — **Partial:** `SuggestionEngine` scored heuristics ship and power "Lumen noticed" (explainable confidence + habit signals). Remaining: fold factor labels into the reasoning UI, honor sensory cadence/limits, and optionally move further toward a lightweight on-device model. Must stay explainable: every suggestion still needs a signal list a person can read and disagree with.
 - **AI assistant (conversational layer)** — ship the "describe it, Lumen proposes, you approve" flow shown in the marketing site's AI section. Text input first; voice later if at all.
 - **CloudKit sync hardening** — stabilize the SwiftData schema (V3) and sync path ahead of beta (currently off — `PersistenceCoordinator.enableCloudKitSync = false`).
+- **Home location setup** — Settings can persist geofence coordinates onto the primary `Home` (required for presence / arrival scenes).
 
 ## Phase 2 — TestFlight beta (September 2026)
 

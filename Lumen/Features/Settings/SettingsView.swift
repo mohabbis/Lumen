@@ -7,7 +7,11 @@ struct SettingsView: View {
     @Environment(DeviceStateStore.self) private var stateStore
     @Environment(AppState.self) private var appState
     @Environment(RemoteService.self) private var remoteService
+    @Environment(LocationService.self) private var locationService
     @Environment(\.modelContext) private var modelContext
+
+    @State private var homeLocationMessage: String?
+    @State private var homeLocationError: String?
 
     var body: some View {
         ZStack {
@@ -15,6 +19,17 @@ struct SettingsView: View {
             scrollContent
         }
         .toolbar(.hidden, for: .navigationBar)
+        .alert(
+            "Couldn’t update location",
+            isPresented: Binding(
+                get: { homeLocationError != nil },
+                set: { if !$0 { homeLocationError = nil } }
+            )
+        ) {
+            Button("OK", role: .cancel) { homeLocationError = nil }
+        } message: {
+            Text(homeLocationError ?? "")
+        }
     }
 
     private var scrollContent: some View {
@@ -55,7 +70,26 @@ struct SettingsView: View {
             if let home = homeService.primaryHome {
                 SettingsRow(label: "Name", value: home.name)
                 SettingsRow(label: "Rooms", value: "\(home.roomCount)")
-                SettingsRow(label: "Devices", value: "\(home.totalDeviceCount)", isLast: true)
+                SettingsRow(label: "Devices", value: "\(home.totalDeviceCount)")
+                SettingsRow(label: "Home location", value: homeLocationStatus(for: home))
+                Button(action: { setHomeLocationFromCurrent(home: home) }) {
+                    HStack {
+                        Text("Use current location")
+                            .font(.system(size: 15, weight: .medium))
+                            .foregroundStyle(Color(hex: "#C49A6C"))
+                        Spacer()
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 14)
+                }
+                .buttonStyle(.plain)
+                if let homeLocationMessage {
+                    Text(homeLocationMessage)
+                        .font(.system(size: 13))
+                        .foregroundStyle(Color.white.opacity(0.45))
+                        .padding(.horizontal, 16)
+                        .padding(.bottom, 14)
+                }
             } else {
                 Text("No home configured")
                     .font(.system(size: 14))
@@ -63,6 +97,43 @@ struct SettingsView: View {
                     .padding(.horizontal, 16)
                     .padding(.vertical, 16)
             }
+        }
+    }
+
+    private func homeLocationStatus(for home: Home) -> String {
+        if home.latitude != nil, home.longitude != nil {
+            return "Set"
+        }
+        if locationService.getHomeCoordinates() != nil {
+            return "Armed (device only)"
+        }
+        return "Not set"
+    }
+
+    private func setHomeLocationFromCurrent(home: Home) {
+        homeLocationMessage = nil
+        locationService.requestLocationPermission()
+        locationService.startMonitoringLocation()
+
+        guard let coordinate = locationService.currentLocation else {
+            homeLocationMessage = "Waiting for GPS — try again in a moment."
+            return
+        }
+
+        do {
+            try homeService.updateCoordinates(
+                home,
+                latitude: coordinate.latitude,
+                longitude: coordinate.longitude
+            )
+            locationService.updateHomeCoordinates(
+                latitude: coordinate.latitude,
+                longitude: coordinate.longitude
+            )
+            homeLocationMessage = "Home radius set from your current location."
+            locationService.requestBackgroundLocationPermission()
+        } catch {
+            homeLocationError = error.localizedDescription
         }
     }
 
