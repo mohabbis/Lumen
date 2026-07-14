@@ -169,6 +169,18 @@ SwiftData `@Model` types are split by domain across two roots:
 Some surfaces are persisted in the schema and have view/view-model code, but are **not** reachable from navigation yet. Treat them as in-progress, not dead code — extend rather than delete:
 
 - **Zones** (`Models/Space/Zone.swift`): part of the schema and relationships, but no service or UI surfaces zones yet.
+- **Local-network devices** (`Integrations/LocalNetwork/`): the `LocalNetworkBridge` engine + Shelly transport are built and tested, but nothing persists `LocalDeviceConfig`s or registers the bridge yet. Next step: a SwiftData config model + a Settings surface to author devices, then register the bridge in `RootView` like `HomeKitBridge`. See the subsection below.
+
+#### Local-network devices (`Integrations/LocalNetwork/`)
+
+The second real `SmartHomeBridge` alongside HomeKit — the "control devices Apple Home can't see" surface (Home Assistant / Homebridge cover the same need). `LocalNetworkBridge` (an `actor`) reaches user-configured LAN devices over their local HTTP APIs — no cloud, no account, staying local-first. Because it registers through `DeviceService.registerBridge` and routes by `BridgeID` (`.localNetwork`), these devices flow through the exact same `DeviceStateStore` → capability UI → scene pipeline as HomeKit, with **no view changes**.
+
+The seam is `Integrations/LocalNetwork/LocalDeviceTransport.swift`, which passes value types only (`LocalTarget` / `LocalDeviceCommand` / `LocalDeviceReading`, never a model), mirroring `IRTransport`. One transport conforms today:
+- **`ShellyGen2Transport`** — Shelly Gen2 RPC over local HTTP (`GET /rpc/Switch.Set`, `Light.Set`, `*.GetStatus`). URL-building and JSON-parsing are pure static helpers (`normalizedBaseURL`, `setURL`, `statusURL`, `parseReading`), unit-tested without networking exactly like `HTTPIRTransport`. The protocol-agnostic `LocalComponent` (`relay`/`light`) keeps the seam vendor-neutral, so Tasmota/ESPHome/generic-REST can conform later.
+
+`LocalDeviceKind` maps a device to its component + capability set (`shellySwitch` → on/off; `shellyDimmer` → on/off + brightness). Unlike HomeKit there is no OS authorization gate and no push channel — local HTTP is read on demand, so the state stream stays open for a future poller but only emits an echo after an executed action. The bridge is driven by injected `[LocalDeviceConfig]` + a transport factory, so the whole vertical is testable without a network.
+
+Tests: pure Shelly codec (vs crafted URLs/JSON) + bridge/device/capability flow (vs a fake `LocalDeviceTransport`) are covered by `LumenTests/LocalNetworkTests.swift`. Unlike IR, this **is** a `SmartHomeBridge` — local devices have controllable state and belong in the device/scene pipeline.
 
 #### IR remotes (`Features/Remote/`, `Integrations/IR/`, `Domain/Models/Remote/`)
 
@@ -227,6 +239,7 @@ Coverage groups (~195 tests at time of writing):
 | `RoomViewModelTests` | RoomVM CRUD wrapper |
 | `RemoteIRTests` | IR endpoint normalization, HTTP request building, `RemoteService` transport routing + learn-capability (fake transports), `RemoteViewModel` command/hostname/transport CRUD |
 | `BroadlinkTests` | Broadlink codec vs crafted vectors (checksum, AES round-trip, packet framing, auth, IR/learn/discovery payloads) + `BroadlinkTransport` actor flow vs a fake `UDPChannel` (send, learn, timeout) |
+| `LocalNetworkTests` | Shelly Gen2 codec (URL building, brightness scaling, status parsing, address normalization) + `LocalNetworkBridge`/device/capability flow vs a fake `LocalDeviceTransport` (discover, reachability probe, action routing, device lookup) |
 | `DashboardPresentationTests` | Dashboard notice / presentation helpers |
 | `SensoryProfileTests` | Sensory profile defaults and persistence helpers |
 
