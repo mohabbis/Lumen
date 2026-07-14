@@ -29,12 +29,12 @@ Everything below is filtered so it strengthens the moat instead of diluting it.
 
 ### 1. A second real bridge: local-LAN device support (the Homebridge move)
 
-> **Status (July 2026):** engine landed. `LocalNetworkBridge` + the
-> `LocalDeviceTransport` seam + `ShellyGen2Transport` + capabilities + tests are
-> in `Integrations/LocalNetwork/` (`LumenTests/LocalNetworkTests.swift`).
-> Remaining: a SwiftData `LocalDeviceConfig` model + a Settings surface to author
-> devices, then register the bridge in `RootView`. Tracked as "scaffolded but not
-> yet wired" in `CLAUDE.md`.
+> **Status (July 2026): shipped & wired.** `LocalNetworkBridge` + the
+> `LocalDeviceTransport` seam + `ShellyGen2Transport` + capabilities live in
+> `Integrations/LocalNetwork/`. Persistence (`LocalDeviceRecord`, schema V4) +
+> `LocalDeviceService` + **Settings → Local Devices** (`LocalDeviceListView` /
+> `LocalDeviceDetailView`) now let users author devices; the bridge registers in
+> `RootView.bootstrap`. Covered by `LocalNetworkTests` + `LocalDeviceServiceTests`.
 
 **Why:** Today, a Shelly relay, a Tasmota/ESPHome switch, a LIFX bulb on LAN, or a
 Tuya device that never made it into Apple Home is invisible to Lumen. This is the

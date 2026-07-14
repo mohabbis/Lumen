@@ -33,8 +33,8 @@ enum PersistenceCoordinator {
         )
 
         let schema = Schema(
-            LumenSchemaV3.models,
-            version: LumenSchemaV3.versionIdentifier
+            LumenSchemaV4.models,
+            version: LumenSchemaV4.versionIdentifier
         )
 
         // When CloudKit is enabled, prefer the synced store but degrade to local-only
@@ -75,8 +75,8 @@ enum PersistenceCoordinator {
 
     static func makeInMemoryContainer() -> ModelContainer {
         let schema = Schema(
-            LumenSchemaV3.models,
-            version: LumenSchemaV3.versionIdentifier
+            LumenSchemaV4.models,
+            version: LumenSchemaV4.versionIdentifier
         )
         // cloudKitDatabase: .none is required — without it SwiftData defaults to
         // .automatic, detects the host app's iCloud entitlement, and tries to set up

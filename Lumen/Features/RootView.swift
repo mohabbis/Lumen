@@ -14,6 +14,7 @@ struct RootView: View {
     @Environment(SceneService.self) private var sceneService
     @Environment(SensorObservationService.self) private var sensorService
     @Environment(LocationService.self) private var locationService
+    @Environment(LocalDeviceService.self) private var localDeviceService
     @Environment(\.modelContext)   private var modelContext
     @Environment(\.horizontalSizeClass) private var sizeClass
 
@@ -158,6 +159,7 @@ struct RootView: View {
         if ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] == nil {
             let hkBridge = HomeKitBridge()
             deviceService.registerBridge(hkBridge)
+            await localDeviceService.reloadBridge()
         }
     }
 }

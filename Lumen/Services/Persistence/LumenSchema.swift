@@ -56,6 +56,25 @@ enum LumenSchemaV3: VersionedSchema {
     ]
 }
 
+// MARK: - Versioned Schema V4
+
+enum LumenSchemaV4: VersionedSchema {
+    static var versionIdentifier = Schema.Version(4, 0, 0)
+
+    static var models: [any PersistentModel.Type] = [
+        Home.self,
+        Room.self,
+        Zone.self,
+        PlannedDevice.self,
+        Scene.self,
+        SceneAction.self,
+        RemoteProfile.self,
+        IRCommand.self,
+        ExecutionEvent.self,
+        LocalDeviceRecord.self,    // new in V4 — local-network device authoring records
+    ]
+}
+
 // MARK: - Migration Plan
 
 enum LumenSchemaMigrationPlan: SchemaMigrationPlan {
@@ -63,6 +82,7 @@ enum LumenSchemaMigrationPlan: SchemaMigrationPlan {
         LumenSchemaV1.self,
         LumenSchemaV2.self,
         LumenSchemaV3.self,
+        LumenSchemaV4.self,
     ]
 
     static var stages: [MigrationStage] = [
@@ -78,6 +98,11 @@ enum LumenSchemaMigrationPlan: SchemaMigrationPlan {
         MigrationStage.lightweight(
             fromVersion: LumenSchemaV2.self,
             toVersion:   LumenSchemaV3.self
+        ),
+        // V3 → V4: add LocalDeviceRecord model (a new table — additive/lightweight).
+        MigrationStage.lightweight(
+            fromVersion: LumenSchemaV3.self,
+            toVersion:   LumenSchemaV4.self
         ),
     ]
 }
