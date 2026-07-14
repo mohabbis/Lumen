@@ -17,6 +17,8 @@ final class SceneService {
     private(set) var lastAutoExecutionEvent: (scene: Scene, event: GeofenceEvent)?
 
     private var monitoringTask: Task<Void, Never>?
+    private var scheduleTask: Task<Void, Never>?
+    private var lastScheduledFire: [UUID: Date] = [:]
 
     init(modelContext: ModelContext, deviceService: DeviceService) {
         self.modelContext = modelContext
@@ -92,6 +94,70 @@ final class SceneService {
         }
     }
 
+    // MARK: - Schedule Monitoring
+    // Scheduled scenes fire directly — the user set the time ahead of time, which
+    // is the consent (see ROADMAP.md "Competitive watch"). Every fire posts a
+    // notification so the automation stays explainable and reversible.
+
+    func startMonitoringScheduledScenes(tick: Duration = .seconds(30), grace: TimeInterval = 120) {
+        scheduleTask?.cancel()
+        scheduleTask = Task {
+            while !Task.isCancelled {
+                await handleScheduledFires(now: Date(), grace: grace)
+                try? await Task.sleep(for: tick)
+            }
+        }
+    }
+
+    func stopMonitoringScheduledScenes() {
+        scheduleTask?.cancel()
+        scheduleTask = nil
+    }
+
+    private func handleScheduledFires(now: Date, grace: TimeInterval) async {
+        let descriptor = FetchDescriptor<Scene>()
+        guard let scenes = try? modelContext.fetch(descriptor) else { return }
+
+        let due = Self.scenesDue(at: now, in: scenes, lastFired: lastScheduledFire, grace: grace)
+        for scene in due {
+            lastScheduledFire[scene.id] = now
+            do {
+                try await execute(scene)
+                NotificationService.shared.notifyAutomationExecuted(
+                    sceneName: scene.name,
+                    eventType: "schedule",
+                    deviceCount: scene.actions.count
+                )
+            } catch {
+                NotificationService.shared.notifyAutomationFailed(
+                    sceneName: scene.name,
+                    reason: error.localizedDescription
+                )
+            }
+        }
+    }
+
+    // Pure routing: which scenes are due to fire at `now`, given when each last
+    // fired. Testable without SwiftData, timers, or notifications.
+    static func scenesDue(
+        at now: Date,
+        in scenes: [Scene],
+        lastFired: [UUID: Date],
+        grace: TimeInterval = 120,
+        calendar: Calendar = .current
+    ) -> [Scene] {
+        scenes.filter { scene in
+            guard let minutes = scene.scheduleMinutesSinceMidnight else { return false }
+            return ScheduleTiming.isDue(
+                minutesSinceMidnight: minutes,
+                now: now,
+                lastFired: lastFired[scene.id],
+                grace: grace,
+                calendar: calendar
+            )
+        }
+    }
+
     // MARK: - Scene CRUD
 
     @discardableResult
@@ -143,6 +209,20 @@ final class SceneService {
         if let iconName { scene.iconName = iconName }
         if let isFavorite { scene.isFavorite = isFavorite }
         if let geofenceTrigger { scene.geofenceTrigger = geofenceTrigger }
+        scene.updatedAt = Date()
+        try modelContext.save()
+    }
+
+    /// Sets (or clears, with `nil`) a scene's daily schedule. `minutesSinceMidnight`
+    /// is clamped to a valid time of day. Clears the last-fired record so a newly
+    /// set time can still fire today.
+    func setSchedule(minutesSinceMidnight: Int?, on scene: Scene) throws {
+        if let minutes = minutesSinceMidnight {
+            scene.scheduleMinutesSinceMidnight = min(max(minutes, 0), 1439)
+        } else {
+            scene.scheduleMinutesSinceMidnight = nil
+        }
+        lastScheduledFire[scene.id] = nil
         scene.updatedAt = Date()
         try modelContext.save()
     }
