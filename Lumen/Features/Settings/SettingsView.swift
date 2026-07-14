@@ -39,6 +39,7 @@ struct SettingsView: View {
                 homeSection
                 bridgesSection
                 remotesSection
+                localDevicesSection
                 preferencesSection
                 sensoryProfileSection
                 aboutSection
@@ -172,6 +173,28 @@ struct SettingsView: View {
             } label: {
                 HStack {
                     Text("IR Remotes")
+                        .font(.system(size: 15))
+                        .foregroundStyle(.white)
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(Color.white.opacity(0.3))
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 14)
+            }
+        }
+    }
+
+    // MARK: - Local Devices Section
+
+    private var localDevicesSection: some View {
+        SettingsDarkCard(title: "LOCAL DEVICES") {
+            NavigationLink {
+                LocalDeviceListView()
+            } label: {
+                HStack {
+                    Text("Wi-Fi Devices")
                         .font(.system(size: 15))
                         .foregroundStyle(.white)
                     Spacer()

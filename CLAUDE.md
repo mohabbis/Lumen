@@ -73,6 +73,7 @@ Most services are `@Observable @MainActor` classes passed through the SwiftUI en
 | `NotificationService` | `Services/` | UNUserNotificationCenter wrapper; called by `SceneService` after automation fires |
 | `SensorObservationService` | `Services/Intelligence/` | Subscribes to motion/contact `AsyncStream`s from all capable devices. Wired in `RootView` via `DeviceStateStore.onDevicesDiscovered/onDevicesRemoved` |
 | `RemoteService` | `Services/Remote/` | Sends IR commands to a user-configured bridge over HTTP via an injectable `IRTransport` (default `HTTPIRTransport`). Standalone, **not** a `SmartHomeBridge` — IR is fire-and-forget |
+| `LocalDeviceService` | `Services/LocalNetwork/` | `LocalDeviceRecord` CRUD; keeps the `LocalNetworkBridge` in sync by republishing a thread-safe config snapshot and re-registering the bridge through `DeviceService` on every change |
 | `KeychainService` | `Services/` | Singleton (`KeychainService.shared`) wrapping the Security framework for secure string/data storage. **Not** an `@Observable` environment service — used directly when a feature needs secure storage |
 
 #### Calm-tone surfaces (the consent + explainability layer)
@@ -145,8 +146,8 @@ The "Lumen noticed" dashboard suggestion is produced by `SuggestionEngine`, a pu
 
 #### SwiftData persistence (`Services/Persistence/`)
 
-- Schema is versioned in `LumenSchema.swift`: `LumenSchemaV1` → `V2` → `V3`, with a lightweight `LumenSchemaMigrationPlan`. `PersistenceCoordinator` always uses `LumenSchemaV3`.
-- The registered `@Model` types (identical across V1–V3 except `ExecutionEvent`, added in V2) are: `Home`, `Room`, `Zone`, `PlannedDevice`, `Scene`, `SceneAction`, `RemoteProfile`, `IRCommand`, `ExecutionEvent`. V2→V3 only drops `@Attribute(.unique)` from `id` fields for CloudKit compatibility; `Home.latitude`/`longitude`, and later `RemoteProfile.transportKindRaw`/`broadlinkMAC`/`broadlinkDeviceType`, were added via SwiftData's inferred nullable-column migration (no new version).
+- Schema is versioned in `LumenSchema.swift`: `LumenSchemaV1` → `V2` → `V3` → `V4`, with a lightweight `LumenSchemaMigrationPlan`. `PersistenceCoordinator` always uses `LumenSchemaV4`.
+- The registered `@Model` types are: `Home`, `Room`, `Zone`, `PlannedDevice`, `Scene`, `SceneAction`, `RemoteProfile`, `IRCommand`, `ExecutionEvent` (added in V2), `LocalDeviceRecord` (added in V4). V2→V3 only drops `@Attribute(.unique)` from `id` fields for CloudKit compatibility; V3→V4 adds the `LocalDeviceRecord` table (additive/lightweight). `Home.latitude`/`longitude`, and later `RemoteProfile.transportKindRaw`/`broadlinkMAC`/`broadlinkDeviceType`, were added via SwiftData's inferred nullable-column migration (no new version).
 - CloudKit sync is **off** (`PersistenceCoordinator.enableCloudKitSync = false`). The flag is guarded by a test (`PersistenceTests.testCloudKitSyncIsGatedOffForBeta`). Flip only after provisioning `iCloud.com.muharafiq.lumen` in the Apple Developer portal.
 - The old `MuhomeDataModels.swift` / `SceneModels.swift` legacy-struct files (`MuhaScene`, `MuhaSceneRecord`, etc.) have been **removed**. `TimeOfDay` — the one enum from that era still in use — now lives in its own file, `Lumen/Models/TimeOfDay.swift`. There is no dead legacy schema to avoid anymore.
 
@@ -161,6 +162,7 @@ SwiftData `@Model` types are split by domain across two roots:
 | `Lumen/Models/` | `TimeOfDay`, `PlanningStage` (planned→commissioned lifecycle enum for `PlannedDevice`) |
 | `Lumen/Domain/Models/Automation/` | `Scene`, `SceneAction` |
 | `Lumen/Domain/Models/Remote/` | `RemoteProfile`, `IRCommand` |
+| `Lumen/Domain/Models/LocalNetwork/` | `LocalDeviceRecord` (authoring record for a local-network device → `LocalDeviceConfig`) |
 
 `Home` owns a cascade relationship to `[Zone]`; `Zone` can hang off either a `Home` (top-level) or a `Room` (sub-zone) with optional normalised `positionX/Y` coordinates.
 
@@ -169,7 +171,6 @@ SwiftData `@Model` types are split by domain across two roots:
 Some surfaces are persisted in the schema and have view/view-model code, but are **not** reachable from navigation yet. Treat them as in-progress, not dead code — extend rather than delete:
 
 - **Zones** (`Models/Space/Zone.swift`): part of the schema and relationships, but no service or UI surfaces zones yet.
-- **Local-network devices** (`Integrations/LocalNetwork/`): the `LocalNetworkBridge` engine + Shelly transport are built and tested, but nothing persists `LocalDeviceConfig`s or registers the bridge yet. Next step: a SwiftData config model + a Settings surface to author devices, then register the bridge in `RootView` like `HomeKitBridge`. See the subsection below.
 
 #### Local-network devices (`Integrations/LocalNetwork/`)
 
@@ -180,7 +181,9 @@ The seam is `Integrations/LocalNetwork/LocalDeviceTransport.swift`, which passes
 
 `LocalDeviceKind` maps a device to its component + capability set (`shellySwitch` → on/off; `shellyDimmer` → on/off + brightness). Unlike HomeKit there is no OS authorization gate and no push channel — local HTTP is read on demand, so the state stream stays open for a future poller but only emits an echo after an executed action. The bridge is driven by injected `[LocalDeviceConfig]` + a transport factory, so the whole vertical is testable without a network.
 
-Tests: pure Shelly codec (vs crafted URLs/JSON) + bridge/device/capability flow (vs a fake `LocalDeviceTransport`) are covered by `LumenTests/LocalNetworkTests.swift`. Unlike IR, this **is** a `SmartHomeBridge` — local devices have controllable state and belong in the device/scene pipeline.
+**Wired and reachable via Settings → Local Devices.** `LocalDeviceRecord` (`@Model`, schema V4) persists the user-authored devices; `LocalDeviceService` (`@Observable @MainActor`) owns their CRUD and keeps the bridge in sync — on any change it republishes a thread-safe `LocalDeviceConfigProvider` snapshot and **re-registers** the bridge through `DeviceService` (so added devices are discovered and removed ones pruned). `LocalDeviceListView` → `LocalDeviceDetailView` author name/address/kind/channel. The bridge is registered in `RootView.bootstrap` (behind the same `XCTest` guard as HomeKit) via `LocalDeviceService.reloadBridge()`.
+
+Tests: pure Shelly codec (vs crafted URLs/JSON) + bridge/device/capability flow (vs a fake `LocalDeviceTransport`) are covered by `LumenTests/LocalNetworkTests.swift`; `LocalDeviceService` CRUD → bridge (re)registration by `LumenTests/LocalDeviceServiceTests.swift`. Unlike IR, this **is** a `SmartHomeBridge` — local devices have controllable state and belong in the device/scene pipeline.
 
 #### IR remotes (`Features/Remote/`, `Integrations/IR/`, `Domain/Models/Remote/`)
 
@@ -240,6 +243,7 @@ Coverage groups (~195 tests at time of writing):
 | `RemoteIRTests` | IR endpoint normalization, HTTP request building, `RemoteService` transport routing + learn-capability (fake transports), `RemoteViewModel` command/hostname/transport CRUD |
 | `BroadlinkTests` | Broadlink codec vs crafted vectors (checksum, AES round-trip, packet framing, auth, IR/learn/discovery payloads) + `BroadlinkTransport` actor flow vs a fake `UDPChannel` (send, learn, timeout) |
 | `LocalNetworkTests` | Shelly Gen2 codec (URL building, brightness scaling, status parsing, address normalization) + `LocalNetworkBridge`/device/capability flow vs a fake `LocalDeviceTransport` (discover, reachability probe, action routing, device lookup) |
+| `LocalDeviceServiceTests` | `LocalDeviceService` CRUD → bridge (re)registration: add surfaces a device in the store, delete prunes it, kind/address edits republish, all vs a stub transport |
 | `DashboardPresentationTests` | Dashboard notice / presentation helpers |
 | `SensoryProfileTests` | Sensory profile defaults and persistence helpers |
 

@@ -16,6 +16,7 @@ struct LumenApp: App {
     @State private var sensorService = SensorObservationService()
     @State private var locationService = LocationService()
     @State private var remoteService = RemoteService()
+    @State private var localDeviceService: LocalDeviceService
 
     init() {
         let c = PersistenceCoordinator.makeContainer()
@@ -26,11 +27,13 @@ struct LumenApp: App {
         let home  = HomeService(modelContext: ctx)
         let dev   = DeviceService(modelContext: ctx, stateStore: store)
         let scene = SceneService(modelContext: ctx, deviceService: dev)
+        let local = LocalDeviceService(modelContext: ctx, deviceService: dev)
 
         _stateStore    = State(wrappedValue: store)
         _homeService   = State(wrappedValue: home)
         _deviceService = State(wrappedValue: dev)
         _sceneService  = State(wrappedValue: scene)
+        _localDeviceService = State(wrappedValue: local)
     }
 
     var body: some SwiftUI.Scene {
@@ -44,6 +47,7 @@ struct LumenApp: App {
                 .environment(sensorService)
                 .environment(locationService)
                 .environment(remoteService)
+                .environment(localDeviceService)
         }
         .modelContainer(container)
     }
