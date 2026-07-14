@@ -155,6 +155,9 @@ struct RootView: View {
         
         // Start geofence event monitoring
         sceneService.startMonitoringGeofenceEvents(from: locationService)
+
+        // Start daily-schedule monitoring (scheduled scenes fire directly)
+        sceneService.startMonitoringScheduledScenes()
         
         if ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] == nil {
             let hkBridge = HomeKitBridge()

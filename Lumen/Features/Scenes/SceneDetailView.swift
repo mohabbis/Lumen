@@ -13,6 +13,10 @@ struct SceneDetailView: View {
     @State private var isShowingAddAction = false
     @State private var editName: String = ""
     @State private var selectedGeofenceTrigger: GeofenceTrigger = .none
+    @State private var isScheduled: Bool = false
+    @State private var scheduleTime: Date = Calendar.current.date(
+        bySettingHour: 21, minute: 0, second: 0, of: Date()
+    ) ?? Date()
 
     var body: some View {
         ZStack {
@@ -32,6 +36,14 @@ struct SceneDetailView: View {
         .onAppear {
             editName = scene.name
             selectedGeofenceTrigger = scene.geofenceTrigger
+            if let (hour, minute) = scene.scheduledTime {
+                isScheduled = true
+                scheduleTime = Calendar.current.date(
+                    bySettingHour: hour, minute: minute, second: 0, of: Date()
+                ) ?? scheduleTime
+            } else {
+                isScheduled = false
+            }
         }
         .sheet(isPresented: $isShowingAddAction) {
             AddSceneActionSheet(
@@ -131,7 +143,54 @@ struct SceneDetailView: View {
                 }
             }
             .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 16))
+
+            scheduleCard
         }
+    }
+
+    private var scheduleCard: some View {
+        VStack(spacing: 0) {
+            Toggle(isOn: $isScheduled) {
+                Label("Run on a schedule", systemImage: "clock.fill")
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundStyle(.white)
+            }
+            .tint(Color(hex: "#C49A6C"))
+            .onChange(of: isScheduled) { _, enabled in
+                // Ignore the toggle flip that comes from onAppear syncing to the model.
+                guard enabled != (scene.scheduleMinutesSinceMidnight != nil) else { return }
+                viewModel.setSchedule(
+                    minutesSinceMidnight: enabled ? Self.minutes(from: scheduleTime) : nil,
+                    on: scene
+                )
+            }
+            .padding(16)
+
+            if isScheduled {
+                Divider().overlay(Color.white.opacity(0.08))
+                DatePicker(
+                    "Time",
+                    selection: $scheduleTime,
+                    displayedComponents: .hourAndMinute
+                )
+                .datePickerStyle(.compact)
+                .tint(Color(hex: "#C49A6C"))
+                .foregroundStyle(.white)
+                .onChange(of: scheduleTime) { _, newValue in
+                    let mins = Self.minutes(from: newValue)
+                    guard mins != scene.scheduleMinutesSinceMidnight else { return }
+                    viewModel.setSchedule(minutesSinceMidnight: mins, on: scene)
+                }
+                .padding(16)
+
+                Divider().overlay(Color.white.opacity(0.08))
+                Text(scheduleHint)
+                    .font(.system(size: 13))
+                    .foregroundStyle(Color.white.opacity(0.45))
+                    .padding(16)
+            }
+        }
+        .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 16))
     }
 
     private var geofenceHint: String {
@@ -143,6 +202,16 @@ struct SceneDetailView: View {
         case .onDeparture:
             return "Runs automatically when you leave home. You'll get a notification."
         }
+    }
+
+    private var scheduleHint: String {
+        let formatted = scheduleTime.formatted(date: .omitted, time: .shortened)
+        return "Runs automatically at \(formatted) every day. It fires on its own — you'll get a notification each time."
+    }
+
+    private static func minutes(from date: Date) -> Int {
+        let comps = Calendar.current.dateComponents([.hour, .minute], from: date)
+        return (comps.hour ?? 0) * 60 + (comps.minute ?? 0)
     }
 
     // MARK: - Actions

@@ -27,6 +27,10 @@ final class Scene {
     var sortOrder: Int
     var isFavorite: Bool
     var geofenceTrigger: GeofenceTrigger
+    // Daily schedule as minutes since local midnight (0…1439). `nil` means the
+    // scene has no schedule. Optional, so SwiftData infers a lightweight
+    // nullable-column migration (no schema-version bump), like Home.latitude.
+    var scheduleMinutesSinceMidnight: Int?
     var createdAt: Date
     var updatedAt: Date
 
@@ -38,17 +42,25 @@ final class Scene {
         name: String,
         iconName: String = "sparkles",
         sortOrder: Int = 0,
-        geofenceTrigger: GeofenceTrigger = .none
+        geofenceTrigger: GeofenceTrigger = .none,
+        scheduleMinutesSinceMidnight: Int? = nil
     ) {
         self.id = id
         self.name = name
         self.iconName = iconName
         self.sortOrder = sortOrder
         self.geofenceTrigger = geofenceTrigger
+        self.scheduleMinutesSinceMidnight = scheduleMinutesSinceMidnight
         self.isFavorite = false
         self.createdAt = Date()
         self.updatedAt = Date()
         self.actions = []
+    }
+
+    /// The scene's schedule as (hour, minute), or nil when unscheduled.
+    var scheduledTime: (hour: Int, minute: Int)? {
+        guard let minutes = scheduleMinutesSinceMidnight, (0..<1440).contains(minutes) else { return nil }
+        return (minutes / 60, minutes % 60)
     }
 
     func asSnapshots() -> [SceneActionSnapshot] {

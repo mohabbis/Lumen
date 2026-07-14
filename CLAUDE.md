@@ -68,7 +68,7 @@ Most services are `@Observable @MainActor` classes passed through the SwiftUI en
 | `HomeService` | `Services/Home/` | Home / Room CRUD, primary-home promotion |
 | `DeviceService` | `Services/Device/` | PlannedDevice CRUD; routes `SceneActionSnapshot` to the right bridge |
 | `DeviceStateStore` | `Services/Device/` | In-memory live state for all connected devices — rebuilt from bridges on each launch, never persisted |
-| `SceneService` | `Services/Scene/` | Scene CRUD, execution, geofence-triggered automation. Owns a cancellable `monitoringTask` for the geofence poller |
+| `SceneService` | `Services/Scene/` | Scene CRUD, execution, geofence-triggered + daily-schedule automation. Owns cancellable `monitoringTask` (geofence poller) and `scheduleTask` (schedule poller) |
 | `LocationService` | `Services/` | CLLocationManager wrapper; publishes `GeofenceEvent` when the user crosses the home radius. Gates first-check event emission via `hasCompletedFirstCheck` so launching at home does not fire a spurious arrival |
 | `NotificationService` | `Services/` | UNUserNotificationCenter wrapper; called by `SceneService` after automation fires |
 | `SensorObservationService` | `Services/Intelligence/` | Subscribes to motion/contact `AsyncStream`s from all capable devices. Wired in `RootView` via `DeviceStateStore.onDevicesDiscovered/onDevicesRemoved` |
@@ -131,6 +131,7 @@ A convention: when view code carries non-trivial logic, lift it into a pure `str
 | `ReasoningCalculator` | `LumenReasoningView` | Signal list + suggestion label from ambient state (incl. confidence / habit signals from the scored layer) |
 | `SuggestionEngine` | `HomeDashboardView` | Scored-heuristic ranking of scenes → the "Lumen noticed" suggestion + explainable factors (see below) |
 | `SceneService.scenesMatching(event:in:)` | `SceneService.handleGeofenceEvent` | Pure routing — which scenes fire for a given event |
+| `ScheduleTiming` / `SceneService.scenesDue(at:in:lastFired:)` | `SceneService` schedule poller | Pure: whether a daily-schedule scene is due now (grace window, no same-day refire, midnight-safe) |
 
 Follow this pattern for new feature work.
 
@@ -214,6 +215,10 @@ The flag defaults to `true`. Tests rely on it indirectly: `DeviceService.addPlan
 - During tests, `RootView` skips registering the HomeKit bridge (`if ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] == nil`). The poller still starts but has nothing to react to.
 - Arrival and departure events trigger a status overlay in `HomeDashboardView` (e.g., “🏠 Welcome Home!” or “🌙 Away Mode”) to inform the user of the detected state change.
 
+#### Schedule automation
+
+A scene can carry a daily schedule (`Scene.scheduleMinutesSinceMidnight: Int?`, nullable → inferred migration, no schema bump). `SceneService.startMonitoringScheduledScenes()` runs a `scheduleTask` poller (30 s tick) that fires due scenes via the same `execute(_:)` path and posts a notification. **Scheduled scenes fire directly** — the user set the time ahead of time, which is the consent — a deliberate decision logged in `ROADMAP.md` (distinct from the forbidden auto-apply-on-a-hunch; inferred `SuggestionEngine` suggestions stay confirmation-gated). Purity lives in `ScheduleTiming` (grace window so a missed schedule doesn't fire stale; no same-day refire) and `SceneService.scenesDue(...)`. Authored in `SceneDetailView`'s automation section (toggle + `DatePicker`), persisted via `SceneService.setSchedule(...)`. The poller starts in `RootView.bootstrap` next to the geofence poller.
+
 ### Tests
 
 The `LumenTests` target uses XCTest with an in-memory `ModelContainer` via `PersistenceCoordinator.makeInMemoryContainer()`. Tests are `@MainActor` where they touch services or view models.
@@ -236,6 +241,7 @@ Coverage groups (~195 tests at time of writing):
 | `SceneApprovalTests` | Approval flow (request/cancel/confirm), `SceneActionDescription` humanization |
 | `SceneActionBuilderTests` | Eligible-device filtering (read-only exclusion), sorted controllable-capability options, default payload per capability |
 | `GeofenceRoutingTests` | `scenesMatching` routes events to correctly-triggered scenes |
+| `ScheduleTests` | `ScheduleTiming` due-logic (grace window, no same-day refire, next-day, midnight) + `SceneService.scenesDue` routing |
 | `RhythmTests` | `RhythmTiming` block math, midnight wrap |
 | `ReasoningTests` | `ReasoningCalculator` signal generation, suggestion labels, confidence/habit signals from the scored layer |
 | `SuggestionEngineTests` | `SuggestionEngine` scoring, surface threshold, ±1h midnight-wrap habit window, presence/geofence boost, deterministic ranking, explainable factors |

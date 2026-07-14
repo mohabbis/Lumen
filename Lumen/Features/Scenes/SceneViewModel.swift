@@ -85,6 +85,15 @@ final class SceneViewModel {
         }
     }
 
+    /// Sets (minutes since midnight) or clears (nil) a scene's daily schedule.
+    func setSchedule(minutesSinceMidnight: Int?, on scene: Scene) {
+        do {
+            try sceneService.setSchedule(minutesSinceMidnight: minutesSinceMidnight, on: scene)
+        } catch {
+            self.error = error
+        }
+    }
+
     func addAction(
         to scene: Scene,
         deviceID: UUID,

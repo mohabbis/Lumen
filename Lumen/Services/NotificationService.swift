@@ -34,6 +34,9 @@ final class NotificationService {
         case "departure":
             content.subtitle = "You left home"
             content.body = "'\(sceneName)' scene activated for \(deviceCount) device\(deviceCount == 1 ? "" : "s")"
+        case "schedule":
+            content.subtitle = "Ran on schedule"
+            content.body = "'\(sceneName)' ran on schedule — you set this up. Tap to adjust."
         default:
             content.body = "'\(sceneName)' scene activated"
         }
