@@ -80,6 +80,7 @@ struct HomeDashboardView: View {
         .sheet(item: $lumenSheet) { sheet in
             lumenSheetContent(sheet)
         }
+        .animation(appState.sensoryProfile.shouldReduceMotion ? .default : .spring(response: 0.42, dampingFraction: 0.86), value: isStatusOverlayVisible)
         .onAppear {
             viewModel.load()
             locationService.requestLocationPermission()
@@ -458,6 +459,9 @@ struct HomeDashboardView: View {
 
     private func handleLumenSuggestion() {
         lumenSheet = nil
+        
+        // Record that a suggestion was shown today (for sensory profile limits)
+        appState.recordSuggestionShown()
 
         // Execute the same scene the Action sheet displayed — single source of truth.
         if let sceneName = suggestedSceneName, let scene = findScene(named: sceneName) {
@@ -516,7 +520,8 @@ struct HomeDashboardView: View {
             hourOfDay: Calendar.current.component(.hour, from: Date()),
             candidates: suggestionCandidates,
             dailySuggestionLimit: appState.sensoryProfile.dailySuggestionLimit,
-            pausedSuggestions: appState.suggestionsPaused
+            pausedSuggestions: appState.suggestionsPaused,
+            hasShownSuggestionToday: appState.hasReachedDailySuggestionLimit
         ).topSuggestion()
     }
 

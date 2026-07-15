@@ -1,30 +1,38 @@
-```swift
+```
+# Build artifacts
+*.o
+*.obj
+*.a
+*.lib
+*.dylib
+*.so
+*.dll
+*.exe
+*.out
+
 # Xcode
 *.xcodeproj/
 *.xcworkspace/
-*.xcuserstate
-project.xcworkspace/xcuserdata/
-xcuserdata/
-
-# Build
+*.xcarchive/
+*.app/
 build/
 DerivedData/
 
-# Swift Package Manager
-.swiftpm/
-Package.resolved
+# Swift
+*.swiftmodule
+*.swiftdoc
+*.sib
 
-# Temporary files
-*.tmp
+# Dependencies
+Packages/
+.build/
+.swift-version
+
+# Logs
 *.log
-*.swp
 
 # Environment
 .env
 .env.local
-*.env.*
-
-# Dependencies
-Pods/
-Carthage/
+.env.*
 ```
