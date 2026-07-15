@@ -339,7 +339,7 @@ function Waitlist() {
             <Mail size={15} className="signup-field-icon" />
             <input name="email" type="email" placeholder="you@example.com" required />
           </div>
-          <button disabled={status === 'loading'}>
+          <button disabled={status === 'loading'} aria-busy={status === 'loading'}>
             {status === 'loading' ? 'Setting up…' : 'Continue'}
             <ArrowRight size={15} />
           </button>
@@ -361,15 +361,17 @@ function Waitlist() {
 
         <p className="signup-platform">Requires iPhone · iOS 17 or later</p>
 
-        {status === 'success' && (
-          <p className="form-note">You&apos;re in. We&apos;ll email your TestFlight invite when a spot opens.</p>
-        )}
-        {status === 'error' && (
-          <p className="form-note error">
-            Something went wrong. Try{' '}
-            <a href="mailto:m.rafiq2006@icloud.com">m.rafiq2006@icloud.com</a>.
-          </p>
-        )}
+        <div className="waitlist-status" role="status" aria-live="polite">
+          {status === 'success' && (
+            <p className="form-note">You&apos;re in. We&apos;ll email your TestFlight invite when a spot opens.</p>
+          )}
+          {status === 'error' && (
+            <p className="form-note error">
+              Something went wrong. Try{' '}
+              <a href="mailto:m.rafiq2006@icloud.com">m.rafiq2006@icloud.com</a>.
+            </p>
+          )}
+        </div>
       </FadeIn>
     </section>
   );
@@ -385,6 +387,7 @@ function SiteShell() {
     <AmbientContext.Provider value={ambient.setAmbient}>
       <PhoneProvider onAmbientChange={ambient.setAmbient}>
         <main className="site-shell">
+          <a className="skip-link" href="#top">Skip to content</a>
           <AmbientBackdrop colors={ambient.colors} front={ambient.front} />
           <div className="grain" />
 
