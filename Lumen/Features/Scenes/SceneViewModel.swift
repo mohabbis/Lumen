@@ -56,8 +56,10 @@ final class SceneViewModel {
         Task {
             do {
                 try await sceneService.execute(scene)
+                LumenHaptics.success()
             } catch {
                 self.error = error
+                LumenHaptics.error()
             }
             executingSceneID = nil
         }
@@ -69,8 +71,12 @@ final class SceneViewModel {
     }
 
     func toggleFavorite(_ scene: Scene) {
-        do { try sceneService.updateScene(scene, isFavorite: !scene.isFavorite) }
-        catch { self.error = error }
+        do {
+            try sceneService.updateScene(scene, isFavorite: !scene.isFavorite)
+            LumenHaptics.selection()
+        } catch {
+            self.error = error
+        }
     }
 
     func updateScene(

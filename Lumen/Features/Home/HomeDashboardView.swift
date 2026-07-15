@@ -89,6 +89,7 @@ struct HomeDashboardView: View {
             showStatusOverlay()
         }
         .onChange(of: locationService.isAtHome) { _, _ in
+            LumenHaptics.impact(.soft)
             showStatusOverlay()
         }
         .onDisappear {
