@@ -1,0 +1,105 @@
+/* =====================================================
+   LUMEN - Accessibility & interaction polish
+   Keyboard focus visibility, skip link, anchor-scroll
+   offset under the sticky nav, and reduced-motion-aware
+   smooth scrolling. Layered on top of the existing chrome
+   so the visual design is untouched for mouse users.
+   ===================================================== */
+
+:root {
+  --focus-ring: rgba(138, 180, 248, 0.95);
+}
+
+html[data-theme='light'] {
+  --focus-ring: rgba(79, 111, 208, 0.95);
+}
+
+/* ===== KEYBOARD FOCUS VISIBILITY =====
+   Only shows for keyboard/AT users (:focus-visible), so mouse
+   clicks stay ring-free. Outline follows each element's own
+   border-radius in modern browsers, so rounded controls stay round. */
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+
+/* The waitlist input clears its outline explicitly (class specificity),
+   so restore a visible focus ring for keyboard users at matching weight. */
+.waitlist-form input:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* ===== SKIP TO CONTENT =====
+   Off-screen until focused, then slides into the top-left so a
+   keyboard user can jump past the nav on the first Tab press. */
+
+.skip-link {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 100;
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: var(--cta-bg, #8ab4f8);
+  color: var(--cta-text, #0a0c12);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  box-shadow: 0 12px 30px -12px rgba(138, 180, 248, 0.7);
+  transform: translateY(-160%);
+  transition: transform 0.18s ease;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skip-link {
+    transition: none;
+  }
+}
+
+/* ===== ANCHOR-SCROLL OFFSET =====
+   The nav is sticky, so bare #anchor jumps land section headings
+   underneath it. Reserve the nav's height at the top of every
+   scroll so targets settle just below it. */
+
+html {
+  scroll-padding-top: 88px;
+}
+
+@media (max-width: 600px) {
+  html {
+    scroll-padding-top: 72px;
+  }
+}
+
+/* ===== SMOOTH IN-PAGE SCROLLING ===== */
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* ===== BRAND-TINTED TEXT SELECTION ===== */
+
+::selection {
+  background: rgba(138, 180, 248, 0.28);
+  color: var(--text-heading, #f7f9fc);
+}
+
+html[data-theme='light'] ::selection {
+  background: rgba(79, 111, 208, 0.22);
+  color: var(--text-heading, #0f1322);
+}

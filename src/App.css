@@ -60,7 +60,10 @@ h1, h2, h3, h4, p {
 
 .site-shell {
   width: 100%;
-  overflow-x: hidden;
+  /* clip (not hidden) contains horizontal overflow without turning the
+     shell into a scroll container — which would force overflow-y to `auto`
+     and break the sticky nav's position. */
+  overflow-x: clip;
   min-height: 100vh;
   background:
     radial-gradient(ellipse at 50% -10%, rgba(138,180,248,0.20) 0%, transparent 52%),
