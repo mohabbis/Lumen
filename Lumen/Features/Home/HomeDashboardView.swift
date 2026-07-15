@@ -102,7 +102,7 @@ struct HomeDashboardView: View {
     private var ambientBackground: some View {
         ZStack {
             if locationService.isAtHome {
-                Color(hex: "#0E0819")
+                Color.lumenBackground
                 LinearGradient(
                     colors: [timeOfDay.backgroundColors.first ?? .clear, .clear],
                     startPoint: .top,
@@ -207,10 +207,10 @@ struct HomeDashboardView: View {
                 Text(locationService.isAtHome ? "HOME MODE" : "AWAY MODE")
                     .font(.system(size: 10, weight: .semibold))
                     .tracking(2)
-                    .foregroundStyle(locationService.isAtHome ? Color(hex: "#C49A6C") : Color.white.opacity(0.35))
+                    .foregroundStyle(locationService.isAtHome ? Color.lumenAccent : Color.white.opacity(0.35))
                 Image(systemName: locationService.isAtHome ? "house.fill" : "location.fill")
                     .font(.system(size: 11))
-                    .foregroundStyle(locationService.isAtHome ? Color(hex: "#C49A6C") : Color.white.opacity(0.35))
+                    .foregroundStyle(locationService.isAtHome ? Color.lumenAccent : Color.white.opacity(0.35))
             }
         }
         .padding(.top, 4)
@@ -400,10 +400,10 @@ struct HomeDashboardView: View {
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 12)
-                .background(Color(hex: "#C49A6C"), in: RoundedRectangle(cornerRadius: 18))
+                .background(Color.lumenAccent, in: RoundedRectangle(cornerRadius: 18))
             }
             .padding(24)
-            .background(Color(hex: "#0E0819").ignoresSafeArea())
+            .background(Color.lumenBackground.ignoresSafeArea())
         }
     }
 
@@ -628,11 +628,11 @@ private struct LumenNoticedCard: View {
                 HStack(spacing: 8) {
                     Image(systemName: icon)
                         .font(.system(size: 12))
-                        .foregroundStyle(Color(hex: "#C49A6C"))
+                        .foregroundStyle(Color.lumenAccent)
                     Text("Lumen noticed")
                         .font(.system(size: 11, weight: .semibold))
                         .tracking(1)
-                        .foregroundStyle(Color(hex: "#C49A6C"))
+                        .foregroundStyle(Color.lumenAccent)
                 }
 
                 Text(message)
@@ -690,7 +690,7 @@ private struct LumenNoticedCard: View {
     private var footerIcon: some View {
         Image(systemName: isActionable ? "chevron.right" : "info.circle")
             .font(.system(size: 12, weight: .semibold))
-            .foregroundStyle(isActionable ? Color(hex: "#C49A6C") : Color.white.opacity(0.35))
+            .foregroundStyle(isActionable ? Color.lumenAccent : Color.white.opacity(0.35))
             .frame(width: 24, height: 24)
     }
 }

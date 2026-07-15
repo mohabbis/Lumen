@@ -15,7 +15,7 @@ struct SettingsView: View {
 
     var body: some View {
         ZStack {
-            Color(hex: "#0E0819").ignoresSafeArea()
+            Color.lumenBackground.ignoresSafeArea()
             scrollContent
         }
         .toolbar(.hidden, for: .navigationBar)
@@ -77,7 +77,7 @@ struct SettingsView: View {
                     HStack {
                         Text("Use current location")
                             .font(.system(size: 15, weight: .medium))
-                            .foregroundStyle(Color(hex: "#C49A6C"))
+                            .foregroundStyle(Color.lumenAccent)
                         Spacer()
                     }
                     .padding(.horizontal, 16)
@@ -309,7 +309,7 @@ private struct SettingsOptionRow<Option: CaseIterable & Hashable & Identifiable>
                     Text(option[keyPath: title]).tag(option)
                 }
             }
-            .tint(Color(hex: "#C49A6C"))
+            .tint(Color.lumenAccent)
             .labelsHidden()
         }
         .padding(.horizontal, 16)
@@ -344,7 +344,7 @@ private struct SettingsStepperRow: View {
                     .foregroundStyle(Color.white.opacity(0.45))
             }
         }
-        .tint(Color(hex: "#C49A6C"))
+        .tint(Color.lumenAccent)
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
         .overlay(alignment: .bottom) {
@@ -414,7 +414,7 @@ private struct SettingsToggleRow: View {
                 .foregroundStyle(.white)
             Spacer()
             Toggle("", isOn: $isOn)
-                .tint(Color(hex: "#C49A6C"))
+                .tint(Color.lumenAccent)
                 .labelsHidden()
         }
         .padding(.horizontal, 16)

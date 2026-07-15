@@ -9,7 +9,7 @@ struct RoomListView: View {
 
     var body: some View {
         ZStack {
-            Color(hex: "#0E0819").ignoresSafeArea()
+            Color.lumenBackground.ignoresSafeArea()
 
             if viewModel.rooms.isEmpty {
                 emptyState

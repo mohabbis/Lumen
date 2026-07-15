@@ -18,7 +18,7 @@ struct SceneListView: View {
 
     var body: some View {
         ZStack {
-            Color(hex: "#0E0819").ignoresSafeArea()
+            Color.lumenBackground.ignoresSafeArea()
 
             if scenes.isEmpty {
                 emptyState
@@ -212,7 +212,7 @@ private struct ActiveSceneCard: View {
             RoundedRectangle(cornerRadius: 20)
                 .fill(
                     LinearGradient(
-                        colors: [Color(hex: "#1E1A3A"), Color(hex: "#0E0819")],
+                        colors: [Color(hex: "#1E1A3A"), Color.lumenBackground],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
@@ -223,16 +223,16 @@ private struct ActiveSceneCard: View {
                     if isExecuting {
                         ProgressView()
                             .scaleEffect(0.6)
-                            .tint(Color(hex: "#C49A6C"))
+                            .tint(Color.lumenAccent)
                     } else {
                         Circle()
-                            .fill(Color(hex: "#C49A6C"))
+                            .fill(Color.lumenAccent)
                             .frame(width: 6, height: 6)
                     }
                     Text("ACTIVE NOW")
                         .font(.system(size: 10, weight: .semibold))
                         .tracking(2)
-                        .foregroundStyle(Color(hex: "#C49A6C"))
+                        .foregroundStyle(Color.lumenAccent)
                 }
 
                 Text(scene.name)

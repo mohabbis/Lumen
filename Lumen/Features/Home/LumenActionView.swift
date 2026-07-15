@@ -28,7 +28,7 @@ struct LumenActionView: View {
         .padding(.horizontal, 24)
         .padding(.top, 12)
         .padding(.bottom, 28)
-        .background(Color(hex: "#0E0819").ignoresSafeArea())
+        .background(Color.lumenBackground.ignoresSafeArea())
         .presentationDetents([.medium, .large])
         .presentationDragIndicator(.hidden)
     }
@@ -50,7 +50,7 @@ struct LumenActionView: View {
                     .frame(width: 64, height: 64)
                 Image(systemName: scene.iconName)
                     .font(.system(size: 26))
-                    .foregroundStyle(Color(hex: "#C49A6C"))
+                    .foregroundStyle(Color.lumenAccent)
             }
 
             VStack(spacing: 6) {
@@ -95,7 +95,7 @@ struct LumenActionView: View {
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)
-                .background(Color(hex: "#C49A6C"), in: RoundedRectangle(cornerRadius: 18))
+                .background(Color.lumenAccent, in: RoundedRectangle(cornerRadius: 18))
         }
         .buttonStyle(.pressable)
         .padding(.bottom, 10)

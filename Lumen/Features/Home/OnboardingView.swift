@@ -11,7 +11,7 @@ struct OnboardingView: View {
 
     var body: some View {
         ZStack {
-            Color(hex: "#0E0819").ignoresSafeArea()
+            Color.lumenBackground.ignoresSafeArea()
 
             VStack(spacing: 0) {
                 Spacer()
@@ -23,7 +23,7 @@ struct OnboardingView: View {
                             .frame(width: 80, height: 80)
                         Image(systemName: "house.fill")
                             .font(.system(size: 34))
-                            .foregroundStyle(Color(hex: "#C49A6C"))
+                            .foregroundStyle(Color.lumenAccent)
                     }
 
                     VStack(spacing: 8) {
@@ -56,7 +56,7 @@ struct OnboardingView: View {
                             .foregroundStyle(.white)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 16)
-                            .background(Color(hex: "#C49A6C"), in: RoundedRectangle(cornerRadius: 16))
+                            .background(Color.lumenAccent, in: RoundedRectangle(cornerRadius: 16))
                     }
                     .disabled(homeName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                     .opacity(homeName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? 0.5 : 1)

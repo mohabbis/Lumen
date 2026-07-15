@@ -9,7 +9,7 @@ struct DeviceListView: View {
 
     var body: some View {
         ZStack {
-            Color(hex: "#0E0819").ignoresSafeArea()
+            Color.lumenBackground.ignoresSafeArea()
             scrollContent
         }
         .toolbar(.hidden, for: .navigationBar)
@@ -78,7 +78,7 @@ struct DeviceListView: View {
         case .connecting:
             DiscoveryCard(
                 icon: "antenna.radiowaves.left.and.right",
-                iconColor: Color(hex: "#C49A6C"),
+                iconColor: Color.lumenAccent,
                 title: "Looking for devices…",
                 message: "Scanning your HomeKit home for smart devices.",
                 actionLabel: nil,
@@ -90,11 +90,11 @@ struct DeviceListView: View {
         case .authorizationRequired:
             DiscoveryCard(
                 icon: "house.fill",
-                iconColor: Color(hex: "#C49A6C"),
+                iconColor: Color.lumenAccent,
                 title: "Connect to HomeKit",
                 message: "Allow Lumen to access your HomeKit home to discover devices automatically.",
                 actionLabel: "Open Settings",
-                actionColor: Color(hex: "#C49A6C"),
+                actionColor: Color.lumenAccent,
                 action: {
                     if let url = URL(string: UIApplication.openSettingsURLString) {
                         UIApplication.shared.open(url)
@@ -122,14 +122,14 @@ struct DeviceListView: View {
         case .authorized:
             if viewModel.totalCount > 0 {
                 HStack(spacing: 8) {
-                    Circle().fill(Color(hex: "#6FDBA8")).frame(width: 6, height: 6)
+                    Circle().fill(Color.lumenSuccess).frame(width: 6, height: 6)
                     Text("HomeKit · \(viewModel.totalCount) device\(viewModel.totalCount == 1 ? "" : "s") discovered")
                         .font(.system(size: 12))
                         .foregroundStyle(Color.white.opacity(0.45))
                     Spacer()
                     Text("\(viewModel.reachableCount) online")
                         .font(.system(size: 12))
-                        .foregroundStyle(Color(hex: "#6FDBA8"))
+                        .foregroundStyle(Color.lumenSuccess)
                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 12)
@@ -277,7 +277,7 @@ private struct DeviceDarkRow: View {
             Spacer()
 
             Circle()
-                .fill(device.reachability == .reachable ? Color(hex: "#6FDBA8") : Color.white.opacity(0.2))
+                .fill(device.reachability == .reachable ? Color.lumenSuccess : Color.white.opacity(0.2))
                 .frame(width: 8, height: 8)
 
             Image(systemName: "chevron.right")
