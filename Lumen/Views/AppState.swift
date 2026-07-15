@@ -19,6 +19,7 @@ final class AppState {
     var sensoryProfile: SensoryProfile {
         didSet { saveSensoryProfile() }
     }
+    var suggestionsPaused: Bool = false
 
     init(userDefaults: UserDefaults = .standard) {
         self.userDefaults = userDefaults

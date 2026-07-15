@@ -12,6 +12,7 @@ struct HomeDashboardView: View {
     @Query private var executions: [ExecutionEvent]
     @Environment(\.horizontalSizeClass) private var sizeClass
     @Environment(LocationService.self) private var locationService
+    @Environment(AppState.self) private var appState
     @State private var isRenamingHome = false
     @State private var renameText = ""
     @State private var lumenSheet: LumenDashboardSheet?
@@ -345,20 +346,56 @@ struct HomeDashboardView: View {
 
     private var lumenNoticedSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("LUMEN NOTICED")
-                .font(.system(size: 10, weight: .semibold))
-                .tracking(2.5)
-                .foregroundStyle(Color.white.opacity(0.35))
+            HStack {
+                Text("LUMEN NOTICED")
+                    .font(.system(size: 10, weight: .semibold))
+                    .tracking(2.5)
+                    .foregroundStyle(Color.white.opacity(0.35))
+                Spacer()
+                if appState.suggestionsPaused {
+                    Button(action: { appState.suggestionsPaused = false }) {
+                        Label("Resume", systemImage: "play.fill")
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundStyle(Color.lumenAccent)
+                    }
+                } else if suggestion != nil {
+                    Button(action: { appState.suggestionsPaused = true }) {
+                        Label("Pause", systemImage: "pause.fill")
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundStyle(Color.white.opacity(0.45))
+                    }
+                }
+            }
 
             VStack(spacing: 8) {
-                LumenNoticedCard(
-                    message: noticePresentation.message,
-                    suggestion: noticePresentation.suggestion,
-                    detail: noticePresentation.detail,
-                    icon: noticePresentation.iconName,
-                    isActionable: noticePresentation.isActionable,
-                    action: { lumenSheet = .reasoning }
-                )
+                if appState.suggestionsPaused {
+                    LumenNoticedCard(
+                        message: "Suggestions are paused.",
+                        suggestion: "Tap resume to receive suggestions again.",
+                        detail: "You can unpause anytime.",
+                        icon: "pause.fill",
+                        isActionable: true,
+                        action: { appState.suggestionsPaused = false }
+                    )
+                } else if let suggestion = suggestion {
+                    LumenNoticedCard(
+                        message: noticePresentation.message,
+                        suggestion: noticePresentation.suggestion,
+                        detail: noticePresentation.detail,
+                        icon: noticePresentation.iconName,
+                        isActionable: noticePresentation.isActionable,
+                        action: { lumenSheet = .reasoning }
+                    )
+                } else {
+                    LumenNoticedCard(
+                        message: "Lumen is monitoring your home.",
+                        suggestion: "No suggestions right now.",
+                        detail: "Everything looks calm.",
+                        icon: "sparkles",
+                        isActionable: false,
+                        action: {}
+                    )
+                }
             }
         }
     }
@@ -477,7 +514,9 @@ struct HomeDashboardView: View {
             presence: locationService.isAtHome ? .home : .away,
             reachableDevices: viewModel.reachableDeviceCount,
             hourOfDay: Calendar.current.component(.hour, from: Date()),
-            candidates: suggestionCandidates
+            candidates: suggestionCandidates,
+            dailySuggestionLimit: appState.sensoryProfile.dailySuggestionLimit,
+            pausedSuggestions: appState.suggestionsPaused
         ).topSuggestion()
     }
 
@@ -523,7 +562,8 @@ struct HomeDashboardView: View {
             suggestedSceneName: suggestedSceneName,
             expectedSceneName: expectedSceneName,
             confidence: suggestion?.confidence,
-            habitRuns: suggestion?.habitRuns
+            habitRuns: suggestion?.habitRuns,
+            factors: suggestion?.factors ?? []
         ).reasoning
     }
 

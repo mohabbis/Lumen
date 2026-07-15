@@ -67,16 +67,53 @@ struct LumenReasoningView: View {
     }
 
     private var signalList: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("SIGNALS")
-                .font(.system(size: 10, weight: .semibold))
-                .tracking(2)
-                .foregroundStyle(Color.white.opacity(0.35))
+        VStack(alignment: .leading, spacing: 16) {
+            if !reasoning.factors.isEmpty {
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("WHY THIS SCENE")
+                        .font(.system(size: 10, weight: .semibold))
+                        .tracking(2)
+                        .foregroundStyle(Color.white.opacity(0.35))
 
-            ForEach(reasoning.signals) { signal in
-                signalRow(signal)
+                    ForEach(reasoning.factors) { factor in
+                        factorRow(factor)
+                    }
+                }
+            }
+
+            VStack(alignment: .leading, spacing: 10) {
+                Text("SIGNALS")
+                    .font(.system(size: 10, weight: .semibold))
+                    .tracking(2)
+                    .foregroundStyle(Color.white.opacity(0.35))
+
+                ForEach(reasoning.signals) { signal in
+                    signalRow(signal)
+                }
             }
         }
+    }
+
+    private func factorRow(_ factor: SuggestionFactor) -> some View {
+        HStack(alignment: .top, spacing: 10) {
+            Circle()
+                .fill(Color.lumenAccent)
+                .frame(width: 6, height: 6)
+                .padding(.top, 6)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(factor.label)
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundStyle(Color.white.opacity(0.85))
+                Text(factor.detail)
+                    .font(.system(size: 12))
+                    .foregroundStyle(Color.white.opacity(0.55))
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 14)
+        .background(Color.white.opacity(0.05), in: RoundedRectangle(cornerRadius: 14))
     }
 
     private func signalRow(_ signal: ReasoningSignal) -> some View {
@@ -153,6 +190,7 @@ struct LumenReasoning: Equatable {
     let headline: String
     let signals: [ReasoningSignal]
     let suggestionLabel: String?
+    let factors: [SuggestionFactor]
 }
 
 struct ReasoningSignal: Equatable, Identifiable {
@@ -194,6 +232,8 @@ struct ReasoningCalculator: Equatable {
     // the raw ambient state.
     let confidence: Double?
     let habitRuns: Int?
+    /// Explainable factors from the SuggestionEngine scoring
+    let factors: [SuggestionFactor]
 
     init(
         timeOfDay: TimeOfDay,
@@ -203,7 +243,8 @@ struct ReasoningCalculator: Equatable {
         suggestedSceneName: String?,
         expectedSceneName: String? = nil,
         confidence: Double? = nil,
-        habitRuns: Int? = nil
+        habitRuns: Int? = nil,
+        factors: [SuggestionFactor] = []
     ) {
         self.timeOfDay = timeOfDay
         self.isAtHome = isAtHome
@@ -213,13 +254,15 @@ struct ReasoningCalculator: Equatable {
         self.expectedSceneName = expectedSceneName
         self.confidence = confidence
         self.habitRuns = habitRuns
+        self.factors = factors
     }
 
     var reasoning: LumenReasoning {
         LumenReasoning(
             headline: headline,
             signals: signals,
-            suggestionLabel: suggestedSceneName.map { "Apply \($0)" }
+            suggestionLabel: suggestedSceneName.map { "Apply \($0)" },
+            factors: factors
         )
     }
 

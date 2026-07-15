@@ -1,2 +1,30 @@
-# Documentation outputs
-outputs/
+```swift
+# Xcode
+*.xcodeproj/
+*.xcworkspace/
+*.xcuserstate
+project.xcworkspace/xcuserdata/
+xcuserdata/
+
+# Build
+build/
+DerivedData/
+
+# Swift Package Manager
+.swiftpm/
+Package.resolved
+
+# Temporary files
+*.tmp
+*.log
+*.swp
+
+# Environment
+.env
+.env.local
+*.env.*
+
+# Dependencies
+Pods/
+Carthage/
+```

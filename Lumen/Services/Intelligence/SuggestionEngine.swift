@@ -83,6 +83,9 @@ struct SuggestionEngine: Equatable {
     let reachableDevices: Int
     let hourOfDay: Int
     let candidates: [SuggestionCandidate]
+    /// Sensory profile constraints from user preferences
+    let dailySuggestionLimit: Int?
+    let pausedSuggestions: Bool
 
     /// Minimum confidence before Lumen will surface a suggestion at all. Below
     /// this, the calm default is to stay quiet rather than nudge on a hunch.
@@ -93,7 +96,9 @@ struct SuggestionEngine: Equatable {
     /// All candidates scored and sorted, highest confidence first. Deterministic:
     /// ties break on run volume, then scene name, so the UI never flickers.
     func rankedSuggestions() -> [SceneSuggestion] {
-        candidates
+        guard !pausedSuggestions else { return [] }
+        
+        return candidates
             .map(score(_:))
             .sorted { lhs, rhs in
                 if lhs.confidence != rhs.confidence { return lhs.confidence > rhs.confidence }
@@ -103,10 +108,18 @@ struct SuggestionEngine: Equatable {
     }
 
     /// The single scene worth suggesting now, or `nil` if nothing clears the
-    /// calm threshold.
+    /// calm threshold, or if daily limit has been reached.
     func topSuggestion() -> SceneSuggestion? {
-        guard let best = rankedSuggestions().first,
-              best.confidence >= Self.surfaceThreshold else { return nil }
+        guard !pausedSuggestions else { return nil }
+        
+        let best = rankedSuggestions().first
+        guard let best = best, best.confidence >= Self.surfaceThreshold else { return nil }
+        
+        // Enforce daily suggestion limit from sensory profile
+        if let limit = dailySuggestionLimit, limit <= 0 {
+            return nil
+        }
+        
         return best
     }
 
