@@ -76,8 +76,10 @@ final class HomeViewModel {
         guard let sceneService = sceneService else { return }
         do {
             try await sceneService.execute(scene)
+            LumenHaptics.success()
         } catch {
             self.error = error
+            LumenHaptics.error()
         }
     }
 

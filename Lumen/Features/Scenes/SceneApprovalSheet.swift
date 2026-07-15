@@ -97,6 +97,7 @@ struct SceneApprovalSheet: View {
                 .padding(.vertical, 16)
                 .background(Color(hex: "#C49A6C"), in: RoundedRectangle(cornerRadius: 18))
         }
+        .buttonStyle(.pressable)
         .padding(.bottom, 10)
     }
 
