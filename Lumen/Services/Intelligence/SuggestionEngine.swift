@@ -90,6 +90,9 @@ struct SuggestionEngine: Equatable {
     /// Minimum confidence before Lumen will surface a suggestion at all. Below
     /// this, the calm default is to stay quiet rather than nudge on a hunch.
     static let surfaceThreshold: Double = 0.2
+    
+    /// Tracks if a suggestion has already been shown today (for limit enforcement)
+    let hasShownSuggestionToday: Bool
 
     // MARK: Public API
 
@@ -112,13 +115,13 @@ struct SuggestionEngine: Equatable {
     func topSuggestion() -> SceneSuggestion? {
         guard !pausedSuggestions else { return nil }
         
-        let best = rankedSuggestions().first
-        guard let best = best, best.confidence >= Self.surfaceThreshold else { return nil }
-        
-        // Enforce daily suggestion limit from sensory profile
-        if let limit = dailySuggestionLimit, limit <= 0 {
+        // Enforce daily suggestion limit from sensory profile BEFORE scoring
+        if hasShownSuggestionToday {
             return nil
         }
+        
+        let best = rankedSuggestions().first
+        guard let best = best, best.confidence >= Self.surfaceThreshold else { return nil }
         
         return best
     }

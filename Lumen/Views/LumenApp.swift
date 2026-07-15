@@ -48,6 +48,7 @@ struct LumenApp: App {
                 .environment(locationService)
                 .environment(remoteService)
                 .environment(localDeviceService)
+                .environment(\.accessibilityReduceMotion, appState.sensoryProfile.shouldReduceMotion)
         }
         .modelContainer(container)
     }

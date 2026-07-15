@@ -80,6 +80,35 @@ final class NotificationService {
         }
     }
     
+    /// Notify user before an automated transition happens (for sensory profile transition warnings)
+    func notifyUpcomingTransition(sceneName: String, minutesUntil: Int) {
+        let content = UNMutableNotificationContent()
+        content.title = "Lumen — Upcoming Change"
+        content.subtitle = "In \(minutesUntil) minutes"
+        content.body = "'\(sceneName)' will activate soon. You can adjust or postpone in the app."
+        content.sound = .default
+        
+        // Add custom data for deep linking
+        content.userInfo = [
+            "sceneName": sceneName,
+            "eventType": "upcoming_transition",
+            "minutesUntil": minutesUntil,
+            "timestamp": Date().timeIntervalSince1970
+        ]
+        
+        // Schedule notification to fire at the warning time
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: TimeInterval(minutesUntil * 60), repeats: false)
+        let request = UNNotificationRequest(identifier: "transition_\(UUID().uuidString)", content: content, trigger: trigger)
+        
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                print("Failed to schedule transition warning: \(error)")
+            } else {
+                print("Transition warning scheduled: \(sceneName) in \(minutesUntil) min")
+            }
+        }
+    }
+    
     // MARK: - Clear Notifications
 
     func clearBadge() {
