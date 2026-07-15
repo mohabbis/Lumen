@@ -27,7 +27,7 @@ struct LumenReasoningView: View {
         .padding(.horizontal, 24)
         .padding(.top, 12)
         .padding(.bottom, 28)
-        .background(Color(hex: "#0E0819").ignoresSafeArea())
+        .background(Color.lumenBackground.ignoresSafeArea())
         .presentationDetents([.medium, .large])
         .presentationDragIndicator(.hidden)
     }
@@ -49,7 +49,7 @@ struct LumenReasoningView: View {
                     .frame(width: 64, height: 64)
                 Image(systemName: "sparkles")
                     .font(.system(size: 26))
-                    .foregroundStyle(Color(hex: "#C49A6C"))
+                    .foregroundStyle(Color.lumenAccent)
             }
             VStack(spacing: 6) {
                 Text("WHY LUMEN NOTICED")
@@ -133,7 +133,7 @@ struct LumenReasoningView: View {
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
-                    .background(Color(hex: "#C49A6C"), in: RoundedRectangle(cornerRadius: 18))
+                    .background(Color.lumenAccent, in: RoundedRectangle(cornerRadius: 18))
             }
             .padding(.bottom, 10)
         }
@@ -169,7 +169,7 @@ enum SignalWeight: Equatable {
 
     var tint: Color {
         switch self {
-        case .high:   return Color(hex: "#C49A6C")
+        case .high:   return Color.lumenAccent
         case .medium: return Color.white.opacity(0.55)
         case .low:    return Color.white.opacity(0.3)
         }

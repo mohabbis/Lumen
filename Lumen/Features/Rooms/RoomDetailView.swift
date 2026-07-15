@@ -12,7 +12,7 @@ struct RoomDetailView: View {
 
     var body: some View {
         ZStack {
-            Color(hex: "#0E0819").ignoresSafeArea()
+            Color.lumenBackground.ignoresSafeArea()
             scrollContent
         }
         .toolbar(.hidden, for: .navigationBar)
@@ -171,7 +171,7 @@ private struct LiveDeviceDarkRow: View {
             Spacer()
 
             Circle()
-                .fill(device.reachability == .reachable ? Color(hex: "#6FDBA8") : Color.white.opacity(0.2))
+                .fill(device.reachability == .reachable ? Color.lumenSuccess : Color.white.opacity(0.2))
                 .frame(width: 8, height: 8)
 
             Image(systemName: "chevron.right")

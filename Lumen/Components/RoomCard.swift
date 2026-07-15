@@ -12,7 +12,7 @@ struct RoomCard: View {
                     .frame(width: 40, height: 40)
                 Image(systemName: room.type.iconName)
                     .font(.system(size: 17))
-                    .foregroundStyle(Color(hex: "#C49A6C"))
+                    .foregroundStyle(Color.lumenAccent)
             }
 
             Spacer()

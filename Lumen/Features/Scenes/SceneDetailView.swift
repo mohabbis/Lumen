@@ -20,7 +20,7 @@ struct SceneDetailView: View {
 
     var body: some View {
         ZStack {
-            Color(hex: "#0E0819").ignoresSafeArea()
+            Color.lumenBackground.ignoresSafeArea()
             ScrollView {
                 VStack(alignment: .leading, spacing: 28) {
                     header
@@ -73,7 +73,7 @@ struct SceneDetailView: View {
                         .frame(width: 52, height: 52)
                     Image(systemName: scene.iconName)
                         .font(.system(size: 22))
-                        .foregroundStyle(Color(hex: "#C49A6C"))
+                        .foregroundStyle(Color.lumenAccent)
                 }
 
                 VStack(alignment: .leading, spacing: 4) {
@@ -101,7 +101,7 @@ struct SceneDetailView: View {
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
-                    .background(Color(hex: "#C49A6C"), in: RoundedRectangle(cornerRadius: 16))
+                    .background(Color.lumenAccent, in: RoundedRectangle(cornerRadius: 16))
             }
         }
     }
@@ -127,7 +127,7 @@ struct SceneDetailView: View {
                         }
                     }
                     .pickerStyle(.menu)
-                    .tint(Color(hex: "#C49A6C"))
+                    .tint(Color.lumenAccent)
                     .onChange(of: selectedGeofenceTrigger) { _, newValue in
                         viewModel.updateScene(scene, geofenceTrigger: newValue)
                     }
@@ -155,7 +155,7 @@ struct SceneDetailView: View {
                     .font(.system(size: 15, weight: .medium))
                     .foregroundStyle(.white)
             }
-            .tint(Color(hex: "#C49A6C"))
+            .tint(Color.lumenAccent)
             .onChange(of: isScheduled) { _, enabled in
                 // Ignore the toggle flip that comes from onAppear syncing to the model.
                 guard enabled != (scene.scheduleMinutesSinceMidnight != nil) else { return }
@@ -174,7 +174,7 @@ struct SceneDetailView: View {
                     displayedComponents: .hourAndMinute
                 )
                 .datePickerStyle(.compact)
-                .tint(Color(hex: "#C49A6C"))
+                .tint(Color.lumenAccent)
                 .foregroundStyle(.white)
                 .onChange(of: scheduleTime) { _, newValue in
                     let mins = Self.minutes(from: newValue)
@@ -229,7 +229,7 @@ struct SceneDetailView: View {
                 } label: {
                     Image(systemName: "plus.circle.fill")
                         .font(.system(size: 20))
-                        .foregroundStyle(Color(hex: "#C49A6C"))
+                        .foregroundStyle(Color.lumenAccent)
                 }
             }
 

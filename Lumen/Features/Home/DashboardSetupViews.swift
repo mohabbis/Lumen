@@ -9,11 +9,11 @@ struct FirstRunSetupCard: View {
             HStack(alignment: .top, spacing: 12) {
                 ZStack {
                     Circle()
-                        .fill(Color(hex: "#C49A6C").opacity(0.14))
+                        .fill(Color.lumenAccent.opacity(0.14))
                         .frame(width: 44, height: 44)
                     Image(systemName: "door.left.hand.open")
                         .font(.system(size: 18, weight: .semibold))
-                        .foregroundStyle(Color(hex: "#C49A6C"))
+                        .foregroundStyle(Color.lumenAccent)
                 }
 
                 VStack(alignment: .leading, spacing: 5) {
@@ -45,7 +45,7 @@ struct FirstRunSetupCard: View {
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 13)
-                    .background(Color(hex: "#C49A6C"), in: RoundedRectangle(cornerRadius: 16))
+                    .background(Color.lumenAccent, in: RoundedRectangle(cornerRadius: 16))
             }
             .accessibilityHint("Opens the room setup sheet.")
         }
@@ -89,9 +89,9 @@ private struct DashboardSetupStepRow: View {
     private var indicatorFill: Color {
         switch step.state {
         case .complete:
-            return Color(hex: "#6FDBA8").opacity(0.18)
+            return Color.lumenSuccess.opacity(0.18)
         case .current:
-            return Color(hex: "#C49A6C").opacity(0.18)
+            return Color.lumenAccent.opacity(0.18)
         case .pending:
             return Color.white.opacity(0.06)
         }
@@ -100,9 +100,9 @@ private struct DashboardSetupStepRow: View {
     private var indicatorForeground: Color {
         switch step.state {
         case .complete:
-            return Color(hex: "#6FDBA8")
+            return Color.lumenSuccess
         case .current:
-            return Color(hex: "#C49A6C")
+            return Color.lumenAccent
         case .pending:
             return Color.white.opacity(0.32)
         }
@@ -146,10 +146,10 @@ struct LocationPermissionCard: View {
                 Button(action: action) {
                     Text(presentation.actionTitle)
                         .font(.system(size: 12, weight: .semibold))
-                        .foregroundStyle(Color(hex: "#C49A6C"))
+                        .foregroundStyle(Color.lumenAccent)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 7)
-                        .background(Color(hex: "#C49A6C").opacity(0.12), in: RoundedRectangle(cornerRadius: 14))
+                        .background(Color.lumenAccent.opacity(0.12), in: RoundedRectangle(cornerRadius: 14))
                 }
                 .padding(.top, 4)
             }

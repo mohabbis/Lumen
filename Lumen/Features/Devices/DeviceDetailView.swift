@@ -15,7 +15,7 @@ struct DeviceDetailView: View {
         let state = viewModel.controlState(for: currentDevice)
 
         ZStack {
-            Color(hex: "#0E0819").ignoresSafeArea()
+            Color.lumenBackground.ignoresSafeArea()
             content(device: currentDevice, state: state)
         }
         .toolbar(.hidden, for: .navigationBar)
@@ -70,7 +70,7 @@ struct DeviceDetailView: View {
                     .frame(width: 46, height: 46)
                 Image(systemName: device.category.systemImage)
                     .font(.system(size: 20))
-                    .foregroundStyle(Color(hex: "#C49A6C"))
+                    .foregroundStyle(Color.lumenAccent)
             }
         }
     }
@@ -83,7 +83,7 @@ struct DeviceDetailView: View {
                 DarkRow(label: "Status") {
                     HStack(spacing: 6) {
                         Circle()
-                            .fill(device.reachability == .reachable ? Color(hex: "#6FDBA8") : Color.white.opacity(0.25))
+                            .fill(device.reachability == .reachable ? Color.lumenSuccess : Color.white.opacity(0.25))
                             .frame(width: 7, height: 7)
                         Text(device.reachability == .reachable ? "Online" : "Offline")
                             .font(.system(size: 14))
@@ -102,7 +102,7 @@ struct DeviceDetailView: View {
                     DarkRow(label: "Power", isLast: true) {
                         Text(state.isPowered ? "On" : "Off")
                             .font(.system(size: 14))
-                            .foregroundStyle(state.isPowered ? Color(hex: "#6FDBA8") : Color.white.opacity(0.4))
+                            .foregroundStyle(state.isPowered ? Color.lumenSuccess : Color.white.opacity(0.4))
                     }
                 }
             }
@@ -117,8 +117,8 @@ struct DeviceDetailView: View {
                 if let linked = viewModel.linkedPlannedDevice(for: device) {
                     DarkRow(label: "Linked to") {
                         HStack(spacing: 4) {
-                            Image(systemName: "link").font(.caption).foregroundStyle(Color(hex: "#6FDBA8"))
-                            Text(linked.displayName).font(.system(size: 14)).foregroundStyle(Color(hex: "#6FDBA8"))
+                            Image(systemName: "link").font(.caption).foregroundStyle(Color.lumenSuccess)
+                            Text(linked.displayName).font(.system(size: 14)).foregroundStyle(Color.lumenSuccess)
                         }
                     }
                     if let room = linked.room?.name {
@@ -138,7 +138,7 @@ struct DeviceDetailView: View {
                     Button { isShowingCommissionSheet = true } label: {
                         Label("Link to Planned Device", systemImage: "link")
                             .font(.system(size: 15, weight: .medium))
-                            .foregroundStyle(Color(hex: "#C49A6C"))
+                            .foregroundStyle(Color.lumenAccent)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(.horizontal, 16)
                             .padding(.vertical, 16)
@@ -161,7 +161,7 @@ struct DeviceDetailView: View {
                     get: { state.isPowered },
                     set: { viewModel.setPower($0, deviceID: device.id) }
                 ))
-                .tint(Color(hex: "#6FDBA8"))
+                .tint(Color.lumenSuccess)
                 .labelsHidden()
             }
             .padding(.horizontal, 16)
@@ -181,7 +181,7 @@ struct DeviceDetailView: View {
                         ),
                         in: 0...1
                     )
-                    .tint(Color(hex: "#C49A6C"))
+                    .tint(Color.lumenAccent)
                     Image(systemName: "sun.max").foregroundStyle(Color.white.opacity(0.8))
                 }
                 Text("\(Int(state.brightness * 100))%")
@@ -206,7 +206,7 @@ struct DeviceDetailView: View {
                         ),
                         in: 1800...6500
                     )
-                    .tint(Color(hex: "#C49A6C"))
+                    .tint(Color.lumenAccent)
                     Image(systemName: "snowflake").foregroundStyle(.blue.opacity(0.8))
                 }
                 Text("\(state.colorTemperature)K")
@@ -257,7 +257,7 @@ struct DeviceDetailView: View {
             DarkRow(label: "Detected", isLast: true) {
                 Text(state.motionDetected ? "Yes" : "No")
                     .font(.system(size: 14))
-                    .foregroundStyle(state.motionDetected ? Color(hex: "#C49A6C") : Color.white.opacity(0.4))
+                    .foregroundStyle(state.motionDetected ? Color.lumenAccent : Color.white.opacity(0.4))
             }
         }
     }
@@ -283,7 +283,7 @@ struct DeviceDetailView: View {
                         systemImage: state.lockState == .locked ? "lock.open.fill" : "lock.fill"
                     )
                     .font(.system(size: 15, weight: .medium))
-                    .foregroundStyle(state.lockState == .locked ? Color(hex: "#C49A6C") : Color.white.opacity(0.6))
+                    .foregroundStyle(state.lockState == .locked ? Color.lumenAccent : Color.white.opacity(0.6))
                     Spacer()
                 }
                 .padding(.horizontal, 16)

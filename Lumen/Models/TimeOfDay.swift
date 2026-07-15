@@ -35,11 +35,11 @@ enum TimeOfDay: Equatable {
 
     var backgroundColors: [Color] {
         switch self {
-        case .dawn:      return [Color(hex: "#1A0F35"), Color(hex: "#0E0819")]
-        case .morning:   return [Color(hex: "#0F1530"), Color(hex: "#0E0819")]
-        case .afternoon: return [Color(hex: "#0D1228"), Color(hex: "#0E0819")]
-        case .evening:   return [Color(hex: "#1E0F38"), Color(hex: "#0E0819")]
-        case .night:     return [Color(hex: "#080618"), Color(hex: "#0E0819")]
+        case .dawn:      return [Color(hex: "#1A0F35"), Color.lumenBackground]
+        case .morning:   return [Color(hex: "#0F1530"), Color.lumenBackground]
+        case .afternoon: return [Color(hex: "#0D1228"), Color.lumenBackground]
+        case .evening:   return [Color(hex: "#1E0F38"), Color.lumenBackground]
+        case .night:     return [Color(hex: "#080618"), Color.lumenBackground]
         }
     }
 

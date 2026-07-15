@@ -33,7 +33,7 @@ struct DarkEmptyStateView: View {
                     .frame(width: 58, height: 58)
                 Image(systemName: icon)
                     .font(.system(size: 24, weight: .semibold))
-                    .foregroundStyle(Color(hex: "#C49A6C"))
+                    .foregroundStyle(Color.lumenAccent)
             }
 
             VStack(spacing: 7) {
@@ -66,7 +66,7 @@ struct DarkEmptyStateView: View {
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 13)
-                        .background(Color(hex: "#C49A6C"), in: RoundedRectangle(cornerRadius: 16))
+                        .background(Color.lumenAccent, in: RoundedRectangle(cornerRadius: 16))
                 }
                 .padding(.top, 2)
             }
@@ -85,9 +85,9 @@ struct DarkEmptyStateView: View {
         HStack(alignment: .top, spacing: 10) {
             Text("\(index + 1)")
                 .font(.system(size: 11, weight: .bold))
-                .foregroundStyle(Color(hex: "#C49A6C"))
+                .foregroundStyle(Color.lumenAccent)
                 .frame(width: 22, height: 22)
-                .background(Color(hex: "#C49A6C").opacity(0.13), in: Circle())
+                .background(Color.lumenAccent.opacity(0.13), in: Circle())
 
             Text(text)
                 .font(.system(size: 12))

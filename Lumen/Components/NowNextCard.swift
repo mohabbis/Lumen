@@ -185,7 +185,7 @@ extension TimeOfDay {
         }
         .padding(20)
     }
-    .background(Color(hex: "#0E0819"))
+    .background(Color.lumenBackground)
 }
 
 private func makeDate(hour: Int, minute: Int) -> Date {
