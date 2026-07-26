@@ -25,6 +25,7 @@ import {
 } from './FeatureSections.jsx';
 import './theme.css';
 import './App.css';
+import './simulator.css';
 
 const supportedCategories = [
   { label: 'Lights', icon: Lightbulb },

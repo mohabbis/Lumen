@@ -36,3 +36,6 @@ Packages/
 .env.local
 .env.*
 ```
+# Node / web build
+node_modules/
+dist/

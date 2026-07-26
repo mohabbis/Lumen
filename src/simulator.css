@@ -1,0 +1,315 @@
+/* ===== iOS simulator additions =====
+ * Styles for the higher-fidelity in-phone simulator (InteractivePhone.jsx).
+ * These mirror the native app's surfaces that the earlier demo didn't cover:
+ * large-title headers, the compact stats row, the reasoning "why this scene"
+ * factors, capability-driven device controls, and the sensory profile settings.
+ * Tokens follow the app: bg #0E0819, accent #C49A6C, ink #e8e0d4.
+ * ------------------------------------------------------------------------- */
+
+/* Let the taller screens scroll like the app's ScrollView, without a visible
+   scrollbar inside the phone frame. The demo wrapper sets text-align:center for
+   the caption; the app screens and the consent-sheet lists are left-aligned. */
+.app-screen {
+  overflow-y: auto;
+  scrollbar-width: none;
+  text-align: left;
+}
+
+.factor-row,
+.factor-row b,
+.factor-row span,
+.signal-row,
+.signal-label,
+.approval-action-row,
+.approval-action-capability {
+  text-align: left;
+}
+
+.signal-value,
+.approval-action-detail {
+  text-align: right;
+}
+
+.app-screen::-webkit-scrollbar {
+  display: none;
+}
+
+/* ===== Large-title header (Rooms / Intel / Auto / Settings + detail views) ===== */
+
+.sim-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 2px 0 1px;
+}
+
+.sim-head-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.sim-eyebrow {
+  font-size: 7px;
+  font-weight: 600;
+  letter-spacing: 0.34em;
+  color: rgba(232, 224, 212, 0.32);
+  text-transform: uppercase;
+}
+
+.sim-title {
+  font-size: 15.5px;
+  font-weight: 700;
+  color: #e8e0d4;
+  margin: 0;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+}
+
+.sim-round {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(232, 224, 212, 0.6);
+  font-size: 11px;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* ===== Compact stats row (dashboard) ===== */
+
+.app-cstats {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 8.5px;
+  color: rgba(232, 224, 212, 0.4);
+}
+
+.app-cstats b {
+  font-weight: 500;
+  color: rgba(232, 224, 212, 0.72);
+  font-variant-numeric: tabular-nums;
+}
+
+.app-cstats i {
+  color: rgba(232, 224, 212, 0.2);
+  font-style: normal;
+}
+
+.app-cstats .app-plus {
+  margin-left: auto;
+}
+
+/* ===== Reasoning "why this scene" factors ===== */
+
+.factor-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  padding: 5px 7px;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.factor-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #C49A6C;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.factor-row > div {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.factor-row b {
+  font-size: 8.5px;
+  font-weight: 500;
+  color: rgba(232, 224, 212, 0.82);
+}
+
+.factor-row span {
+  font-size: 7.5px;
+  line-height: 1.35;
+  color: rgba(232, 224, 212, 0.45);
+}
+
+/* Reasoning sheet holds more content now — let it scroll within the sheet. */
+.reason-sheet {
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.reason-sheet::-webkit-scrollbar {
+  display: none;
+}
+
+/* ===== Scene rows ===== */
+
+/* Explicit app-style surface (SceneDarkRow uses white 0.06) so scene names stay
+   readable and no default <button> background leaks through on inactive rows. */
+.scene-row.interactive-card {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.scene-row.interactive-card.active {
+  background: rgba(196, 154, 108, 0.1);
+}
+
+.scene-meta b {
+  color: rgba(232, 224, 212, 0.9);
+}
+
+.scene-edit {
+  color: rgba(232, 224, 212, 0.3);
+  flex-shrink: 0;
+  margin-right: 2px;
+}
+
+/* ===== Intel ===== */
+
+.intel-online {
+  margin-left: auto;
+  color: #6FDBA8;
+}
+
+.intel-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+/* ===== Device control screen ===== */
+
+.device-screen {
+  position: relative;
+}
+
+.stat-online {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.climate-temp {
+  color: rgba(196, 154, 108, 0.78);
+  font-variant-numeric: tabular-nums;
+}
+
+.control-row span:last-child {
+  color: rgba(232, 224, 212, 0.5);
+}
+
+/* Device rows are buttons in the room detail — reset button chrome. */
+.device-row.interactive-card {
+  appearance: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+/* ===== Room empty state ===== */
+
+.room-empty {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 10px;
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.028);
+  border: 1px solid rgba(255, 255, 255, 0.055);
+}
+
+.room-empty-msg {
+  font-size: 8px;
+  line-height: 1.45;
+  color: rgba(232, 224, 212, 0.4);
+  margin: 0;
+}
+
+/* ===== Settings ===== */
+
+.settings-card {
+  display: flex;
+  flex-direction: column;
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.045);
+  overflow: hidden;
+}
+
+.settings-row2 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 7px 10px;
+  font-size: 9px;
+  color: rgba(232, 224, 212, 0.75);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.settings-row2:last-child {
+  border-bottom: none;
+}
+
+.settings-row2 span:last-child {
+  color: rgba(232, 224, 212, 0.45);
+}
+
+.settings-row2 .settings-on {
+  color: rgba(196, 154, 108, 0.82);
+}
+
+.settings-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 7px 10px;
+  font-size: 9px;
+  color: rgba(232, 224, 212, 0.75);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Segmented control (sensory profile options) */
+
+.seg {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 7px;
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.seg-opt {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: rgba(232, 224, 212, 0.4);
+  font-family: inherit;
+  font-size: 7.5px;
+  letter-spacing: 0.02em;
+  padding: 4px 3px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s;
+}
+
+.seg-opt.active {
+  background: rgba(196, 154, 108, 0.9);
+  color: #0e0819;
+  font-weight: 500;
+}
