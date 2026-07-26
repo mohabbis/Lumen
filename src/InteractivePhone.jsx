@@ -1,48 +1,45 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import {
-  Activity, BedDouble, ChevronRight, Home, Laptop, Lightbulb, Lock, Settings, Sofa, Sparkle, Sparkles, SunMedium, Thermometer, Utensils,
-} from 'lucide-react';
-import {
-  Moon, MoonStar, Popcorn, Sunrise,
+  Activity, BedDouble, Blinds, ChevronRight, DoorOpen, Flame, Home, Laptop, Lightbulb, Lock,
+  LogOut, Moon, MoonStar, Popcorn, Settings, SlidersHorizontal, Snowflake, Sofa, Sparkle, Sparkles,
+  Sunrise, SunMedium, Thermometer, Utensils,
 } from 'lucide-react';
 
-// Shared demo data (mirrors the iOS app seed content)
+// Shared demo data. This mirrors the native iOS app (Lumen/) as closely as a
+// web mockup can — same tab set, seeded scenes, dark palette (#0E0819 / accent
+// #C49A6C), consent-first flow (Awareness → Reasoning → Action → Execution),
+// and the calm surfaces (rhythm card, sensory profile) that distinguish Lumen
+// from a generic HomeKit controller.
 
 export const phoneTabs = [
   { label: 'Home', icon: Home },
-  { label: 'Rooms', icon: Sofa },
+  { label: 'Rooms', icon: DoorOpen },
   { label: 'Intel', icon: Sparkle },
   { label: 'Auto', icon: Sparkles },
   { label: 'Settings', icon: Settings },
 ];
 
-export const favoriteRooms = [
-  { name: 'Living Room', icon: Sofa, count: '3 active' },
-  { name: 'Bedroom', icon: BedDouble, count: '2 active' },
-  { name: 'Kitchen', icon: Utensils, count: '1 active' },
-  { name: 'Office', icon: Laptop, count: 'No devices' },
-];
-
+// Seeded scenes match SceneService.seedDefaultScenesIfNeeded (first three favorited).
 export const scenes = [
   {
-    name: 'Morning', icon: Sunrise, devices: '4 devices', mood: 'Bright & energising',
+    name: 'Morning', icon: Sunrise, favorite: true, mood: 'Bright & cool',
     actions: [
       { capability: 'Power', detail: 'On' },
       { capability: 'Brightness', detail: '90%' },
-      { capability: 'Temperature', detail: '5000K' },
+      { capability: 'Color Temperature', detail: '5000K' },
     ],
   },
   {
-    name: 'Evening', icon: MoonStar, devices: '3 devices', mood: 'Warm & dim',
+    name: 'Evening', icon: MoonStar, favorite: true, mood: 'Warm & dim',
     actions: [
       { capability: 'Power', detail: 'On' },
       { capability: 'Brightness', detail: '40%' },
-      { capability: 'Temperature', detail: '2700K' },
+      { capability: 'Color Temperature', detail: '2700K' },
     ],
   },
   {
-    name: 'Movie Night', icon: Popcorn, devices: '5 devices', mood: 'Dim & ambient',
+    name: 'Movie Night', icon: Popcorn, favorite: true, mood: 'Dim & ambient',
     actions: [
       { capability: 'Brightness', detail: '12%' },
       { capability: 'Color', detail: 'Custom color' },
@@ -50,7 +47,15 @@ export const scenes = [
     ],
   },
   {
-    name: 'Sleep', icon: Moon, devices: '6 devices', mood: 'All lights off',
+    name: 'Sleep', icon: Moon, favorite: false, mood: 'All lights off',
+    actions: [
+      { capability: 'Power', detail: 'Off' },
+      { capability: 'Lock', detail: 'Locked' },
+      { capability: 'Mode', detail: 'Away' },
+    ],
+  },
+  {
+    name: 'Away', icon: LogOut, favorite: false, mood: 'Away mode',
     actions: [
       { capability: 'Power', detail: 'Off' },
       { capability: 'Lock', detail: 'Locked' },
@@ -59,18 +64,53 @@ export const scenes = [
   },
 ];
 
+// Rooms shown on the dashboard + Rooms tab. Each drills into a room detail
+// that lists its devices, and each device drills into a capability-driven
+// control screen (mirrors RoomDetailView → DeviceDetailView).
+export const rooms = [
+  { name: 'Living Room', type: 'Living Room', icon: Sofa, devices: ['ceiling', 'floorlamp', 'thermostat'] },
+  { name: 'Bedroom', type: 'Bedroom', icon: BedDouble, devices: ['bedside', 'blind'] },
+  { name: 'Kitchen', type: 'Kitchen', icon: Utensils, devices: ['undercab'] },
+  { name: 'Office', type: 'Office', icon: Laptop, devices: [] },
+];
+
+const deviceCatalog = {
+  ceiling: { name: 'Ceiling Light', room: 'Living Room', category: 'Lighting', icon: Lightbulb, kind: 'light', online: true },
+  floorlamp: { name: 'Floor Lamp', room: 'Living Room', category: 'Lighting', icon: Lightbulb, kind: 'light', online: true },
+  thermostat: { name: 'Thermostat', room: 'Living Room', category: 'Climate', icon: Thermometer, kind: 'climate', online: true },
+  bedside: { name: 'Bedside Lamp', room: 'Bedroom', category: 'Lighting', icon: Lightbulb, kind: 'light', online: true },
+  blind: { name: 'Blackout Blind', room: 'Bedroom', category: 'Other', icon: Blinds, kind: 'blind', online: true },
+  undercab: { name: 'Under-cabinet Light', room: 'Kitchen', category: 'Lighting', icon: Lightbulb, kind: 'light', online: true },
+  desklamp: { name: 'Desk Lamp', room: 'Office', category: 'Lighting', icon: Lightbulb, kind: 'light', online: true },
+  frontdoor: { name: 'Front Door', room: 'Entryway', category: 'Security', icon: Lock, kind: 'lock', online: false },
+  motion: { name: 'Living Room Motion', room: 'Living Room', category: 'Sensors', icon: Activity, kind: 'sensor', online: true },
+};
+
+// Global device list for the Intel tab, grouped by category (8 devices, 7 online),
+// matching the discovery banner "HomeKit · 8 devices discovered · 7 online".
+const intelCategories = [
+  { category: 'Lighting', ids: ['ceiling', 'floorlamp', 'bedside', 'undercab', 'desklamp'] },
+  { category: 'Climate', ids: ['thermostat'] },
+  { category: 'Security', ids: ['frontdoor'] },
+  { category: 'Sensors', ids: ['motion'] },
+];
+
+// Evening reasoning — mirrors ReasoningCalculator + SuggestionEngine output.
+const reasoningHeadline = 'Sunset is moving across your home.';
+
+const reasoningFactors = [
+  { label: 'Fits the evening', detail: 'Warm, low light suits winding down.' },
+  { label: 'Your usual routine', detail: 'You’ve run Evening 3× around this hour.' },
+  { label: 'Devices are ready', detail: '7 reachable right now.' },
+];
+
 const reasoningSignals = [
   { label: 'Time of day', value: 'Evening', weight: 'high' },
   { label: 'Presence', value: 'At home', weight: 'high' },
   { label: 'Reachable devices', value: '7', weight: 'medium' },
   { label: 'Matching scene', value: 'Evening', weight: 'high' },
-];
-
-const devices = [
-  { name: 'Ceiling Light', room: 'Living Room', icon: Lightbulb, online: true },
-  { name: 'Desk Lamp', room: 'Office', icon: Lightbulb, online: true },
-  { name: 'Thermostat', room: 'Hallway', icon: Thermometer, online: true },
-  { name: 'Front Door', room: 'Entryway', icon: Lock, online: false },
+  { label: 'Usual routine', value: '3× around now', weight: 'medium' },
+  { label: 'Confidence', value: '72%', weight: 'high' },
 ];
 
 const TAB_AMBIENT = {
@@ -89,15 +129,17 @@ const SHEET_AMBIENT = {
 
 export const PHONE_HINTS = {
   idle: 'Tap through the phone like the real app. Calm tabs, gentle suggestions, and consent before anything runs.',
-  Home: 'Home shows rhythm, rooms, and gentle suggestions. Tap Lumen noticed to begin.',
-  Rooms: 'Open Living Room to try planned-device controls before hardware arrives.',
-  Intel: 'Every Apple Home device in one calm list.',
-  Auto: 'Tap a scene to preview the approval sheet before anything runs.',
-  Settings: 'Remotes, homes, and calm preferences live here in the beta.',
-  reasoning: 'Reasoning shows the signals behind a suggestion.',
+  Home: 'Home shows rhythm, rooms, and one gentle suggestion. Tap “Lumen noticed” to begin.',
+  Rooms: 'Open a room, then a device, to try the capability controls before hardware arrives.',
+  Intel: 'Every Apple Home device in one calm list, grouped by type.',
+  Auto: 'Tap a scene to preview its approval sheet before anything runs.',
+  Settings: 'Sensory profile, bridges, and calm preferences live here in the beta.',
+  room: 'Tap a device to open its controls.',
+  device: 'Drag the sliders — brightness and warmth respond live.',
+  reasoning: 'Reasoning shows the signals and the “why this scene”.',
   action: 'Action confirms exactly what Lumen will change.',
   approval: 'Manual scene runs use the same approval pattern.',
-  applied: 'Evening is live. Lights and locks updated after your tap.',
+  applied: 'Evening is live. Lights updated only after your tap.',
 };
 
 const PhoneContext = createContext(null);
@@ -108,15 +150,16 @@ export function usePhone() {
   return ctx;
 }
 
+const DEFAULT_LIGHT = { power: true, brightness: 62, temp: 40 };
+
 export function PhoneProvider({ children, onAmbientChange, onFlowModeChange }) {
   const [tab, setTab] = useState('Home');
   const [sheet, setSheet] = useState(null);
   const [approvalScene, setApprovalScene] = useState(null);
   const [activeScene, setActiveScene] = useState(null);
   const [selectedRoom, setSelectedRoom] = useState(null);
-  const [lightOn, setLightOn] = useState(true);
-  const [brightness, setBrightness] = useState(62);
-  const [colorTemp, setColorTemp] = useState(40);
+  const [selectedDevice, setSelectedDevice] = useState(null);
+  const [deviceStates, setDeviceStates] = useState({ ceiling: { ...DEFAULT_LIGHT } });
   const [toast, setToast] = useState(null);
   const [touched, setTouched] = useState(false);
 
@@ -132,10 +175,18 @@ export function PhoneProvider({ children, onAmbientChange, onFlowModeChange }) {
   const hint = useMemo(() => {
     if (toast) return PHONE_HINTS.applied;
     if (sheet) return PHONE_HINTS[sheet];
+    if (selectedDevice) return PHONE_HINTS.device;
+    if (selectedRoom) return PHONE_HINTS.room;
     return PHONE_HINTS[tab] ?? PHONE_HINTS.idle;
-  }, [tab, sheet, toast]);
+  }, [tab, sheet, toast, selectedRoom, selectedDevice]);
 
   const markTouched = useCallback(() => setTouched(true), []);
+
+  const lightState = useCallback(id => deviceStates[id] ?? DEFAULT_LIGHT, [deviceStates]);
+
+  const setLight = useCallback((id, patch) => {
+    setDeviceStates(prev => ({ ...prev, [id]: { ...DEFAULT_LIGHT, ...prev[id], ...patch } }));
+  }, []);
 
   const selectTab = useCallback(label => {
     markTouched();
@@ -143,18 +194,12 @@ export function PhoneProvider({ children, onAmbientChange, onFlowModeChange }) {
     setSheet(null);
     setApprovalScene(null);
     setSelectedRoom(null);
+    setSelectedDevice(null);
     setToast(null);
   }, [markTouched]);
 
-  const openReasoning = useCallback(() => {
-    markTouched();
-    setSheet('reasoning');
-  }, [markTouched]);
-
-  const openAction = useCallback(() => {
-    markTouched();
-    setSheet('action');
-  }, [markTouched]);
+  const openReasoning = useCallback(() => { markTouched(); setSheet('reasoning'); }, [markTouched]);
+  const openAction = useCallback(() => { markTouched(); setSheet('action'); }, [markTouched]);
 
   const dismissSheet = useCallback(() => {
     markTouched();
@@ -166,12 +211,10 @@ export function PhoneProvider({ children, onAmbientChange, onFlowModeChange }) {
     markTouched();
     setSheet(null);
     setActiveScene(eveningScene.name);
-    setLightOn(true);
-    setBrightness(40);
-    setColorTemp(25);
+    setLight('ceiling', { power: true, brightness: 40, temp: 19 });
     setToast('Evening scene applied');
     setTimeout(() => setToast(null), 2800);
-  }, [eveningScene.name, markTouched]);
+  }, [eveningScene.name, markTouched, setLight]);
 
   const openSceneApproval = useCallback(scene => {
     markTouched();
@@ -192,37 +235,29 @@ export function PhoneProvider({ children, onAmbientChange, onFlowModeChange }) {
   const openRoom = useCallback(name => {
     markTouched();
     setSelectedRoom(name);
+    setSelectedDevice(null);
   }, [markTouched]);
+
+  const openDevice = useCallback(id => { markTouched(); setSelectedDevice(id); }, [markTouched]);
 
   const runGuidedStep = useCallback(stepId => {
     markTouched();
     setToast(null);
+    setSelectedRoom(null);
+    setSelectedDevice(null);
     switch (stepId) {
       case 'home':
-        setTab('Home');
-        setSheet(null);
-        setApprovalScene(null);
-        setSelectedRoom(null);
+        setTab('Home'); setSheet(null); setApprovalScene(null);
         break;
       case 'noticed':
-        setTab('Home');
-        setSheet('reasoning');
-        setApprovalScene(null);
-        break;
       case 'reasoning':
-        setTab('Home');
-        setSheet('reasoning');
-        setApprovalScene(null);
+        setTab('Home'); setSheet('reasoning'); setApprovalScene(null);
         break;
       case 'action':
-        setTab('Home');
-        setSheet('action');
-        setApprovalScene(null);
+        setTab('Home'); setSheet('action'); setApprovalScene(null);
         break;
       case 'scenes':
-        setTab('Auto');
-        setApprovalScene(eveningScene);
-        setSheet('approval');
+        setTab('Auto'); setApprovalScene(eveningScene); setSheet('approval');
         break;
       default:
         break;
@@ -240,36 +275,17 @@ export function PhoneProvider({ children, onAmbientChange, onFlowModeChange }) {
   }, [flowMode, touched, onFlowModeChange]);
 
   const value = {
-    tab,
-    sheet,
-    approvalScene,
-    activeScene,
-    selectedRoom,
-    lightOn,
-    brightness,
-    colorTemp,
-    toast,
-    touched,
-    flowMode,
-    hint,
-    eveningScene,
-    selectTab,
-    openReasoning,
-    openAction,
-    dismissSheet,
-    applySuggestion,
-    openSceneApproval,
-    confirmScene,
-    openRoom,
-    setLightOn,
-    setBrightness,
-    setColorTemp,
-    markTouched,
-    runGuidedStep,
+    tab, sheet, approvalScene, activeScene, selectedRoom, selectedDevice,
+    toast, touched, flowMode, hint, eveningScene,
+    lightState, setLight,
+    selectTab, openReasoning, openAction, dismissSheet, applySuggestion,
+    openSceneApproval, confirmScene, openRoom, openDevice, markTouched, runGuidedStep,
   };
 
   return <PhoneContext.Provider value={value}>{children}</PhoneContext.Provider>;
 }
+
+// ===== Chrome =====
 
 function StatusBar() {
   return (
@@ -297,6 +313,24 @@ function TabBar({ active, onSelect }) {
           {label}
         </button>
       ))}
+    </div>
+  );
+}
+
+// Large-title header used by the secondary screens (Rooms / Intel / Auto /
+// Settings and the detail views), matching the app's eyebrow + big title.
+function SimHeader({ eyebrow, title, back, onBack, action }) {
+  return (
+    <div className="sim-head">
+      <div className="sim-head-text">
+        {back ? (
+          <button type="button" className="room-back" onClick={onBack}>{back}</button>
+        ) : (
+          <span className="sim-eyebrow">{eyebrow}</span>
+        )}
+        <h4 className="sim-title">{title}</h4>
+      </div>
+      {action ? <span className="sim-round" aria-hidden="true">{action}</span> : null}
     </div>
   );
 }
@@ -331,6 +365,29 @@ function DragSlider({ value, onChange, children }) {
   );
 }
 
+// ===== Home (dashboard) =====
+
+function RhythmCard() {
+  return (
+    <div className="nownext-card">
+      <p className="app-label">Rhythm</p>
+      <div className="nownext-now">
+        <span className="nownext-tag now">Now</span>
+        <div>
+          <b>Evening</b>
+          <span>Winding down softly.</span>
+        </div>
+      </div>
+      <div className="nownext-bar"><span style={{ width: '62%' }} /></div>
+      <div className="nownext-next">
+        <span className="nownext-tag next">Next</span>
+        <b>Night</b>
+        <span>at 9:00 PM</span>
+      </div>
+    </div>
+  );
+}
+
 function DashboardScreen() {
   const phone = usePhone();
 
@@ -340,38 +397,51 @@ function DashboardScreen() {
         <span className="app-wordmark">LUMEN</span>
         <span className="app-mode"><Home size={9} /> HOME MODE</span>
       </div>
-      <h4 className="app-greeting serif">Good evening,</h4>
+      <h4 className="app-greeting serif">Welcome Home,</h4>
       <h4 className="app-greeting serif home-name">Home</h4>
-      <p className="app-subtitle">7 of 8 devices online. All looking good.</p>
+      <p className="app-subtitle">7 of 8 devices online — all looking good.</p>
 
-      <p className="app-label noticed-section-label">Lumen noticed</p>
-      <button type="button" className="noticed-card interactive-card" onClick={phone.openReasoning}>
-        <div className="noticed-head"><Sparkles size={11} /> Lumen noticed</div>
-        <p className="noticed-msg">Sunset detected. Warm lighting mode is available.</p>
-        <div className="noticed-action">
-          <div>
-            <b>Run Evening scene</b>
-            <span>Suggested by Lumen</span>
-          </div>
-          <ChevronRight size={13} />
-        </div>
-      </button>
+      <div className="app-cstats">
+        <span><b>4</b> rooms</span>
+        <i>·</i>
+        <span><b>8</b> devices</span>
+        <i>·</i>
+        <span><b>5</b> automations</span>
+        <span className="app-plus" aria-hidden="true">+</span>
+      </div>
+
+      <RhythmCard />
 
       <div className="app-section-head">
         <p className="app-label">Favorite Rooms</p>
       </div>
       <div className="fav-rooms-grid">
-        {favoriteRooms.map(({ name, icon: Icon, count }) => (
+        {rooms.map(({ name, icon: Icon, devices }) => (
           <button type="button" className="fav-room-card interactive-card" key={name} onClick={() => { phone.selectTab('Rooms'); phone.openRoom(name); }}>
             <div className="fav-room-icon"><Icon size={15} /></div>
             <b>{name}</b>
-            <span>{count}</span>
+            <span>{devices.length === 0 ? 'No devices' : `${devices.length} active`}</span>
           </button>
         ))}
       </div>
+
+      <p className="app-label noticed-section-label">Lumen noticed</p>
+      <button type="button" className="noticed-card interactive-card" onClick={phone.openReasoning}>
+        <div className="noticed-head"><Sparkles size={11} /> Lumen noticed</div>
+        <p className="noticed-msg">Sunset detected. Warm lighting may fit this moment.</p>
+        <div className="noticed-action">
+          <div>
+            <b>Review Evening scene</b>
+            <span>Confirm before anything changes</span>
+          </div>
+          <ChevronRight size={13} />
+        </div>
+      </button>
     </div>
   );
 }
+
+// ===== Consent sheets =====
 
 function SheetMotion({ children, className }) {
   const reducedMotion = useReducedMotion();
@@ -393,9 +463,23 @@ function ReasoningSheet() {
   return (
     <SheetMotion className="reason-sheet">
       <span className="sheet-handle" />
-      <div className="sheet-icon"><Sparkles size={22} /></div>
+      <div className="sheet-icon"><Sparkles size={20} /></div>
       <p className="sheet-kicker">Why Lumen noticed</p>
-      <h4 className="sheet-title">Sunset is moving<br />across your home.</h4>
+      <h4 className="sheet-title">{reasoningHeadline}</h4>
+
+      <p className="app-label sheet-signals-label">Why this scene</p>
+      <div className="signal-list">
+        {reasoningFactors.map(({ label, detail }) => (
+          <div className="factor-row" key={label}>
+            <span className="factor-dot" />
+            <div>
+              <b>{label}</b>
+              <span>{detail}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+
       <p className="app-label sheet-signals-label">Signals</p>
       <div className="signal-list">
         {reasoningSignals.map(({ label, value, weight }) => (
@@ -406,6 +490,7 @@ function ReasoningSheet() {
           </div>
         ))}
       </div>
+
       <button type="button" className="sheet-apply" onClick={phone.openAction}>Apply Evening</button>
       <button type="button" className="sheet-dismiss" onClick={phone.dismissSheet}>Not now</button>
     </SheetMotion>
@@ -417,7 +502,7 @@ function ActionConfirmationSheet({ scene }) {
   return (
     <SheetMotion className="reason-sheet">
       <span className="sheet-handle" />
-      <div className="sheet-icon"><scene.icon size={22} /></div>
+      <div className="sheet-icon"><scene.icon size={20} /></div>
       <p className="sheet-kicker">Apply suggested scene</p>
       <h4 className="sheet-title">{scene.name}</h4>
       <p className="app-label sheet-signals-label">Lumen will</p>
@@ -440,7 +525,7 @@ function SceneApprovalSheet({ scene }) {
   return (
     <SheetMotion className="reason-sheet">
       <span className="sheet-handle" />
-      <div className="sheet-icon"><scene.icon size={22} /></div>
+      <div className="sheet-icon"><scene.icon size={20} /></div>
       <p className="sheet-kicker">Apply scene</p>
       <h4 className="sheet-title">{scene.name}</h4>
       <p className="app-label sheet-signals-label">Lumen will</p>
@@ -452,35 +537,38 @@ function SceneApprovalSheet({ scene }) {
           </div>
         ))}
       </div>
-      <button type="button" className="sheet-apply" onClick={phone.confirmScene}>Apply {scene.name}</button>
+      <button type="button" className="sheet-apply" onClick={phone.confirmScene}>Apply</button>
       <button type="button" className="sheet-dismiss" onClick={phone.dismissSheet}>Cancel</button>
     </SheetMotion>
   );
 }
 
+// ===== Auto (Scenes) =====
+
 function AutoScreen() {
   const phone = usePhone();
   const running = phone.activeScene;
+  const runningScene = scenes.find(s => s.name === running);
 
   return (
     <div className={phone.sheet ? 'app-screen dimmed' : 'app-screen'}>
-      <div className="app-topbar"><span className="app-wordmark">LUMEN</span></div>
-      <h4 className="app-greeting small">Scenes</h4>
-      {running && (
+      <SimHeader eyebrow="LUMEN" title="Scenes" action="+" />
+      {runningScene && (
         <div className="active-scene-card">
           <div className="active-scene-badge"><span className="active-pulse" /> ACTIVE NOW</div>
           <b>{running}</b>
-          <span>{scenes.find(s => s.name === running)?.devices ?? ''} · {scenes.find(s => s.name === running)?.mood ?? ''}</span>
+          <span>{runningScene.actions.length} devices · {runningScene.mood}</span>
         </div>
       )}
       <p className="app-label">All Scenes</p>
       <div className="scene-list">
         {scenes.map(scene => {
-          const { name, icon: Icon, devices: d, mood } = scene;
+          const { name, icon: Icon, actions, mood } = scene;
           return (
             <button type="button" className={`scene-row interactive-card ${running === name ? 'active' : ''}`} key={name} onClick={() => phone.openSceneApproval(scene)}>
               <div className="scene-icon"><Icon size={16} /></div>
-              <div className="scene-meta"><b>{name}</b><span>{d} · {mood}</span></div>
+              <div className="scene-meta"><b>{name}</b><span>{actions.length} devices · {mood}</span></div>
+              <SlidersHorizontal size={11} className="scene-edit" />
               <ChevronRight size={13} />
             </button>
           );
@@ -490,58 +578,148 @@ function AutoScreen() {
   );
 }
 
-function RoomsScreen() {
+// ===== Rooms =====
+
+function DeviceControlScreen({ deviceId }) {
   const phone = usePhone();
+  const device = deviceCatalog[deviceId];
+  const state = phone.lightState(deviceId);
 
-  if (phone.selectedRoom === 'Living Room') {
-    const warm = [212, 130, 90];
-    const cool = [120, 170, 230];
-    const t = phone.colorTemp / 100;
-    const rgb = warm.map((w, i) => Math.round(w + (cool[i] - w) * t));
-    const glowOpacity = phone.lightOn ? 0.15 + (phone.brightness / 100) * 0.55 : 0.04;
+  const warm = [212, 130, 90];
+  const cool = [120, 170, 230];
+  const t = state.temp / 100;
+  const rgb = warm.map((w, i) => Math.round(w + (cool[i] - w) * t));
+  const glowOpacity = device.kind === 'light' && state.power ? 0.14 + (state.brightness / 100) * 0.5 : 0.04;
+  const kelvin = Math.round(1800 + (state.temp / 100) * 4700);
 
-    return (
-      <div className="app-screen">
+  return (
+    <div className="app-screen device-screen">
+      {device.kind === 'light' && (
         <div className="room-glow" style={{ background: `radial-gradient(ellipse at 50% 0%, rgba(${rgb.join(',')}, ${glowOpacity}) 0%, transparent 70%)` }} />
-        <div className="app-topbar">
-          <button type="button" className="room-back" onClick={() => phone.openRoom(null)}>Rooms</button>
-          <span className="try-it-pill">Try it</span>
-        </div>
-        <h4 className="app-greeting small">Living Room</h4>
-        <p className="app-label">Ceiling Light</p>
-        <div className="control-card">
-          <div className="control-row">
-            <span>Power</span>
-            <button type="button" className={phone.lightOn ? 'toggle on' : 'toggle'} onClick={() => phone.setLightOn(!phone.lightOn)} aria-label="Toggle power"><span /></button>
-          </div>
-          <div className="control-slider">
-            <SunMedium size={11} className="dim" />
-            <DragSlider value={phone.brightness} onChange={v => { phone.markTouched(); phone.setBrightness(v); }} />
-            <SunMedium size={13} />
-            <small>{phone.brightness}%</small>
-          </div>
-          <div className="control-slider">
-            <span className="warm">Warm</span>
-            <DragSlider value={phone.colorTemp} onChange={v => { phone.markTouched(); phone.setColorTemp(v); }} />
-            <span className="cool">Cool</span>
-            <small>{Math.round(1800 + (phone.colorTemp / 100) * 4700)}K</small>
-          </div>
-        </div>
+      )}
+      <SimHeader
+        back={device.room}
+        title={device.name}
+        onBack={() => phone.openDevice(null)}
+      />
+
+      <p className="app-label">Status</p>
+      <div className="control-card">
+        <div className="control-row"><span>Status</span><span className="stat-online"><span className={device.online ? 'online-dot' : 'offline-dot'} /> {device.online ? 'Online' : 'Offline'}</span></div>
+        <div className="control-row"><span>Room</span><span>{device.room}</span></div>
+        <div className="control-row"><span>Category</span><span>{device.category}</span></div>
       </div>
-    );
+
+      {device.kind === 'light' && (
+        <>
+          <p className="app-label">Controls</p>
+          <div className="control-card">
+            <div className="control-row">
+              <span>Power</span>
+              <button type="button" className={state.power ? 'toggle on' : 'toggle'} onClick={() => phone.setLight(deviceId, { power: !state.power })} aria-label="Toggle power"><span /></button>
+            </div>
+            <div className="control-slider">
+              <SunMedium size={11} className="dim" />
+              <DragSlider value={state.brightness} onChange={v => { phone.markTouched(); phone.setLight(deviceId, { brightness: v }); }} />
+              <SunMedium size={13} />
+              <small>{state.brightness}%</small>
+            </div>
+            <div className="control-slider">
+              <Flame size={10} className="warm" />
+              <DragSlider value={state.temp} onChange={v => { phone.markTouched(); phone.setLight(deviceId, { temp: v }); }} />
+              <Snowflake size={10} className="cool" />
+              <small>{kelvin}K</small>
+            </div>
+          </div>
+        </>
+      )}
+
+      {device.kind === 'climate' && (
+        <>
+          <p className="app-label">Temperature</p>
+          <div className="control-card">
+            <div className="control-row"><span>Current</span><span className="climate-temp">21.0 °C</span></div>
+          </div>
+        </>
+      )}
+
+      {device.kind === 'lock' && (
+        <>
+          <p className="app-label">Lock</p>
+          <div className="control-card">
+            <div className="control-row"><span><Lock size={10} /> Locked</span><span>Tap to unlock</span></div>
+          </div>
+        </>
+      )}
+
+      {device.kind === 'blind' && (
+        <>
+          <p className="app-label">Position</p>
+          <div className="control-card">
+            <div className="control-row"><span>Open</span><span>100%</span></div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+function RoomDetailScreen({ roomName }) {
+  const phone = usePhone();
+  const room = rooms.find(r => r.name === roomName);
+
+  if (phone.selectedDevice) {
+    return <DeviceControlScreen deviceId={phone.selectedDevice} />;
   }
 
   return (
     <div className="app-screen">
-      <div className="app-topbar"><span className="app-wordmark">LUMEN</span></div>
-      <h4 className="app-greeting small">Rooms</h4>
+      <SimHeader back="Rooms" title={room.name} onBack={() => phone.openRoom(null)} action="+" />
+      {room.devices.length === 0 ? (
+        <div className="room-empty">
+          <p className="app-label">Plan this room</p>
+          <p className="room-empty-msg">Add the devices you expect here first. They stay as preview controls until real hardware is linked.</p>
+        </div>
+      ) : (
+        <>
+          <p className="app-label">Active Devices</p>
+          <div className="device-list">
+            {room.devices.map(id => {
+              const d = deviceCatalog[id];
+              const Icon = d.icon;
+              return (
+                <button type="button" className="device-row interactive-card" key={id} onClick={() => phone.openDevice(id)}>
+                  <div className="device-icon"><Icon size={13} /></div>
+                  <div className="device-meta"><b>{d.name}</b><span>{d.category}</span></div>
+                  <span className={d.online ? 'online-dot' : 'offline-dot'} />
+                  <ChevronRight size={12} />
+                </button>
+              );
+            })}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+function RoomsScreen() {
+  const phone = usePhone();
+
+  if (phone.selectedRoom) {
+    return <RoomDetailScreen roomName={phone.selectedRoom} />;
+  }
+
+  return (
+    <div className="app-screen">
+      <SimHeader eyebrow="LUMEN" title="Rooms" action="+" />
       <p className="app-label">All Rooms</p>
       <div className="fav-rooms-grid">
-        {favoriteRooms.map(({ name, icon: Icon, count }) => (
+        {rooms.map(({ name, icon: Icon, devices }) => (
           <button type="button" className="fav-room-card interactive-card" key={name} onClick={() => phone.openRoom(name)}>
             <div className="fav-room-icon"><Icon size={15} /></div>
             <b>{name}</b>
-            <span>{count}</span>
+            <span>{devices.length === 0 ? 'No devices' : `${devices.length} active`}</span>
           </button>
         ))}
       </div>
@@ -549,39 +727,131 @@ function RoomsScreen() {
   );
 }
 
+// ===== Intel (Devices) =====
+
 function IntelScreen() {
   return (
     <div className="app-screen">
-      <div className="app-topbar"><span className="app-wordmark">LUMEN</span></div>
-      <h4 className="app-greeting small">Intel</h4>
-      <div className="intel-banner"><span className="online-dot" /> Apple Home · 8 devices · 7 online</div>
-      <div className="device-list">
-        {devices.map(({ name, room, icon: Icon, online }) => (
-          <div className="device-row" key={name}>
-            <div className="device-icon"><Icon size={15} /></div>
-            <div className="device-meta"><b>{name}</b><span>{room}</span></div>
-            <span className={online ? 'online-dot' : 'offline-dot'} />
-          </div>
-        ))}
+      <SimHeader eyebrow="LUMEN" title="Intel" action="⟳" />
+      <div className="intel-banner">
+        <span className="online-dot" /> HomeKit · 8 devices discovered
+        <span className="intel-online">7 online</span>
       </div>
+      {intelCategories.map(({ category, ids }) => (
+        <div className="intel-group" key={category}>
+          <p className="app-label">{category}</p>
+          <div className="device-list">
+            {ids.map(id => {
+              const d = deviceCatalog[id];
+              const Icon = d.icon;
+              return (
+                <div className="device-row" key={id}>
+                  <div className="device-icon"><Icon size={13} /></div>
+                  <div className="device-meta"><b>{d.name}</b><span>{d.room}</span></div>
+                  <span className={d.online ? 'online-dot' : 'offline-dot'} />
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ===== Settings =====
+
+const cadenceOptions = ['Quiet', 'Balanced', 'Supportive'];
+const motionOptions = ['Reduced', 'Balanced'];
+const contrastOptions = ['Soft', 'Balanced', 'Clear'];
+
+function Segmented({ options, value, onChange }) {
+  return (
+    <div className="seg">
+      {options.map(opt => (
+        <button
+          type="button"
+          key={opt}
+          className={value === opt ? 'seg-opt active' : 'seg-opt'}
+          onClick={() => onChange(opt)}
+        >
+          {opt}
+        </button>
+      ))}
     </div>
   );
 }
 
 function SettingsScreen() {
+  const phone = usePhone();
+  const [calm, setCalm] = useState(false);
+  const [cadence, setCadence] = useState('Balanced');
+  const [motionPref, setMotionPref] = useState('Balanced');
+  const [contrast, setContrast] = useState('Balanced');
+  const [transitions, setTransitions] = useState(10);
+
+  // Enabling Calm Mode applies the calm defaults (mirrors applyCalmModeDefaults).
+  const toggleCalm = () => {
+    phone.markTouched();
+    setCalm(prev => {
+      const next = !prev;
+      if (next) {
+        setCadence('Quiet');
+        setMotionPref('Reduced');
+        setContrast('Soft');
+        setTransitions(t => Math.max(t, 15));
+      }
+      return next;
+    });
+  };
+
   return (
-    <div className="app-screen">
-      <div className="app-topbar"><span className="app-wordmark">LUMEN</span></div>
-      <h4 className="app-greeting small">Settings</h4>
-      <div className="settings-list">
-        <div className="settings-row"><span>Home</span><ChevronRight size={12} /></div>
-        <div className="settings-row"><span>Remotes</span><ChevronRight size={12} /></div>
-        <div className="settings-row"><span>Location &amp; arrival</span><ChevronRight size={12} /></div>
-        <div className="settings-row"><span>Local preview devices</span><span className="settings-on">On</span></div>
+    <div className="app-screen settings-screen">
+      <SimHeader eyebrow="LUMEN" title="Settings" />
+
+      <p className="app-label">Home</p>
+      <div className="settings-card">
+        <div className="settings-row2"><span>Name</span><span>Home</span></div>
+        <div className="settings-row2"><span>Rooms</span><span>4</span></div>
+        <div className="settings-row2"><span>Devices</span><span>8</span></div>
+        <div className="settings-row2"><span>Home location</span><span>Set</span></div>
+      </div>
+
+      <p className="app-label">Bridges</p>
+      <div className="settings-card">
+        <div className="settings-row2"><span>Homekit</span><span className="settings-on">Connected</span></div>
+        <div className="settings-row2"><span>Local network</span><span className="settings-on">Connected</span></div>
+      </div>
+
+      <p className="app-label">Connections</p>
+      <div className="settings-card">
+        <div className="settings-row2"><span>IR Remotes</span><ChevronRight size={11} /></div>
+        <div className="settings-row2"><span>Wi-Fi Devices</span><ChevronRight size={11} /></div>
+      </div>
+
+      <p className="app-label">Sensory Profile</p>
+      <div className="settings-card">
+        <div className="settings-row2"><span>Profile</span><span className="settings-on">{calm ? 'Calm Mode' : 'Balanced'}</span></div>
+        <div className="settings-row2">
+          <span>Calm Mode</span>
+          <button type="button" className={calm ? 'toggle on' : 'toggle'} onClick={toggleCalm} aria-label="Toggle Calm Mode"><span /></button>
+        </div>
+        <div className="settings-stack"><span>Suggestions</span><Segmented options={cadenceOptions} value={cadence} onChange={v => { phone.markTouched(); setCadence(v); }} /></div>
+        <div className="settings-stack"><span>Motion</span><Segmented options={motionOptions} value={motionPref} onChange={v => { phone.markTouched(); setMotionPref(v); }} /></div>
+        <div className="settings-stack"><span>Contrast</span><Segmented options={contrastOptions} value={contrast} onChange={v => { phone.markTouched(); setContrast(v); }} /></div>
+        <div className="settings-row2"><span>Transitions</span><span>{transitions === 0 ? 'Off' : `${transitions} min`}</span></div>
+      </div>
+
+      <p className="app-label">About</p>
+      <div className="settings-card">
+        <div className="settings-row2"><span>Version</span><span>1.0</span></div>
+        <div className="settings-row2"><span>Build</span><span>1</span></div>
       </div>
     </div>
   );
 }
+
+// ===== Toast + stage =====
 
 function PhoneToast({ message }) {
   if (!message) return null;

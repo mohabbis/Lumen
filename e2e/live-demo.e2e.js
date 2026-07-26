@@ -17,7 +17,10 @@ test.describe('Lumen live demo', () => {
     await demo.getByRole('button', { name: /auto tab/i }).click();
     await demo.getByRole('button', { name: /morning/i }).click();
 
-    await expect(demo.getByRole('button', { name: /apply morning/i })).toBeVisible();
+    // The scene approval sheet mirrors the app's SceneApprovalSheet: an "Apply
+    // scene" header for Morning and a plain "Apply" confirm button.
+    await expect(demo.getByText(/apply scene/i)).toBeVisible();
+    await expect(demo.getByRole('button', { name: /^apply$/i })).toBeVisible();
     await expect(demo.getByText('Power', { exact: true })).toBeVisible();
   });
 
