@@ -3,7 +3,7 @@ import {
   Activity, Apple, ArrowRight, Blinds, Check, DoorClosed, Droplets, ExternalLink, Home, Lightbulb, Lock,
   Mail, Menu, Moon, Sparkle, Sun, SunMedium, Thermometer, X, Zap,
 } from 'lucide-react';
-import { PhoneProvider, InteractivePhone, usePhone } from './InteractivePhone.jsx';
+import { PhoneProvider, InteractivePhone, FullscreenApp, usePhone } from './InteractivePhone.jsx';
 import { submitWaitlist } from './waitlistSubmit.js';
 import { trackWaitlistEvent } from './waitlistAnalytics.js';
 import { TESTFLIGHT_URL } from './siteConfig.js';
@@ -380,6 +380,7 @@ function Waitlist() {
 
 function SiteShell() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [appOpen, setAppOpen] = useState(false);
   const { theme, toggleTheme } = useSiteTheme();
   const close = () => setMenuOpen(false);
   const ambient = useAmbientController(AMBIENT_IDLE);
@@ -448,6 +449,9 @@ function SiteShell() {
                 </div>
                 <div className="hero-glow" />
                 <InteractivePhone />
+                <button type="button" className="demo-openapp" onClick={() => setAppOpen(true)}>
+                  Open the app full screen <ArrowRight size={14} />
+                </button>
                 <GuidedDemoSteps />
               </div>
             </div>
@@ -469,6 +473,8 @@ function SiteShell() {
           <Waitlist />
 
           <MobileDemoFAB />
+
+          <FullscreenApp open={appOpen} onClose={() => setAppOpen(false)} />
 
           <footer className="site-footer">
             <a className="logo" href="#top">

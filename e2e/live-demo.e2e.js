@@ -44,4 +44,28 @@ test.describe('Lumen live demo', () => {
 
     await expect(demo.getByText(/why lumen noticed/i)).toBeVisible();
   });
+
+  test('opens full-screen app mode and plans a device', async ({ page }) => {
+    await page.goto('/');
+    await page.getByRole('button', { name: /open the app full screen/i }).click();
+
+    const app = page.locator('.app-fullscreen');
+    await expect(app).toBeVisible();
+
+    // Rooms → Office (empty) → add a planned device.
+    await app.getByRole('button', { name: /rooms tab/i }).click();
+    await app.getByRole('button', { name: /office/i }).first().click();
+    await app.getByRole('button', { name: /add a device/i }).click();
+    await app.locator('.add-device-input').fill('Reading Lamp');
+    const addButton = app.getByRole('button', { name: /^add device$/i });
+    await expect(addButton).toBeEnabled();
+    await addButton.click();
+
+    await expect(app.getByRole('button', { name: /reading lamp/i })).toBeVisible();
+    await expect(app.locator('.planned-dot')).toBeVisible();
+
+    // Close returns to the marketing page.
+    await app.getByRole('button', { name: /close app preview/i }).click();
+    await expect(page.locator('.app-fullscreen')).toHaveCount(0);
+  });
 });
