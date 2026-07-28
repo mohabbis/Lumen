@@ -313,3 +313,245 @@
   color: #0e0819;
   font-weight: 500;
 }
+
+/* ===== Phone frame proportions =====
+ * The hero rule (.hero-split .live-demo .phone-featured, 3 classes) outranks the
+ * responsive overrides, so size it here and keep a true phone aspect (was reading
+ * tablet-wide at 320×490). */
+.hero-split .live-demo .phone-featured {
+  width: 264px;
+}
+
+@media (max-width: 600px) {
+  .hero-split .live-demo .phone-featured {
+    width: min(264px, 82vw);
+  }
+}
+
+.phone-app .phone-screen {
+  min-height: 544px;
+}
+
+/* ===== Applied-scene ambient on the dashboard ===== */
+
+.home-ambient {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  transition: background 0.6s ease;
+}
+
+/* ===== "Open the app" launch button ===== */
+
+.demo-openapp {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 18px;
+  padding: 11px 20px;
+  border-radius: 99px;
+  border: 1px solid rgba(196, 154, 108, 0.4);
+  background: rgba(196, 154, 108, 0.12);
+  color: #e8d3b6;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, transform 0.2s;
+}
+
+.demo-openapp:hover {
+  background: rgba(196, 154, 108, 0.2);
+  border-color: rgba(196, 154, 108, 0.6);
+  transform: translateY(-1px);
+}
+
+/* ===== Full-screen app mode ===== */
+
+.app-fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: #0b0716;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-fullscreen-stage {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  max-width: 460px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  background: #0E0819;
+  box-shadow: 0 0 120px rgba(0, 0, 0, 0.6);
+}
+
+/* Full-screen app chrome scales up from the tiny embedded frame. */
+.app-fullscreen-stage .phone-status {
+  padding: max(12px, env(safe-area-inset-top)) 22px 6px;
+  font-size: 13px;
+}
+
+.app-fullscreen-stage .dynamic-island {
+  width: 108px;
+  height: 28px;
+}
+
+/* The Close pill lives top-right, so drop the decorative signal indicator. */
+.app-fullscreen-stage .phone-status span:last-child {
+  visibility: hidden;
+}
+
+.app-fullscreen-stage .app-screen {
+  padding: 10px 18px 12px;
+  gap: 9px;
+}
+
+.app-fullscreen-stage .app-tabbar {
+  padding: 9px 6px max(12px, env(safe-area-inset-bottom));
+}
+
+.app-fullscreen-stage .app-tabbar span,
+.app-fullscreen-stage .app-tabbar button {
+  font-size: 9px;
+  gap: 3px;
+}
+
+.app-fullscreen-close {
+  position: absolute;
+  top: max(12px, env(safe-area-inset-top));
+  right: 16px;
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 13px;
+  border-radius: 99px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(20, 14, 34, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: rgba(232, 224, 212, 0.85);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.app-fullscreen-close:hover {
+  background: rgba(30, 20, 48, 0.85);
+  color: #fff;
+}
+
+/* ===== Add-device sheet ===== */
+
+.add-device-sheet {
+  overflow-y: auto;
+}
+
+.add-device-input {
+  width: 100%;
+  margin-top: 2px;
+  padding: 9px 11px;
+  border-radius: 9px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: #e8e0d4;
+  font-family: inherit;
+  font-size: 11px;
+  outline: none;
+}
+
+.add-device-input:focus {
+  border-color: rgba(196, 154, 108, 0.5);
+  background: rgba(196, 154, 108, 0.07);
+}
+
+.add-device-input::placeholder {
+  color: rgba(232, 224, 212, 0.3);
+}
+
+.type-grid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+}
+
+.type-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 4px;
+  border-radius: 9px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.035);
+  color: rgba(232, 224, 212, 0.55);
+  font-family: inherit;
+  font-size: 7.5px;
+  letter-spacing: 0.01em;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.type-chip:hover {
+  border-color: rgba(196, 154, 108, 0.25);
+  color: rgba(232, 224, 212, 0.8);
+}
+
+.type-chip.active {
+  border-color: rgba(196, 154, 108, 0.55);
+  background: rgba(196, 154, 108, 0.14);
+  color: #e8d3b6;
+}
+
+.type-chip svg {
+  color: currentColor;
+}
+
+.add-device-note {
+  width: 100%;
+  margin: 4px 0 0;
+  font-size: 7.5px;
+  line-height: 1.4;
+  color: rgba(232, 224, 212, 0.35);
+}
+
+.add-device-sheet .sheet-apply:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Planned-device affordances */
+
+.planned-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(196, 154, 108, 0.7);
+  flex-shrink: 0;
+  display: inline-block;
+}
+
+.room-empty-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  align-self: flex-start;
+  margin-top: 4px;
+  padding: 7px 12px;
+  border-radius: 99px;
+  border: 1px solid rgba(196, 154, 108, 0.35);
+  background: rgba(196, 154, 108, 0.1);
+  color: #e8d3b6;
+  font-family: inherit;
+  font-size: 8.5px;
+  cursor: pointer;
+}
