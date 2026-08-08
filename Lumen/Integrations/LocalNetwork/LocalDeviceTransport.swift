@@ -7,8 +7,11 @@ import Foundation
 // generic REST), keeping Lumen local-first — no cloud, no account.
 //
 // Only value types cross this boundary (never a SwiftData model), matching the
-// SmartHomeBridge snapshot convention and the IRTransport seam. One transport
-// conforms today: ShellyGen2Transport (Shelly Gen2 RPC over local HTTP).
+// SmartHomeBridge snapshot convention and the IRTransport seam. Three transports
+// conform today: ShellyGen2Transport (Shelly Gen2 RPC), TasmotaTransport
+// (Tasmota `/cm` command API), and ESPHomeTransport (ESPHome web_server REST) —
+// all local HTTP, no cloud. LocalTransportFactory routes a device to the right
+// one by vendor.
 
 /// Addressing for a local device. `address` is what the user typed — a bare IP
 /// or host ("192.168.1.50", "shelly.local"), "host:port", or a full http URL.
@@ -28,16 +31,21 @@ enum LocalComponent: String, Sendable, Equatable, Codable {
 }
 
 /// Addresses one controllable point on a device: a host, which component it is,
-/// and which channel/index (multi-relay devices expose several).
+/// and which channel/index (multi-relay devices expose several). `entityID` is
+/// an optional string name for vendors that address entities by name rather than
+/// a numeric index (e.g. ESPHome's `/light/<object_id>`); numeric-indexed vendors
+/// (Shelly, Tasmota) leave it nil and use `channel`.
 struct LocalTarget: Sendable, Equatable {
     let host: LocalHost
     let component: LocalComponent
     let channel: Int
+    let entityID: String?
 
-    init(host: LocalHost, component: LocalComponent, channel: Int = 0) {
+    init(host: LocalHost, component: LocalComponent, channel: Int = 0, entityID: String? = nil) {
         self.host = host
         self.component = component
         self.channel = channel
+        self.entityID = entityID
     }
 }
 

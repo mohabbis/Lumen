@@ -6,23 +6,63 @@ import Foundation
 // deliberately plain (no SwiftData) so the integration layer is fully testable;
 // persistence + a Settings surface to author these is the next step.
 
-/// The concrete kind of local device. Drives both the component the transport
-/// talks to and the capability set the UI renders.
+/// The vendor / local protocol a device speaks. Drives which transport
+/// `LocalTransportFactory` hands the bridge. Vendor-neutral seam below stays the
+/// same regardless of which one a device uses.
+enum LocalVendor: String, Sendable, Equatable, Codable, CaseIterable {
+    case shelly     // Shelly Gen2 RPC over HTTP
+    case tasmota    // Tasmota `/cm?cmnd=` command API
+    case esphome    // ESPHome web_server REST API
+
+    var displayName: String {
+        switch self {
+        case .shelly: return "Shelly"
+        case .tasmota: return "Tasmota"
+        case .esphome: return "ESPHome"
+        }
+    }
+}
+
+/// The concrete kind of local device. Drives the vendor/transport, the component
+/// the transport talks to, and the capability set the UI renders.
 enum LocalDeviceKind: String, Sendable, Equatable, Codable, CaseIterable {
-    case shellySwitch   // Shelly Gen2 Switch — on/off
-    case shellyDimmer   // Shelly Gen2 Light — on/off + brightness
+    case shellySwitch    // Shelly Gen2 Switch — on/off
+    case shellyDimmer    // Shelly Gen2 Light — on/off + brightness
+    case tasmotaSwitch   // Tasmota relay/plug — on/off
+    case tasmotaDimmer   // Tasmota dimmer/bulb — on/off + brightness
+    case esphomeSwitch   // ESPHome switch entity — on/off
+    case esphomeLight    // ESPHome light entity — on/off + brightness
+
+    var vendor: LocalVendor {
+        switch self {
+        case .shellySwitch, .shellyDimmer: return .shelly
+        case .tasmotaSwitch, .tasmotaDimmer: return .tasmota
+        case .esphomeSwitch, .esphomeLight: return .esphome
+        }
+    }
 
     var component: LocalComponent {
         switch self {
-        case .shellySwitch: return .relay
-        case .shellyDimmer: return .light
+        case .shellySwitch, .tasmotaSwitch, .esphomeSwitch: return .relay
+        case .shellyDimmer, .tasmotaDimmer, .esphomeLight: return .light
         }
     }
+
+    /// Whether this kind exposes a brightness capability (its component is a light).
+    var supportsBrightness: Bool { component == .light }
+
+    /// Whether authoring this kind needs a string entity name rather than a
+    /// numeric channel (ESPHome addresses entities by `object_id`).
+    var usesEntityID: Bool { vendor == .esphome }
 
     var displayName: String {
         switch self {
         case .shellySwitch: return "Shelly Switch"
         case .shellyDimmer: return "Shelly Dimmer"
+        case .tasmotaSwitch: return "Tasmota Switch"
+        case .tasmotaDimmer: return "Tasmota Dimmer"
+        case .esphomeSwitch: return "ESPHome Switch"
+        case .esphomeLight: return "ESPHome Light"
         }
     }
 }
@@ -34,6 +74,9 @@ struct LocalDeviceConfig: Sendable, Equatable, Identifiable {
     var host: LocalHost
     var kind: LocalDeviceKind
     var channel: Int
+    /// Entity name for vendors that address by name (ESPHome). Nil for numeric-
+    /// indexed vendors, which use `channel`.
+    var entityID: String?
     var category: DeviceCategory
 
     init(
@@ -43,6 +86,7 @@ struct LocalDeviceConfig: Sendable, Equatable, Identifiable {
         host: LocalHost,
         kind: LocalDeviceKind,
         channel: Int = 0,
+        entityID: String? = nil,
         category: DeviceCategory = .lighting
     ) {
         self.id = id
@@ -51,11 +95,12 @@ struct LocalDeviceConfig: Sendable, Equatable, Identifiable {
         self.host = host
         self.kind = kind
         self.channel = channel
+        self.entityID = entityID
         self.category = category
     }
 
     var target: LocalTarget {
-        LocalTarget(host: host, component: kind.component, channel: channel)
+        LocalTarget(host: host, component: kind.component, channel: channel, entityID: entityID)
     }
 }
 
@@ -113,7 +158,7 @@ struct LocalNetworkDevice: SmartDevice {
         var caps: [any DeviceCapability] = [
             LocalNetworkOnOffCapability(target: config.target, transport: transport)
         ]
-        if config.kind == .shellyDimmer {
+        if config.kind.supportsBrightness {
             caps.append(LocalNetworkBrightnessCapability(target: config.target, transport: transport))
         }
         return caps
