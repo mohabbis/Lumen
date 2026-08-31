@@ -17,7 +17,7 @@ test.describe('Lumen live demo', () => {
     await demo.getByRole('button', { name: /review evening scene/i }).click();
     await expect(demo.getByText(/why lumen noticed/i)).toBeVisible();
     await demo.getByRole('button', { name: /apply evening/i }).click();
-    await expect(demo.getByText(/lumen will/i)).toBeVisible();
+    await expect(demo.getByText('Lumen will', { exact: true })).toBeVisible();
     await demo.getByRole('button', { name: /^apply$/i }).click();
     await expect(demo.getByText(/evening scene applied/i)).toBeVisible();
   });
@@ -95,7 +95,7 @@ test.describe('Lumen live demo', () => {
     await expect(page.locator('#demo .phone.phone-featured')).toHaveCount(0);
     await expect(page.getByRole('button', { name: /home tab/i })).toBeVisible();
 
-    await page.getByRole('button', { name: /auto tab/i }).click();
-    await expect(page.getByRole('button', { name: /morning/i })).toBeVisible();
+    await page.getByRole('button', { name: /auto tab/i }).click({ force: false });
+    await expect(page.locator('#demo').getByRole('button', { name: /morning/i })).toBeVisible();
   });
 });

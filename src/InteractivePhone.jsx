@@ -1,4 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   Activity, ArrowRight, BedDouble, Blinds, Camera, ChevronRight, DoorClosed, DoorOpen, Droplets, Flame, Home, Laptop,
@@ -1168,15 +1169,17 @@ export function InteractivePhone({ focusMode = false, onRequestFocus, onCloseFoc
     if (!focusMode) return undefined;
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
+    document.body.classList.add('preview-focus');
     const onKey = e => { if (e.key === 'Escape') onCloseFocus?.(); };
     window.addEventListener('keydown', onKey);
     return () => {
       document.body.style.overflow = prev;
+      document.body.classList.remove('preview-focus');
       window.removeEventListener('keydown', onKey);
     };
   }, [focusMode, onCloseFocus]);
 
-  return (
+  const tree = (
     <div
       className={`live-demo interactive-demo ${focusMode ? 'is-focus app-fullscreen' : ''}`}
       role={focusMode ? 'dialog' : undefined}
@@ -1208,4 +1211,10 @@ export function InteractivePhone({ focusMode = false, onRequestFocus, onCloseFoc
       )}
     </div>
   );
+
+  if (focusMode && typeof document !== 'undefined') {
+    return createPortal(tree, document.body);
+  }
+
+  return tree;
 }

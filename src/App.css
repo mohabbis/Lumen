@@ -2311,8 +2311,11 @@ p {
   }
 
   .hero-demo-first {
-    padding-top: 80px;
-    padding-bottom: 32px;
+    padding: 0 0 32px;
+  }
+
+  .hero-demo-first .hero-copy {
+    padding: 28px 20px 0;
   }
 
   .hero-demo-first .hero-copy h1 {

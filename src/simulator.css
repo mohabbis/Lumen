@@ -671,10 +671,20 @@
 }
 
 @media (max-width: 900px) {
+  .hero-demo-first .hero-inner {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .hero-demo-first .hero-demo {
+    order: -1;
+    margin-top: 0;
+  }
+
   .app-preview-stage {
     width: 100%;
-    height: calc(100svh - 88px);
-    min-height: 560px;
+    height: calc(100svh - 64px);
+    min-height: 0;
     border-radius: 0;
     border: none;
     box-shadow: 0 16px 48px rgba(0, 0, 0, 0.35);
