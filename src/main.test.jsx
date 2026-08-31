@@ -31,14 +31,14 @@ describe('Lumen landing page', () => {
     render(<App />);
     const nav = screen.getByRole('navigation');
     expect(within(nav).getByRole('link', { name: /features/i })).toHaveAttribute('href', '#features');
-    expect(within(nav).getByRole('link', { name: /live demo/i })).toHaveAttribute('href', '#demo');
+    expect(within(nav).getByRole('link', { name: /preview/i })).toHaveAttribute('href', '#demo');
     expect(within(nav).getByRole('link', { name: /privacy/i })).toHaveAttribute('href', '/privacy');
   });
 
   it('renders guided demo steps', () => {
     render(<App />);
     expect(screen.getByText(/try the flow/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /lumen noticed/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /lumen noticed: tap the suggestion card/i })).toBeInTheDocument();
   });
 
   it('renders getting started section', () => {
@@ -74,11 +74,29 @@ describe('Lumen landing page', () => {
     expect(screen.getByRole('button', { name: /continue/i })).toBeInTheDocument();
   });
 
-  it('renders the live interactive demo', () => {
+  it('renders the interactive preview without an overlay', () => {
     render(<App />);
-    expect(screen.getByText(/live interactive demo/i)).toBeInTheDocument();
+    expect(screen.getByText(/^interactive preview$/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /auto tab/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /home tab/i })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /close app preview/i })).not.toBeInTheDocument();
+  });
+
+  it('does not name a clinical audience in public copy', () => {
+    render(<App />);
+    expect(document.body.textContent).not.toMatch(/neurodiverg|autism|\bADHD\b|sensory processing/i);
+  });
+
+  it('hides the suggestion card when Suggestions is Quiet', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getByRole('button', { name: /settings tab/i }));
+    await user.click(screen.getByRole('button', { name: /^quiet$/i }));
+    await user.click(screen.getByRole('button', { name: /home tab/i }));
+
+    expect(screen.getByText(/lumen is staying quiet/i)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /review evening scene/i })).not.toBeInTheDocument();
   });
 
   it('states the honest Apple Home / HomeKit + Matter compatibility', () => {

@@ -314,22 +314,251 @@
   font-weight: 500;
 }
 
-/* ===== Phone frame proportions =====
- * The hero rule (.hero-split .live-demo .phone-featured, 3 classes) outranks the
- * responsive overrides, so size it here and keep a true phone aspect (was reading
- * tablet-wide at 320×490). */
-.hero-split .live-demo .phone-featured {
-  width: 264px;
+/* ===== In-page preview stage (usable size, not a 264px toy phone) ===== */
+
+.app-preview-stage {
+  width: min(390px, 100%);
+  height: min(80vh, 780px);
+  min-height: 620px;
+  display: flex;
+  flex-direction: column;
+  background: #0E0819;
+  border: 8px solid #181818;
+  border-radius: 40px;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.07),
+    0 40px 100px rgba(0, 0, 0, 0.8),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.04);
 }
 
-@media (max-width: 600px) {
-  .hero-split .live-demo .phone-featured {
-    width: min(264px, 82vw);
-  }
+.app-preview-stage .app-stage {
+  flex: 1;
+  min-height: 0;
 }
 
-.phone-app .phone-screen {
-  min-height: 544px;
+.app-preview-stage .phone-status {
+  padding: 12px 22px 6px;
+  font-size: 13px;
+}
+
+.app-preview-stage .dynamic-island {
+  width: 108px;
+  height: 28px;
+}
+
+.app-preview-stage .app-screen {
+  padding: 12px 18px 14px;
+  gap: 10px;
+}
+
+.app-preview-stage .app-tabbar {
+  padding: 8px 6px 14px;
+}
+
+.app-preview-stage .app-tabbar span,
+.app-preview-stage .app-tabbar button {
+  font-size: 11px;
+  gap: 4px;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 6px 4px;
+}
+
+.app-preview-stage .sim-title {
+  font-size: 22px;
+}
+
+.app-preview-stage .sim-eyebrow {
+  font-size: 10px;
+}
+
+.app-preview-stage .sim-round {
+  width: 32px;
+  height: 32px;
+  font-size: 16px;
+}
+
+.app-preview-stage .app-greeting.serif {
+  font-size: 22px;
+}
+
+.app-preview-stage .app-wordmark {
+  font-size: 11px;
+}
+
+.app-preview-stage .app-mode {
+  font-size: 10px;
+}
+
+.app-preview-stage .app-subtitle {
+  font-size: 13px !important;
+}
+
+.app-preview-stage .app-label {
+  font-size: 11px;
+}
+
+.app-preview-stage .app-cstats {
+  font-size: 12px;
+}
+
+.app-preview-stage .noticed-head {
+  font-size: 11px;
+}
+
+.app-preview-stage .noticed-msg {
+  font-size: 14px !important;
+}
+
+.app-preview-stage .noticed-action b {
+  font-size: 14px;
+}
+
+.app-preview-stage .noticed-action span {
+  font-size: 12px;
+}
+
+.app-preview-stage .fav-room-card {
+  min-height: 44px;
+  padding: 12px 10px;
+}
+
+.app-preview-stage .fav-room-card b {
+  font-size: 13px;
+}
+
+.app-preview-stage .fav-room-card span {
+  font-size: 11px;
+}
+
+.app-preview-stage .scene-row {
+  padding: 10px 12px;
+  min-height: 44px;
+}
+
+.app-preview-stage .scene-meta b {
+  font-size: 14px;
+}
+
+.app-preview-stage .scene-meta span {
+  font-size: 11px;
+}
+
+.app-preview-stage .device-row {
+  min-height: 44px;
+  padding: 10px 12px;
+}
+
+.app-preview-stage .device-meta b {
+  font-size: 13px;
+}
+
+.app-preview-stage .device-meta span {
+  font-size: 11px;
+}
+
+.app-preview-stage .settings-row2,
+.app-preview-stage .settings-stack {
+  font-size: 13px;
+  padding: 12px 14px;
+}
+
+.app-preview-stage .seg-opt {
+  font-size: 11px;
+  padding: 8px 6px;
+  min-height: 36px;
+}
+
+.app-preview-stage .sheet-kicker {
+  font-size: 11px !important;
+}
+
+.app-preview-stage .sheet-title {
+  font-size: 22px;
+}
+
+.app-preview-stage .sheet-apply,
+.app-preview-stage .sheet-dismiss {
+  min-height: 44px;
+  font-size: 15px;
+  padding: 12px 16px;
+}
+
+.app-preview-stage .factor-row b,
+.app-preview-stage .signal-label,
+.app-preview-stage .approval-action-capability {
+  font-size: 13px;
+}
+
+.app-preview-stage .factor-row span,
+.app-preview-stage .signal-value,
+.app-preview-stage .approval-action-detail {
+  font-size: 12px;
+}
+
+.app-preview-stage .add-device-input {
+  font-size: 15px;
+  padding: 12px 14px;
+  min-height: 44px;
+}
+
+.app-preview-stage .type-chip {
+  font-size: 11px;
+  padding: 10px 6px;
+  min-height: 44px;
+}
+
+.app-preview-stage .room-empty-msg {
+  font-size: 13px;
+}
+
+.app-preview-stage .room-empty-cta {
+  font-size: 14px;
+  min-height: 44px;
+  padding: 10px 16px;
+}
+
+.app-preview-stage .nownext-now b,
+.app-preview-stage .nownext-next b {
+  font-size: 15px;
+}
+
+.app-preview-stage .control-row {
+  font-size: 13px;
+}
+
+.noticed-quiet {
+  margin: 0;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 14px;
+  line-height: 1.45;
+  color: rgba(232, 224, 212, 0.55);
+  text-align: left;
+}
+
+.app-preview-stage[data-contrast="soft"] {
+  filter: contrast(0.86) saturate(0.92);
+}
+
+.app-preview-stage[data-contrast="clear"] {
+  filter: contrast(1.08);
+}
+
+.app-preview-stage[data-motion="reduced"] .active-pulse,
+.app-preview-stage[data-motion="reduced"] .demo-live-dot {
+  animation: none;
+}
+
+.app-preview-stage[data-motion="reduced"] .home-ambient {
+  transition: none;
+}
+
+.app-preview-stage[data-motion="reduced"] .app-screen.dimmed {
+  filter: none;
 }
 
 /* ===== Applied-scene ambient on the dashboard ===== */
@@ -342,13 +571,17 @@
   transition: background 0.6s ease;
 }
 
-/* ===== "Open the app" launch button ===== */
+.home-ambient.is-still {
+  transition: none;
+}
+
+/* ===== Expand preview ===== */
 
 .demo-openapp {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  margin-top: 18px;
+  margin-top: 4px;
   padding: 11px 20px;
   border-radius: 99px;
   border: 1px solid rgba(196, 154, 108, 0.4);
@@ -359,67 +592,56 @@
   font-weight: 500;
   letter-spacing: 0.01em;
   cursor: pointer;
-  transition: background 0.2s, border-color 0.2s, transform 0.2s;
+  transition: background 0.2s, border-color 0.2s;
 }
 
 .demo-openapp:hover {
   background: rgba(196, 154, 108, 0.2);
   border-color: rgba(196, 154, 108, 0.6);
-  transform: translateY(-1px);
 }
 
-/* ===== Full-screen app mode ===== */
+@media (prefers-reduced-motion: reduce) {
+  .demo-openapp {
+    transition: none;
+  }
+}
 
-.app-fullscreen {
+/* ===== Focus mode (same AppShell, hides page chrome) ===== */
+
+.live-demo.is-focus.app-fullscreen {
   position: fixed;
   inset: 0;
   z-index: 300;
   background: #0b0716;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  gap: 0;
+  padding: 0;
 }
 
-.app-fullscreen-stage {
+.live-demo.is-focus .app-preview-stage {
   flex: 1;
-  min-height: 0;
   width: 100%;
   max-width: 460px;
+  height: auto;
+  min-height: 0;
+  border-radius: 0;
+  border: none;
   margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  background: #0E0819;
   box-shadow: 0 0 120px rgba(0, 0, 0, 0.6);
 }
 
-/* Full-screen app chrome scales up from the tiny embedded frame. */
-.app-fullscreen-stage .phone-status {
-  padding: max(12px, env(safe-area-inset-top)) 22px 6px;
-  font-size: 13px;
+.live-demo.is-focus .phone-status {
+  padding-top: max(12px, env(safe-area-inset-top));
 }
 
-.app-fullscreen-stage .dynamic-island {
-  width: 108px;
-  height: 28px;
-}
-
-/* The Close pill lives top-right, so drop the decorative signal indicator. */
-.app-fullscreen-stage .phone-status span:last-child {
+.live-demo.is-focus .phone-status span:last-child {
   visibility: hidden;
 }
 
-.app-fullscreen-stage .app-screen {
-  padding: 10px 18px 12px;
-  gap: 9px;
-}
-
-.app-fullscreen-stage .app-tabbar {
-  padding: 9px 6px max(12px, env(safe-area-inset-bottom));
-}
-
-.app-fullscreen-stage .app-tabbar span,
-.app-fullscreen-stage .app-tabbar button {
-  font-size: 9px;
-  gap: 3px;
+.live-demo.is-focus .app-tabbar {
+  padding-bottom: max(14px, env(safe-area-inset-bottom));
 }
 
 .app-fullscreen-close {
@@ -446,6 +668,27 @@
 .app-fullscreen-close:hover {
   background: rgba(30, 20, 48, 0.85);
   color: #fff;
+}
+
+@media (max-width: 900px) {
+  .hero-demo-first .hero-inner {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .hero-demo-first .hero-demo {
+    order: -1;
+    margin-top: 0;
+  }
+
+  .app-preview-stage {
+    width: 100%;
+    height: calc(100svh - 64px);
+    min-height: 0;
+    border-radius: 0;
+    border: none;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.35);
+  }
 }
 
 /* ===== Add-device sheet ===== */

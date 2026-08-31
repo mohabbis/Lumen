@@ -29,7 +29,7 @@ export const guidedDemoSteps = [
   },
   {
     id: 'scenes',
-    label: 'Scenes',
-    short: 'Try manual approval',
+    label: 'Runs',
+    short: 'See it apply',
   },
 ];

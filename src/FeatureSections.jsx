@@ -5,7 +5,7 @@ import {
 import { usePhone } from './InteractivePhone.jsx';
 import { FadeIn } from './components/FadeIn.jsx';
 
-function DemoLink({ tab, label = 'Try in the phone' }) {
+function DemoLink({ tab, label = 'Try in the preview' }) {
   const phone = usePhone();
 
   return (
@@ -90,8 +90,8 @@ export function AppShowcaseSection() {
           <h2>simple by<br /><em>design.</em></h2>
           <p className="section-note">
             Five calm tabs — Home, Rooms, Intel, Auto, Settings — each with one job.
-            The live iPhone demo above is the real beta flow: rhythm, suggestions, scenes,
-            and consent sheets you can tap through right now.
+            The interactive preview above is the same loop: rhythm, one suggestion,
+            scenes, and consent sheets you can tap through right now.
           </p>
         </FadeIn>
         <FadeIn className="app-showcase-highlights">
@@ -110,7 +110,7 @@ export function AppShowcaseSection() {
         </FadeIn>
         <FadeIn>
           <a className="app-showcase-cta" href="#demo">
-            Try the live demo <ArrowRight size={14} />
+            Try the preview <ArrowRight size={14} />
           </a>
         </FadeIn>
       </div>
@@ -164,7 +164,7 @@ export function FeaturesOverviewSection() {
         <p className="eyebrow">explore</p>
         <h2>everything your home needs.<br /><em>nothing extra.</em></h2>
         <p className="section-note">
-          Each part of the app has one job. Tap a card to read more, or try it live in the phone above.
+          Each part of the app has one job. Tap a card to read more, or try it in the preview above.
         </p>
       </FadeIn>
       <div className="features-overview-grid">
@@ -230,7 +230,7 @@ export function ScenesFeatureSection() {
             'Geofence automation on arrival or departure',
             'Morning, Evening, Movie Night, Sleep presets included',
           ]} />
-          <DemoLink tab="Auto" label="Try scenes in the phone" />
+          <DemoLink tab="Auto" label="Try scenes in the preview" />
         </FadeIn>
         <FadeIn delay={0.08} className="feature-spotlight-panel">
           <div className="feature-mock-stack">
@@ -292,7 +292,7 @@ export function RoomsFeatureSection() {
             'Brightness, color temperature, and power sliders',
             'Local preview mode enabled by default in beta',
           ]} />
-          <DemoLink tab="Rooms" label="Open Living Room in the phone" />
+          <DemoLink tab="Rooms" label="Open Living Room in the preview" />
         </FadeIn>
         <FadeIn delay={0.08} className="feature-spotlight-panel">
           <div className="feature-mock-card warm">
@@ -324,7 +324,7 @@ export function PresenceFeatureSection() {
             'Notifications when automation runs or needs attention',
             'Welcome Home and Away Mode overlays on the home screen',
           ]} />
-          <DemoLink tab="Home" label="See the home screen in the phone" />
+          <DemoLink tab="Home" label="See the home screen in the preview" />
         </FadeIn>
         <FadeIn delay={0.08} className="feature-spotlight-panel">
           <div className="feature-mock-card presence">

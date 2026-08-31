@@ -1,10 +1,12 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { createPortal } from 'react-dom';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
-  Activity, BedDouble, Blinds, Camera, ChevronRight, DoorClosed, DoorOpen, Droplets, Flame, Home, Laptop,
+  Activity, ArrowRight, BedDouble, Blinds, Camera, ChevronRight, DoorClosed, DoorOpen, Droplets, Flame, Home, Laptop,
   Lightbulb, Lock, LogOut, Moon, MoonStar, Plus, Popcorn, Power, Radar, Settings, SlidersHorizontal,
   Snowflake, Sofa, Sparkle, Sparkles, Speaker, Sunrise, SunDim, SunMedium, Thermometer, Tv, Utensils, Wind, X,
 } from 'lucide-react';
+import { useReducedMotion } from './hooks/useReducedMotion.js';
 
 // Shared demo data. This mirrors the native iOS app (Lumen/) as closely as a
 // web mockup can — same tab set, seeded scenes, dark palette (#0E0819 / accent
@@ -157,7 +159,7 @@ const SHEET_AMBIENT = {
 };
 
 export const PHONE_HINTS = {
-  idle: 'Tap through the phone like the real app. Calm tabs, gentle suggestions, and consent before anything runs.',
+  idle: 'Tap through the preview. Calm tabs, one suggestion, and consent before anything runs.',
   Home: 'Home shows rhythm, rooms, and one gentle suggestion. Tap “Lumen noticed” to begin.',
   Rooms: 'Open a room, then a device, to try the controls — or tap + to add your own device.',
   Intel: 'Every Apple Home device in one calm list, grouped by type.',
@@ -185,6 +187,7 @@ const DEFAULT_LIGHT = { power: true, brightness: 62, temp: 40 };
 let plannedSeq = 0;
 
 export function PhoneProvider({ children, onAmbientChange, onFlowModeChange }) {
+  const osReducedMotion = useReducedMotion();
   const [tab, setTab] = useState('Home');
   const [sheet, setSheet] = useState(null);
   const [approvalScene, setApprovalScene] = useState(null);
@@ -196,6 +199,14 @@ export function PhoneProvider({ children, onAmbientChange, onFlowModeChange }) {
   const [plannedDevices, setPlannedDevices] = useState({});
   const [toast, setToast] = useState(null);
   const [touched, setTouched] = useState(false);
+  const [calmMode, setCalmMode] = useState(false);
+  const [cadence, setCadenceState] = useState('Balanced');
+  const [motionPref, setMotionPrefState] = useState('Balanced');
+  const [contrast, setContrastState] = useState('Balanced');
+  const [transitions, setTransitionsState] = useState(10);
+
+  const reduceMotion = osReducedMotion || motionPref === 'Reduced';
+  const suggestionsQuiet = cadence === 'Quiet';
 
   const eveningScene = scenes.find(s => s.name === 'Evening') ?? scenes[1];
 
@@ -215,6 +226,40 @@ export function PhoneProvider({ children, onAmbientChange, onFlowModeChange }) {
   }, [tab, sheet, toast, selectedRoom, selectedDevice]);
 
   const markTouched = useCallback(() => setTouched(true), []);
+
+  const setCadence = useCallback(value => {
+    markTouched();
+    setCadenceState(value);
+  }, [markTouched]);
+
+  const setMotionPref = useCallback(value => {
+    markTouched();
+    setMotionPrefState(value);
+  }, [markTouched]);
+
+  const setContrast = useCallback(value => {
+    markTouched();
+    setContrastState(value);
+  }, [markTouched]);
+
+  const setTransitions = useCallback(value => {
+    markTouched();
+    setTransitionsState(value);
+  }, [markTouched]);
+
+  const toggleCalmMode = useCallback(() => {
+    markTouched();
+    setCalmMode(prev => {
+      const next = !prev;
+      if (next) {
+        setCadenceState('Quiet');
+        setMotionPrefState('Reduced');
+        setContrastState('Soft');
+        setTransitionsState(t => Math.max(t, 15));
+      }
+      return next;
+    });
+  }, [markTouched]);
 
   const getDevice = useCallback(id => deviceCatalog[id] ?? plannedDevices[id], [plannedDevices]);
   const lightState = useCallback(id => deviceStates[id] ?? DEFAULT_LIGHT, [deviceStates]);
@@ -340,18 +385,27 @@ export function PhoneProvider({ children, onAmbientChange, onFlowModeChange }) {
         setTab('Home'); setSheet('action'); setApprovalScene(null);
         break;
       case 'scenes':
-        setTab('Auto'); setApprovalScene(eveningScene); setSheet('approval');
+        setTab('Home');
+        setSheet(null);
+        setApprovalScene(null);
+        setActiveScene(eveningScene.name);
+        applyScenePreset(eveningScene.name);
+        setToast(`${eveningScene.name} scene applied`);
+        setTimeout(() => setToast(null), 2800);
         break;
       default:
         break;
     }
-    document.getElementById('demo')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }, [eveningScene, markTouched]);
+    const demo = document.getElementById('demo');
+    demo?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'nearest' });
+  }, [eveningScene, markTouched, applyScenePreset, reduceMotion]);
 
   useEffect(() => {
+    if (!touched || reduceMotion) return undefined;
     const ambient = sheet ? SHEET_AMBIENT[sheet] : TAB_AMBIENT[tab];
     onAmbientChange?.(ambient);
-  }, [tab, sheet, onAmbientChange]);
+    return undefined;
+  }, [tab, sheet, onAmbientChange, touched, reduceMotion]);
 
   useEffect(() => {
     onFlowModeChange?.(flowMode, touched);
@@ -360,10 +414,13 @@ export function PhoneProvider({ children, onAmbientChange, onFlowModeChange }) {
   const value = {
     tab, sheet, approvalScene, activeScene, activeSceneAmbient, selectedRoom, selectedDevice,
     toast, touched, flowMode, hint, eveningScene,
+    calmMode, cadence, motionPref, contrast, transitions,
+    reduceMotion, suggestionsQuiet,
     lightState, setLight, getDevice, plannedByRoom,
     selectTab, openReasoning, openAction, dismissSheet, applySuggestion,
     openSceneApproval, confirmScene, openRoom, openDevice, openAddDevice, addDevice,
     markTouched, runGuidedStep,
+    setCadence, setMotionPref, setContrast, setTransitions, toggleCalmMode,
   };
 
   return <PhoneContext.Provider value={value}>{children}</PhoneContext.Provider>;
@@ -393,7 +450,7 @@ function TabBar({ active, onSelect }) {
           aria-label={`${label} tab`}
           aria-current={active === label ? 'page' : undefined}
         >
-          <Icon size={15} strokeWidth={active === label ? 2.2 : 1.7} />
+          <Icon size={18} strokeWidth={active === label ? 2.2 : 1.7} />
           {label}
         </button>
       ))}
@@ -484,7 +541,7 @@ function DashboardScreen() {
     <div className={phone.sheet ? 'app-screen dimmed' : 'app-screen'}>
       {ambient && (
         <div
-          className="home-ambient"
+          className={phone.reduceMotion ? 'home-ambient is-still' : 'home-ambient'}
           style={{ background: `radial-gradient(ellipse at 50% 0%, rgba(${ambient.rgb}, ${ambient.opacity}) 0%, transparent 68%)` }}
         />
       )}
@@ -526,17 +583,21 @@ function DashboardScreen() {
       </div>
 
       <p className="app-label noticed-section-label">Lumen noticed</p>
-      <button type="button" className="noticed-card interactive-card" onClick={phone.openReasoning}>
-        <div className="noticed-head"><Sparkles size={11} /> Lumen noticed</div>
-        <p className="noticed-msg">Sunset detected. Warm lighting may fit this moment.</p>
-        <div className="noticed-action">
-          <div>
-            <b>Review Evening scene</b>
-            <span>Confirm before anything changes</span>
+      {phone.suggestionsQuiet ? (
+        <p className="noticed-quiet">Lumen is staying quiet.</p>
+      ) : (
+        <button type="button" className="noticed-card interactive-card" onClick={phone.openReasoning}>
+          <div className="noticed-head"><Sparkles size={11} /> Lumen noticed</div>
+          <p className="noticed-msg">Sunset detected. Warm lighting may fit this moment.</p>
+          <div className="noticed-action">
+            <div>
+              <b>Review Evening scene</b>
+              <span>Confirm before anything changes</span>
+            </div>
+            <ChevronRight size={13} />
           </div>
-          <ChevronRight size={13} />
-        </div>
-      </button>
+        </button>
+      )}
     </div>
   );
 }
@@ -544,14 +605,15 @@ function DashboardScreen() {
 // ===== Consent sheets =====
 
 function SheetMotion({ children, className }) {
-  const reducedMotion = useReducedMotion();
+  const phone = usePhone();
+  const reducedMotion = phone.reduceMotion;
   return (
     <motion.div
       className={className}
       initial={reducedMotion ? false : { y: '100%' }}
       animate={{ y: 0 }}
       exit={reducedMotion ? { opacity: 0 } : { y: '100%' }}
-      transition={reducedMotion ? { duration: 0.15 } : { type: 'spring', stiffness: 320, damping: 34 }}
+      transition={reducedMotion ? { duration: 0.12 } : { type: 'spring', stiffness: 320, damping: 34 }}
     >
       {children}
     </motion.div>
@@ -754,7 +816,7 @@ function DeviceControlScreen({ deviceId }) {
       {device.kind === 'light' && (
         <div className="room-glow" style={{ background: `radial-gradient(ellipse at 50% 0%, rgba(${rgb.join(',')}, ${glowOpacity}) 0%, transparent 70%)` }} />
       )}
-      <SimHeader back={device.room} title={device.name} onBack={() => phone.openDevice(null)} />
+      <SimHeader back={phone.selectedRoom ? device.room : 'Intel'} title={device.name} onBack={() => phone.openDevice(null)} />
 
       <p className="app-label">Status</p>
       <div className="control-card">
@@ -936,6 +998,12 @@ function RoomsScreen() {
 // ===== Intel (Devices) =====
 
 function IntelScreen() {
+  const phone = usePhone();
+
+  if (phone.selectedDevice) {
+    return <DeviceControlScreen deviceId={phone.selectedDevice} />;
+  }
+
   return (
     <div className="app-screen">
       <SimHeader eyebrow="LUMEN" title="Intel" action="⟳" />
@@ -947,17 +1015,7 @@ function IntelScreen() {
         <div className="intel-group" key={category}>
           <p className="app-label">{category}</p>
           <div className="device-list">
-            {ids.map(id => {
-              const d = deviceCatalog[id];
-              const Icon = d.icon;
-              return (
-                <div className="device-row" key={id}>
-                  <div className="device-icon"><Icon size={13} /></div>
-                  <div className="device-meta"><b>{d.name}</b><span>{d.room}</span></div>
-                  <span className={d.online ? 'online-dot' : 'offline-dot'} />
-                </div>
-              );
-            })}
+            {ids.map(id => <DeviceRow key={id} id={id} />)}
           </div>
         </div>
       ))}
@@ -990,26 +1048,6 @@ function Segmented({ options, value, onChange }) {
 
 function SettingsScreen() {
   const phone = usePhone();
-  const [calm, setCalm] = useState(false);
-  const [cadence, setCadence] = useState('Balanced');
-  const [motionPref, setMotionPref] = useState('Balanced');
-  const [contrast, setContrast] = useState('Balanced');
-  const [transitions, setTransitions] = useState(10);
-
-  // Enabling Calm Mode applies the calm defaults (mirrors applyCalmModeDefaults).
-  const toggleCalm = () => {
-    phone.markTouched();
-    setCalm(prev => {
-      const next = !prev;
-      if (next) {
-        setCadence('Quiet');
-        setMotionPref('Reduced');
-        setContrast('Soft');
-        setTransitions(t => Math.max(t, 15));
-      }
-      return next;
-    });
-  };
 
   return (
     <div className="app-screen settings-screen">
@@ -1037,15 +1075,15 @@ function SettingsScreen() {
 
       <p className="app-label">Sensory Profile</p>
       <div className="settings-card">
-        <div className="settings-row2"><span>Profile</span><span className="settings-on">{calm ? 'Calm Mode' : 'Balanced'}</span></div>
+        <div className="settings-row2"><span>Profile</span><span className="settings-on">{phone.calmMode ? 'Calm Mode' : 'Balanced'}</span></div>
         <div className="settings-row2">
           <span>Calm Mode</span>
-          <button type="button" className={calm ? 'toggle on' : 'toggle'} onClick={toggleCalm} aria-label="Toggle Calm Mode"><span /></button>
+          <button type="button" className={phone.calmMode ? 'toggle on' : 'toggle'} onClick={phone.toggleCalmMode} aria-label="Toggle Calm Mode"><span /></button>
         </div>
-        <div className="settings-stack"><span>Suggestions</span><Segmented options={cadenceOptions} value={cadence} onChange={v => { phone.markTouched(); setCadence(v); }} /></div>
-        <div className="settings-stack"><span>Motion</span><Segmented options={motionOptions} value={motionPref} onChange={v => { phone.markTouched(); setMotionPref(v); }} /></div>
-        <div className="settings-stack"><span>Contrast</span><Segmented options={contrastOptions} value={contrast} onChange={v => { phone.markTouched(); setContrast(v); }} /></div>
-        <div className="settings-row2"><span>Transitions</span><span>{transitions === 0 ? 'Off' : `${transitions} min`}</span></div>
+        <div className="settings-stack"><span>Suggestions</span><Segmented options={cadenceOptions} value={phone.cadence} onChange={phone.setCadence} /></div>
+        <div className="settings-stack"><span>Motion</span><Segmented options={motionOptions} value={phone.motionPref} onChange={phone.setMotionPref} /></div>
+        <div className="settings-stack"><span>Contrast</span><Segmented options={contrastOptions} value={phone.contrast} onChange={phone.setContrast} /></div>
+        <div className="settings-row2"><span>Transitions</span><span>{phone.transitions === 0 ? 'Off' : `${phone.transitions} min`}</span></div>
       </div>
 
       <p className="app-label">About</p>
@@ -1060,9 +1098,17 @@ function SettingsScreen() {
 // ===== Toast + shell =====
 
 function PhoneToast({ message }) {
+  const phone = usePhone();
   if (!message) return null;
+  const reducedMotion = phone.reduceMotion;
   return (
-    <motion.div className="phone-toast" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}>
+    <motion.div
+      className="phone-toast"
+      initial={reducedMotion ? { opacity: 0 } : { opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={reducedMotion ? { opacity: 0 } : { opacity: 0, y: -6 }}
+      transition={reducedMotion ? { duration: 0.12 } : undefined}
+    >
       <Activity size={11} /> {message}
     </motion.div>
   );
@@ -1102,7 +1148,7 @@ function PhoneScreen() {
   );
 }
 
-// The app UI itself — reused by the framed hero demo and the full-screen mode.
+// The app UI itself — one mount for the in-page preview and focus mode.
 function AppShell() {
   const phone = usePhone();
   return (
@@ -1116,59 +1162,59 @@ function AppShell() {
   );
 }
 
-export function InteractivePhone() {
+export function InteractivePhone({ focusMode = false, onRequestFocus, onCloseFocus }) {
   const phone = usePhone();
 
-  return (
-    <div className="live-demo interactive-demo">
-      <div className="phone phone-featured phone-app">
-        <div className="phone-screen">
-          <AppShell />
-        </div>
-      </div>
-      <p className="demo-caption live-hint">{phone.hint}</p>
-    </div>
-  );
-}
-
-// Full-screen "open the app" experience — the same interactive app filling the
-// viewport (edge-to-edge on phones, a tall centered phone on desktop).
-export function FullscreenApp({ open, onClose }) {
-  const reducedMotion = useReducedMotion();
-
   useEffect(() => {
-    if (!open) return undefined;
+    if (!focusMode) return undefined;
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-    const onKey = e => { if (e.key === 'Escape') onClose(); };
+    document.body.classList.add('preview-focus');
+    const onKey = e => { if (e.key === 'Escape') onCloseFocus?.(); };
     window.addEventListener('keydown', onKey);
     return () => {
       document.body.style.overflow = prev;
+      document.body.classList.remove('preview-focus');
       window.removeEventListener('keydown', onKey);
     };
-  }, [open, onClose]);
+  }, [focusMode, onCloseFocus]);
 
-  return (
-    <AnimatePresence>
-      {open && (
-        <motion.div
-          className="app-fullscreen"
-          initial={reducedMotion ? { opacity: 0 } : { opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={reducedMotion ? { opacity: 0 } : { opacity: 0, y: 24 }}
-          transition={{ type: 'spring', stiffness: 260, damping: 30 }}
-          role="dialog"
-          aria-modal="true"
-          aria-label="Lumen app preview"
-        >
-          <button type="button" className="app-fullscreen-close" onClick={onClose} aria-label="Close app preview">
-            <X size={16} /> Close
-          </button>
-          <div className="app-fullscreen-stage phone-app">
-            <AppShell />
-          </div>
-        </motion.div>
+  const tree = (
+    <div
+      className={`live-demo interactive-demo ${focusMode ? 'is-focus app-fullscreen' : ''}`}
+      role={focusMode ? 'dialog' : undefined}
+      aria-modal={focusMode ? 'true' : undefined}
+      aria-label={focusMode ? 'Lumen app preview' : undefined}
+    >
+      {focusMode ? (
+        <button type="button" className="app-fullscreen-close" onClick={onCloseFocus} aria-label="Close app preview">
+          <X size={16} /> Close
+        </button>
+      ) : null}
+      <div
+        className="app-preview-stage phone-app"
+        data-contrast={phone.contrast.toLowerCase()}
+        data-motion={phone.reduceMotion ? 'reduced' : 'balanced'}
+        data-cadence={phone.cadence.toLowerCase()}
+      >
+        <AppShell />
+      </div>
+      {focusMode ? null : (
+        <>
+          <p className="demo-caption live-hint">{phone.hint}</p>
+          {onRequestFocus ? (
+            <button type="button" className="demo-openapp" onClick={onRequestFocus}>
+              Expand preview <ArrowRight size={14} />
+            </button>
+          ) : null}
+        </>
       )}
-    </AnimatePresence>
+    </div>
   );
+
+  if (focusMode && typeof document !== 'undefined') {
+    return createPortal(tree, document.body);
+  }
+
+  return tree;
 }
