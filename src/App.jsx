@@ -3,11 +3,10 @@ import {
   Activity, Apple, ArrowRight, Blinds, Check, DoorClosed, Droplets, ExternalLink, Home, Lightbulb, Lock,
   Mail, Menu, Moon, Sparkle, Sun, SunMedium, Thermometer, X, Zap,
 } from 'lucide-react';
-import { PhoneProvider, InteractivePhone, FullscreenApp, usePhone } from './InteractivePhone.jsx';
+import { PhoneProvider, InteractivePhone, usePhone } from './InteractivePhone.jsx';
 import { submitWaitlist } from './waitlistSubmit.js';
 import { trackWaitlistEvent } from './waitlistAnalytics.js';
 import { TESTFLIGHT_URL } from './siteConfig.js';
-import { useReducedMotion } from './hooks/useReducedMotion.js';
 import { FadeIn } from './components/FadeIn.jsx';
 import { GuidedDemoSteps, MobileDemoFAB } from './components/GuidedDemoSteps.jsx';
 import { GettingStartedSection } from './components/GettingStartedSection.jsx';
@@ -72,7 +71,6 @@ const actionFlowModes = [
 ];
 
 const FLOW_AMBIENT = ['138,180,248', '197,138,249', '124,197,255', '150,130,250'];
-const FLOW_ADVANCE_MS = 4200;
 const AMBIENT_IDLE = '120,150,235';
 const THEME_STORAGE_KEY = 'lumen-theme';
 
@@ -171,7 +169,6 @@ function useAmbientRegion(ref, color) {
 }
 
 function HeroCopy() {
-  const phone = usePhone();
   return (
     <FadeIn className="hero-copy">
       <div className="pill">
@@ -180,16 +177,11 @@ function HeroCopy() {
       </div>
       <h1>when your home shifts,<br /><em>you stay calm.</em></h1>
       <p className="hero-lede">
-        Lumen reads the moment — time, presence, your devices — and surfaces one
-        gentle suggestion. You read why and approve what changes. Opted-in arrival
-        and departure scenes can still run with a notification.
+        One gentle suggestion, in plain language, before anything in your home changes.
       </p>
       <div className="hero-actions">
         <a className="primary" href="#access">
           Join the beta <ArrowRight size={15} />
-        </a>
-        <a className="secondary" href="#flow">
-          See how it works
         </a>
       </div>
       <p className="hero-platform-note">
@@ -202,7 +194,6 @@ function HeroCopy() {
           </a>
         </p>
       ) : null}
-      <p className="hero-hint">{phone.hint}</p>
     </FadeIn>
   );
 }
@@ -252,20 +243,10 @@ function CompatibilitySection() {
 
 function ActionFlowSection() {
   const phone = usePhone();
-  const reducedMotion = useReducedMotion();
-  const [idleActive, setIdleActive] = useState(0);
   const sectionRef = useRef(null);
-  const active = phone.touched ? phone.flowMode : idleActive;
+  const active = phone.touched ? phone.flowMode : -1;
 
-  useAmbientRegion(sectionRef, FLOW_AMBIENT[active]);
-
-  useEffect(() => {
-    if (phone.touched || reducedMotion) return undefined;
-    const id = setInterval(() => {
-      setIdleActive(a => (a + 1) % actionFlowModes.length);
-    }, FLOW_ADVANCE_MS);
-    return () => clearInterval(id);
-  }, [phone.touched, reducedMotion]);
+  useAmbientRegion(sectionRef, FLOW_AMBIENT[Math.max(active, 0)]);
 
   const flowStepIds = ['home', 'reasoning', 'action', 'scenes'];
 
@@ -276,8 +257,8 @@ function ActionFlowSection() {
         <h2>the same calm loop,<br /><em>every suggestion.</em></h2>
         <p className="section-note">
           {phone.touched
-            ? 'The cards below follow what you are doing in the live demo.'
-            : 'Tap a card to drive the iPhone demo, or watch the loop cycle on its own.'}
+            ? 'The cards below follow what you are doing in the preview.'
+            : 'Tap a card to move the preview through the loop.'}
         </p>
       </FadeIn>
       <div className="flow-row">
@@ -400,7 +381,7 @@ function SiteShell() {
             </a>
             <div className="links">
               <a href="#features">features</a>
-              <a href="#demo">live demo</a>
+              <a href="#demo">preview</a>
               <a href="#flow">how it works</a>
               <a href="/privacy">privacy</a>
             </div>
@@ -427,7 +408,7 @@ function SiteShell() {
           {menuOpen && (
             <div className="mobile-menu" onClick={close}>
               <div className="mobile-menu-inner" onClick={e => e.stopPropagation()}>
-                <a href="#demo" onClick={close}>live demo</a>
+                <a href="#demo" onClick={close}>preview</a>
                 <a href="#features" onClick={close}>features</a>
                 <a href="#flow" onClick={close}>how it works</a>
                 <a href="/privacy" onClick={close} className="privacy-link">privacy</a>
@@ -438,20 +419,21 @@ function SiteShell() {
             </div>
           )}
 
-          <section className="hero hero-split" id="top">
+          <section className="hero hero-split hero-demo-first" id="top">
             <div className="hero-bg" />
             <div className="hero-inner">
               <HeroCopy />
               <div className="hero-demo" id="demo">
                 <div className="demo-live-badge">
                   <span className="demo-live-dot" />
-                  Live interactive demo
+                  Interactive preview
                 </div>
                 <div className="hero-glow" />
-                <InteractivePhone />
-                <button type="button" className="demo-openapp" onClick={() => setAppOpen(true)}>
-                  Open the app full screen <ArrowRight size={14} />
-                </button>
+                <InteractivePhone
+                  focusMode={appOpen}
+                  onRequestFocus={() => setAppOpen(true)}
+                  onCloseFocus={() => setAppOpen(false)}
+                />
                 <GuidedDemoSteps />
               </div>
             </div>
@@ -474,8 +456,6 @@ function SiteShell() {
 
           <MobileDemoFAB />
 
-          <FullscreenApp open={appOpen} onClose={() => setAppOpen(false)} />
-
           <footer className="site-footer">
             <a className="logo" href="#top">
               <SunMedium size={17} /><span>LUMEN</span>
@@ -485,7 +465,7 @@ function SiteShell() {
               <a href="#access" className="footer-cta">
                 request early access <ArrowRight size={13} />
               </a>
-              <a href="#demo">live demo</a>
+              <a href="#demo">preview</a>
               <a href="/privacy">privacy</a>
               <a href="https://github.com/mohabbis/lumen" target="_blank" rel="noopener noreferrer">GitHub</a>
               <a href="mailto:m.rafiq2006@icloud.com">contact</a>

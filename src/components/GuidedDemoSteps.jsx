@@ -5,9 +5,10 @@ import { usePhone } from '../InteractivePhone.jsx';
 import { FadeIn } from './FadeIn.jsx';
 
 function deriveActiveStep(phone) {
-  if (phone.tab === 'Auto' && phone.sheet === 'approval') return 'scenes';
-  if (phone.sheet === 'action' || phone.toast) return 'action';
+  if (phone.toast) return 'scenes';
+  if (phone.sheet === 'action' || phone.sheet === 'approval') return 'action';
   if (phone.sheet === 'reasoning') return 'reasoning';
+  if (phone.tab === 'Home' && !phone.sheet) return 'home';
   return 'home';
 }
 
@@ -20,20 +21,21 @@ export function GuidedDemoSteps() {
       <p className="guided-demo-label">Try the flow</p>
       <div className="guided-demo-strip" role="list">
         {guidedDemoSteps.map((step, i) => (
-          <button
-            key={step.id}
-            type="button"
-            role="listitem"
-            className={`guided-demo-step ${active === step.id ? 'active' : ''}`}
-            onClick={() => phone.runGuidedStep(step.id)}
-            aria-current={active === step.id ? 'step' : undefined}
-          >
-            <span className="guided-demo-num">{i + 1}</span>
-            <span className="guided-demo-text">
-              <b>{step.label}</b>
-              <span>{step.short}</span>
-            </span>
-          </button>
+          <div key={step.id} role="listitem">
+            <button
+              type="button"
+              className={`guided-demo-step ${active === step.id ? 'active' : ''}`}
+              onClick={() => phone.runGuidedStep(step.id)}
+              aria-current={active === step.id ? 'step' : undefined}
+              aria-label={`${step.label}: ${step.short}`}
+            >
+              <span className="guided-demo-num">{i + 1}</span>
+              <span className="guided-demo-text">
+                <b>{step.label}</b>
+                <span>{step.short}</span>
+              </span>
+            </button>
+          </div>
         ))}
       </div>
     </FadeIn>
@@ -48,7 +50,7 @@ export function MobileDemoFAB() {
   return (
     <a className="mobile-demo-fab" href="#demo">
       <span className="demo-live-dot" />
-      Live demo
+      Back to Lumen
       <ArrowRight size={14} />
     </a>
   );

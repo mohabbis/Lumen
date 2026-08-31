@@ -75,7 +75,7 @@ h1, h2, h3, h4, p {
 /* ===== AMBIENT BACKDROP =====
    A slow-shifting color wash behind the whole page. Two full-viewport
    layers crossfade opacity so the tint eases from one moment's color to
-   the next instead of snapping - driven by the live demo's current step,
+   the next instead of snapping - driven by the preview after you tap,
    and by whichever section is centered in the viewport once you scroll
    past the hero. */
 
@@ -333,13 +333,13 @@ h1, h2, h3, h4, p {
   padding: 88px clamp(20px, 5%, 64px) 80px;
 }
 
-.hero-inner {
+.hero-split .hero-inner {
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: clamp(32px, 5vw, 72px);
-  align-items: center;
+  grid-template-columns: minmax(240px, 0.85fr) minmax(360px, 1.2fr);
+  gap: clamp(28px, 4vw, 64px);
+  align-items: start;
   max-width: 1180px;
   width: 100%;
   margin: 0 auto;
@@ -370,11 +370,11 @@ h1, h2, h3, h4, p {
   margin-top: 0;
   flex-direction: column;
   align-items: center;
+  width: 100%;
 }
 
-.hero-split .live-demo .phone-featured {
-  width: min(320px, 100%);
-  filter: drop-shadow(0 32px 80px rgba(0, 0, 0, 0.55));
+.hero-split .live-demo {
+  width: 100%;
 }
 
 .demo-live-badge {
@@ -2310,6 +2310,20 @@ p {
     text-align: center;
   }
 
+  .hero-demo-first {
+    padding-top: 80px;
+    padding-bottom: 32px;
+  }
+
+  .hero-demo-first .hero-copy h1 {
+    font-size: clamp(28px, 8vw, 42px);
+  }
+
+  .hero-demo-first .hero-lede {
+    font-size: 16px;
+    max-width: 36em;
+  }
+
   .hero-split .hero-copy {
     align-items: center;
     text-align: center;
@@ -2829,7 +2843,7 @@ p {
   }
 
   .live-demo .phone-featured {
-    width: 260px;
+    width: auto;
   }
 }
 
@@ -2860,12 +2874,12 @@ p {
   }
 
   .hero-demo {
-    margin-top: 40px;
+    margin-top: 24px;
     width: 100%;
   }
 
   .live-demo .phone-featured {
-    width: min(290px, 88vw);
+    width: auto;
   }
 }
 
@@ -3348,6 +3362,10 @@ p {
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+.guided-demo-strip [role="listitem"] {
+  width: 100%;
 }
 
 .guided-demo-step {
