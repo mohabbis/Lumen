@@ -31,8 +31,12 @@ jobs:
         with:
           fetch-depth: 1
 
+      # Advisory: this action has returned is_error:true at $0 cost on every PR
+      # since 2026-07-15 (expired/quota CLAUDE_CODE_OAUTH_TOKEN). Keep it running
+      # so a rotated secret starts posting reviews again, but do not fail the PR.
       - name: Run Claude Code Review
         id: claude-review
+        continue-on-error: true
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
@@ -41,7 +45,12 @@ jobs:
           prompt: '/code-review:code-review ${{ github.repository }}/pull/${{ github.event.pull_request.number }}'
           # Cursor Cloud Agents open PRs as cursor[bot]. Without this, the
           # action fails immediately: "Workflow initiated by non-human actor".
-          allowed_bots: 'cursor'
+          allowed_bots: 'cursor,cursor[bot]'
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
           # or https://code.claude.com/docs/en/cli-reference for available options
+
+      - name: Note advisory review failure
+        if: steps.claude-review.outcome == 'failure'
+        run: |
+          echo "::warning::Claude Code Review is advisory and failed. Re-mint CLAUDE_CODE_OAUTH_TOKEN with 'claude setup-token' if the log shows is_error:true at \$0 cost."
 

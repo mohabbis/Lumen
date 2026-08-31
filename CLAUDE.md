@@ -24,7 +24,7 @@ A calm home companion for iOS. Lumen builds a local model of a home — rooms, d
 
 The iOS app and the marketing site are independent. Changes to one do **not** require touching the other. When working on iOS, do not pull from `src/` to validate claims — the two lanes are kept in sync separately.
 
-`AGENTS.md` at the repo root is a byte-for-byte mirror of this file — if you update one, update the other so both stay in sync. `.github/workflows/` holds the GitHub CI (`ci.yml` runs the **web** test + build on Node 22 — it does not build the iOS app) plus the Claude PR-assistant and code-review workflows.
+`AGENTS.md` at the repo root is a byte-for-byte mirror of this file — if you update one, update the other so both stay in sync. `.github/workflows/` holds the GitHub CI (`ci.yml` runs the **web** test + build on Node 22 — it does not build the iOS app) plus the Claude PR-assistant (`claude.yml`) and an advisory code-review workflow (`claude-code-review.yml`; Cursor bots allowed; `continue-on-error` so an expired `CLAUDE_CODE_OAUTH_TOKEN` does not fail the PR).
 
 ---
 
