@@ -32,7 +32,7 @@
   height: 44px;
   border-radius: 13px;
   margin-bottom: 16px;
-  background: var(--grad-accent-soft, rgba(138, 180, 248, 0.14));
+  background: var(--accent-wash, rgba(138, 180, 248, 0.14));
   border: 1px solid rgba(138, 180, 248, 0.26);
   color: var(--ag-blue, #8ab4f8);
 }
@@ -165,7 +165,7 @@
   padding: 0 22px;
   border: 0;
   border-radius: 12px;
-  background: var(--grad-accent, linear-gradient(135deg, #8ab4f8, #c58af9));
+  background: var(--accent-solid, #8ab4f8);
   color: #0a0c12;
   font-size: 14px;
   font-weight: 600;
@@ -263,8 +263,8 @@
   }
 
   h1 {
-    font-size: clamp(54px, 15vw, 72px);
-    line-height: 0.95;
+    font-size: clamp(34px, 9vw, 44px);
+    line-height: 1.06;
   }
 
   h2 {

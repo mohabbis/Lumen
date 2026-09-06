@@ -161,17 +161,17 @@ const SHEET_AMBIENT = {
 export const PHONE_HINTS = {
   idle: 'Tap through the preview. Calm tabs, one suggestion, and consent before anything runs.',
   Home: 'Home shows rhythm, rooms, and one gentle suggestion. Tap “Lumen noticed” to begin.',
-  Rooms: 'Open a room, then a device, to try the controls — or tap + to add your own device.',
+  Rooms: 'Open a room, then a device, to try the controls. Tap + to add your own device.',
   Intel: 'Every Apple Home device in one calm list, grouped by type.',
   Auto: 'Tap a scene to preview its approval sheet before anything runs.',
   Settings: 'Sensory profile, bridges, and calm preferences live here in the beta.',
   room: 'Tap a device to open its controls, or + to plan a new one.',
-  device: 'Drag the sliders — brightness and warmth respond live.',
+  device: 'Drag the sliders. Brightness and warmth respond live.',
   reasoning: 'Reasoning shows the signals and the “why this scene”.',
   action: 'Action confirms exactly what Lumen will change.',
   approval: 'Manual scene runs use the same approval pattern.',
-  addDevice: 'Plan a device — it becomes a preview control right away.',
-  applied: 'Scene applied. The home reflects it — lights update only after your tap.',
+  addDevice: 'Plan a device and it becomes a preview control right away.',
+  applied: 'Scene applied. The home reflects it, because lights update only after your tap.',
 };
 
 const PhoneContext = createContext(null);
@@ -550,9 +550,11 @@ function DashboardScreen() {
         <span className="app-mode"><Home size={9} /> HOME MODE</span>
       </div>
       <h4 className="app-greeting serif">Welcome Home,</h4>
-      <h4 className="app-greeting serif home-name">Home</h4>
+      {/* The demo home is named, like a real one would be. An unnamed home
+          renders as "Home" here and reads like a bug in screenshots. */}
+      <h4 className="app-greeting serif home-name">Maple Street</h4>
       <p className="app-subtitle">
-        {phone.activeScene ? `${phone.activeScene} scene is live.` : '7 of 8 devices online — all looking good.'}
+        {phone.activeScene ? `${phone.activeScene} scene is live.` : '7 of 8 devices online. All looking good.'}
       </p>
 
       <div className="app-cstats">
@@ -938,7 +940,7 @@ function RoomDetailScreen({ roomName }) {
       {!hasAny ? (
         <div className="room-empty">
           <p className="app-label">Plan this room</p>
-          <p className="room-empty-msg">Add the devices you expect here first — they become preview controls right away.</p>
+          <p className="room-empty-msg">Add the devices you expect here first. They become preview controls right away.</p>
           <button type="button" className="room-empty-cta" onClick={phone.openAddDevice}>
             <Plus size={12} /> Add a device
           </button>

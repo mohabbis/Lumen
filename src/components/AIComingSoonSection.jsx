@@ -12,10 +12,10 @@ export function AIComingSoonSection() {
     <section className="ai-teaser-section" id="ai">
       <FadeIn className="ai-teaser-inner">
         <p className="eyebrow">coming soon</p>
-        <h2>describe it.<br /><em>you approve it.</em></h2>
+        <h2>Say what you want.<br /><em>You still approve it.</em></h2>
         <p className="section-note">
-          A conversational layer is on the way. Describe what you want in plain language,
-          and Lumen proposes the scene, shows its reasoning, and waits for your tap.
+          A conversational layer is on the way. Describe what you want in plain language and
+          Lumen proposes a scene, shows the reasoning behind it, then waits for your tap.
         </p>
         <div className="ai-teaser-callouts">
           {aiCallouts.map(({ icon: Icon, label, sub }) => (

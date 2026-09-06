@@ -45,14 +45,14 @@ const actionFlowModes = [
     tag: 'Awareness',
     icon: Activity,
     headline: 'Notices the moment',
-    description: 'Time of day, presence, and reachable devices are read quietly in the background.',
+    description: 'Time of day, presence, and which devices answer are read in the background.',
   },
   {
     id: 'reasoning',
     tag: 'Reasoning',
     icon: Sparkle,
     headline: 'Explains the why',
-    description: 'Signals turn into a plain language sheet you can read, question, or dismiss.',
+    description: 'Those signals become a plain language sheet you can read or dismiss.',
   },
   {
     id: 'action',
@@ -70,7 +70,7 @@ const actionFlowModes = [
   },
 ];
 
-const FLOW_AMBIENT = ['138,180,248', '197,138,249', '124,197,255', '150,130,250'];
+const FLOW_AMBIENT = ['138,180,248', '124,197,255', '110,160,240', '95,143,221'];
 const AMBIENT_IDLE = '120,150,235';
 const THEME_STORAGE_KEY = 'lumen-theme';
 
@@ -173,11 +173,12 @@ function HeroCopy() {
     <FadeIn className="hero-copy">
       <div className="pill">
         <span />
-        Now in private beta
+        Beta on TestFlight
       </div>
-      <h1>when your home shifts,<br /><em>you stay calm.</em></h1>
+      <h1>A home app that <em>asks before it acts.</em></h1>
       <p className="hero-lede">
-        One gentle suggestion, in plain language, before anything in your home changes.
+        Lumen reads the time of day, who is home, and which devices are reachable.
+        It suggests one change in plain language, and nothing runs until you tap Apply.
       </p>
       <div className="hero-actions">
         <a className="primary" href="#access">
@@ -185,7 +186,7 @@ function HeroCopy() {
         </a>
       </div>
       <p className="hero-platform-note">
-        <Apple size={13} /> iPhone &amp; iPad · TestFlight · free
+        <Apple size={13} /> iPhone and iPad · TestFlight · free
       </p>
       {TESTFLIGHT_URL ? (
         <p className="hero-testflight">
@@ -206,13 +207,13 @@ function CompatibilitySection() {
     <section className="app-tour-section compat-section" id="product" ref={sectionRef}>
       <FadeIn className="section-copy centered">
         <p className="eyebrow">works with your home</p>
-        <h2>your Apple Home,<br /><em>HomeKit &amp; Matter.</em></h2>
+        <h2>Your Apple Home,<br /><em>HomeKit and Matter.</em></h2>
         <p className="section-note">
           Lumen controls whatever lives in your Apple Home: every HomeKit accessory,
           plus the Matter ones you have added. No extra hubs, no brand logins.
         </p>
       </FadeIn>
-      <FadeIn className="capability-chips-wrap">
+      <div className="capability-chips-wrap">
         <p className="eyebrow">controls these accessories</p>
         <div className="capability-chips">
           {supportedCategories.map(({ label, icon: Icon }) => (
@@ -222,8 +223,8 @@ function CompatibilitySection() {
             </span>
           ))}
         </div>
-      </FadeIn>
-      <FadeIn className="compat-brands">
+      </div>
+      <div className="compat-brands">
         <p className="compat-brands-line">
           Works with certified brands through Apple Home, like{' '}
           {exampleBrands.map((brand, i) => (
@@ -233,10 +234,10 @@ function CompatibilitySection() {
           ))}
         </p>
         <p className="compat-note">
-          Lumen rides on Apple Home instead of each brand cloud. The calm rhythm layer
-          keeps working with no smart hardware at all.
+          Lumen rides on Apple Home instead of each brand cloud. The rhythm layer keeps
+          working even if you own no smart hardware at all.
         </p>
-      </FadeIn>
+      </div>
     </section>
   );
 }
@@ -254,7 +255,7 @@ function ActionFlowSection() {
     <section className="action-flow-section" id="flow" ref={sectionRef}>
       <FadeIn className="section-copy centered">
         <p className="eyebrow">how lumen thinks</p>
-        <h2>the same calm loop,<br /><em>every suggestion.</em></h2>
+        <h2>The same four steps,<br /><em>every time.</em></h2>
         <p className="section-note">
           {phone.touched
             ? 'The cards below follow what you are doing in the preview.'
@@ -263,18 +264,17 @@ function ActionFlowSection() {
       </FadeIn>
       <div className="flow-row">
         {actionFlowModes.map(({ tag, icon: Icon, headline, description }, i) => (
-          <FadeIn key={tag} delay={i * 0.06}>
-            <button
-              type="button"
-              className={`flow-card flow-card-btn ${active === i ? 'active' : ''}`}
-              onClick={() => phone.runGuidedStep(flowStepIds[i])}
-            >
-              <div className="flow-card-top"><Icon size={16} /></div>
-              <b className="flow-tag">{tag}</b>
-              <span className="flow-headline">{headline}</span>
-              <p className="flow-description">{description}</p>
-            </button>
-          </FadeIn>
+          <button
+            type="button"
+            key={tag}
+            className={`flow-card flow-card-btn ${active === i ? 'active' : ''}`}
+            onClick={() => phone.runGuidedStep(flowStepIds[i])}
+          >
+            <div className="flow-card-top"><Icon size={16} /></div>
+            <b className="flow-tag">{tag}</b>
+            <span className="flow-headline">{headline}</span>
+            <p className="flow-description">{description}</p>
+          </button>
         ))}
       </div>
     </section>
@@ -309,10 +309,10 @@ function Waitlist() {
         <div className="signup-head">
           <div className="signup-logo"><SunMedium size={20} /></div>
           <p className="eyebrow">open beta</p>
-          <h2>try <em>lumen.</em></h2>
+          <h2>Try <em>Lumen.</em></h2>
           <p className="signup-sub">
-            We&apos;re inviting testers now. Free to install via TestFlight — open to everyone,
-            no spam, no strings.
+            We are inviting testers now. Free to install through TestFlight, open to everyone,
+            and we will not pass your address on.
           </p>
         </div>
 
@@ -341,7 +341,7 @@ function Waitlist() {
           <span><Check size={12} /> No spam</span>
         </div>
 
-        <p className="signup-platform">Requires iPhone · iOS 17 or later</p>
+        <p className="signup-platform">Requires iPhone running iOS 17 or later</p>
 
         <div className="waitlist-status" role="status" aria-live="polite">
           {status === 'success' && (
@@ -380,10 +380,11 @@ function SiteShell() {
               <span>LUMEN</span>
             </a>
             <div className="links">
-              <a href="#features">features</a>
-              <a href="#demo">preview</a>
-              <a href="#flow">how it works</a>
-              <a href="/privacy">privacy</a>
+              <a href="#features">Features</a>
+              <a href="#demo">Preview</a>
+              <a href="#flow">How it works</a>
+              <a href="/privacy">Privacy</a>
+              <a href="/terms">Terms</a>
             </div>
             <div className="nav-actions">
               <button
@@ -394,7 +395,7 @@ function SiteShell() {
               >
                 {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
               </button>
-              <a href="#access">request access</a>
+              <a href="#access">Request access</a>
               <button
                 aria-label={menuOpen ? 'Close menu' : 'Open menu'}
                 onClick={() => setMenuOpen(o => !o)}
@@ -408,12 +409,13 @@ function SiteShell() {
           {menuOpen && (
             <div className="mobile-menu" onClick={close}>
               <div className="mobile-menu-inner" onClick={e => e.stopPropagation()}>
-                <a href="#demo" onClick={close}>preview</a>
-                <a href="#features" onClick={close}>features</a>
-                <a href="#flow" onClick={close}>how it works</a>
-                <a href="/privacy" onClick={close} className="privacy-link">privacy</a>
+                <a href="#demo" onClick={close}>Preview</a>
+                <a href="#features" onClick={close}>Features</a>
+                <a href="#flow" onClick={close}>How it works</a>
+                <a href="/privacy" onClick={close} className="privacy-link">Privacy</a>
+                <a href="/terms" onClick={close} className="privacy-link">Terms</a>
                 <a href="#access" onClick={close} className="mobile-cta">
-                  request access <ArrowRight size={14} />
+                  Request access <ArrowRight size={14} />
                 </a>
               </div>
             </div>
@@ -460,15 +462,16 @@ function SiteShell() {
             <a className="logo" href="#top">
               <SunMedium size={17} /><span>LUMEN</span>
             </a>
-            <p>Calm by design · Open to everyone · Native iOS · Private beta</p>
+            <p>When your home shifts, you stay calm.</p>
             <div className="footer-links">
               <a href="#access" className="footer-cta">
-                request early access <ArrowRight size={13} />
+                Request early access <ArrowRight size={13} />
               </a>
-              <a href="#demo">preview</a>
-              <a href="/privacy">privacy</a>
+              <a href="#demo">Preview</a>
+              <a href="/privacy">Privacy</a>
+              <a href="/terms">Terms</a>
               <a href="https://github.com/mohabbis/lumen" target="_blank" rel="noopener noreferrer">GitHub</a>
-              <a href="mailto:m.rafiq2006@icloud.com">contact</a>
+              <a href="mailto:m.rafiq2006@icloud.com">Contact</a>
             </div>
           </footer>
         </main>
