@@ -1092,16 +1092,6 @@ p {
   flex-wrap: wrap;
 }
 
-.chat-chip {
-  padding: 4px 9px;
-  border-radius: 99px;
-  border: 1px solid rgba(255,255,255,0.1);
-  background: rgba(255,255,255,0.04);
-  color: rgba(232,224,212,0.52);
-  font-size: 9px;
-  cursor: pointer;
-  font-family: inherit;
-}
 
 .chat-chip.apply {
   border-color: rgba(200,184,154,0.3);
@@ -1357,20 +1347,6 @@ p {
   justify-content: center;
 }
 
-.chapter-strip button {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 7px 13px;
-  border-radius: 99px;
-  border: 1px solid rgba(255,255,255,0.07);
-  background: transparent;
-  color: rgba(232,224,212,0.38);
-  font-size: 11px;
-  font-family: inherit;
-  cursor: pointer;
-  transition: color 0.2s, border-color 0.2s, background 0.2s;
-}
 
 .chapter-strip button:hover {
   color: rgba(232,224,212,0.7);
@@ -1412,6 +1388,14 @@ p {
   padding: 5px 11px 6px;
   overflow: hidden;
   gap: 5px;
+}
+
+/* Column flex children shrink below their content by default, so a screen
+   taller than the stage squeezes the last card instead of scrolling: the
+   "Lumen noticed" card collapsed from 106px to 14px at common laptop sizes.
+   Hold every row at its natural height and let .app-screen scroll. */
+.app-screen > * {
+  flex-shrink: 0;
 }
 
 .app-screen.dimmed {
@@ -1915,7 +1899,7 @@ p {
   width: 100%;
   margin-top: 6px;
   padding: 8px 14px;
-  border-radius: 99px;
+  border-radius: 7px;
   border: none;
   background: #C49A6C;
   color: #0e0819;
@@ -1936,7 +1920,7 @@ p {
   width: 100%;
   margin-top: 6px;
   padding: 8px 14px;
-  border-radius: 99px;
+  border-radius: 7px;
   background: #C49A6C;
   color: #0e0819;
   font-size: 9.5px;
@@ -2789,38 +2773,9 @@ p {
   z-index: 0;
 }
 
-.try-it-pill {
-  display: inline-flex;
-  align-items: center;
-  padding: 3px 8px;
-  border-radius: 99px;
-  background: rgba(196,154,108,0.16);
-  border: 1px solid rgba(196,154,108,0.32);
-  color: #C49A6C;
-  font-size: 8px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  margin-left: auto;
-  flex-shrink: 0;
-  animation: pulseGlow 2.2s ease-in-out infinite;
-}
 
 /* ===== COMING PILL ===== */
 
-.coming-pill {
-  display: inline-flex;
-  align-items: center;
-  padding: 3px 8px;
-  border-radius: 99px;
-  background: rgba(138,180,248,0.12);
-  border: 1px solid rgba(160,100,255,0.18);
-  color: rgba(180,130,255,0.65);
-  font-size: 8px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  margin-left: auto;
-  flex-shrink: 0;
-}
 
 /* ===== RESPONSIVE (additions) ===== */
 
