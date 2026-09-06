@@ -4,16 +4,17 @@ import userEvent from '@testing-library/user-event';
 import { App } from './App.jsx';
 
 describe('Lumen landing page', () => {
-  it('renders the hero heading', () => {
+  it('renders a hero heading that names what the app is', () => {
     render(<App />);
     const h1 = screen.getByRole('heading', { level: 1 });
-    expect(h1).toHaveTextContent(/when your home shifts/i);
-    expect(h1).toHaveTextContent(/you stay calm/i);
+    // The hero must state the product plainly, not just set a mood.
+    expect(h1).toHaveTextContent(/home app/i);
+    expect(h1).toHaveTextContent(/asks before it acts/i);
   });
 
   it('renders the beta pill', () => {
     render(<App />);
-    expect(screen.getByText(/now in private beta/i)).toBeInTheDocument();
+    expect(screen.getByText(/^beta on testflight$/i)).toBeInTheDocument();
   });
 
   it('renders a light/dark theme toggle', () => {
@@ -35,6 +36,13 @@ describe('Lumen landing page', () => {
     expect(within(nav).getByRole('link', { name: /privacy/i })).toHaveAttribute('href', '/privacy');
   });
 
+  it('links to the privacy and terms pages from the footer', () => {
+    render(<App />);
+    const footerLinks = screen.getAllByRole('link');
+    expect(footerLinks.some(a => a.getAttribute('href') === '/terms')).toBe(true);
+    expect(footerLinks.some(a => a.getAttribute('href') === '/privacy')).toBe(true);
+  });
+
   it('renders guided demo steps', () => {
     render(<App />);
     expect(screen.getByText(/try the flow/i)).toBeInTheDocument();
@@ -43,7 +51,7 @@ describe('Lumen landing page', () => {
 
   it('renders getting started section', () => {
     render(<App />);
-    expect(screen.getByRole('heading', { name: /set up in/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /to your first run/i })).toBeInTheDocument();
   });
 
   it('renders the hero CTA pointing at the access section', () => {
@@ -85,6 +93,13 @@ describe('Lumen landing page', () => {
   it('does not name a clinical audience in public copy', () => {
     render(<App />);
     expect(document.body.textContent).not.toMatch(/neurodiverg|autism|\bADHD\b|sensory processing/i);
+  });
+
+  it('keeps em dashes out of the rendered copy', () => {
+    // Em dashes read as machine-written filler here; the house style is a
+    // full stop or a comma instead. Guard it so it does not creep back.
+    render(<App />);
+    expect(document.body.textContent).not.toContain('\u2014');
   });
 
   it('hides the suggestion card when Suggestions is Quiet', async () => {

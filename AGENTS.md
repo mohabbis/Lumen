@@ -270,9 +270,36 @@ npm run lint       # ESLint
 npm run test       # Vitest (single run)
 npm run e2e        # Playwright end-to-end tests
 npm run ci         # lint + test + build + e2e
+npm run og         # regenerate the Open Graph card (needs `npm run preview` running)
 ```
 
-Single-page React/Vite app — no router, anchor-scroll only. Entry is `src/main.jsx`, which mounts `src/App.jsx` into `#root` in the top-level `index.html` and imports the page styles (`App.css`, `lumen-overrides.css`, `mobile-polish.css`; `App.jsx` also imports `theme.css` and `simulator.css`). `src/styles.css` is unused if present. The hero is a **demo-first in-page preview** (`src/InteractivePhone.jsx`): one `AppShell` mount at usable size (~390px on desktop, viewport-height with no nested bezel on mobile). It mirrors the native app's surfaces — all five tabs (Home rhythm/stats/rooms/"Lumen noticed", Rooms→room→device drill-down, Intel device list, Auto scenes, Settings incl. the Sensory Profile) and the consent flow (Awareness → Reasoning → Action → Execution). Optional **Expand preview** promotes that same `AppShell` to focus mode (page chrome hidden) instead of mounting a second tree. Sensory Profile settings in the preview are wired: Quiet hides the suggestion card, Reduced motion / Calm Mode mute springs and page ambient, Soft contrast actually changes the stage. Public copy stays calm and unnamed — do not add autism, ADHD, or neurodivergent claims on the site. Markup reuses the app's copy, seeded scenes, and dark palette; `simulator.css` holds the preview-stage scale. Keep it in step with the Swift UI when that changes. Running a scene applies its light preset to every light and tints the dashboard (`activeSceneAmbient`), and the Rooms `+` opens an Add-Device sheet (mirrors `AddDeviceView`) that adds a planned device to the room. Unit tests run on Vitest (`src/main.test.jsx`, setup in `src/test/setup.js`); end-to-end coverage uses Playwright (`playwright.config.js`, `testDir: ./e2e`). `public/privacy/index.html` is fully self-contained (no React); the `vercel.json` rewrite maps `/privacy` → `/privacy/index.html`.
+Single-page React/Vite app — no router, anchor-scroll only. Entry is `src/main.jsx`, which mounts `src/App.jsx` into `#root` in the top-level `index.html` and imports the page styles (`App.css`, `lumen-overrides.css`, `mobile-polish.css`; `App.jsx` also imports `theme.css` and `simulator.css`). `src/styles.css` is unused if present. The hero is a **demo-first in-page preview** (`src/InteractivePhone.jsx`): one `AppShell` mount at usable size (~390px on desktop, viewport-height with no nested bezel on mobile). It mirrors the native app's surfaces — all five tabs (Home rhythm/stats/rooms/"Lumen noticed", Rooms→room→device drill-down, Intel device list, Auto scenes, Settings incl. the Sensory Profile) and the consent flow (Awareness → Reasoning → Action → Execution). Optional **Expand preview** promotes that same `AppShell` to focus mode (page chrome hidden) instead of mounting a second tree. Sensory Profile settings in the preview are wired: Quiet hides the suggestion card, Reduced motion / Calm Mode mute springs and page ambient, Soft contrast actually changes the stage. Public copy stays calm and unnamed — do not add autism, ADHD, or neurodivergent claims on the site. Markup reuses the app's copy, seeded scenes, and dark palette; `simulator.css` holds the preview-stage scale. Keep it in step with the Swift UI when that changes. Running a scene applies its light preset to every light and tints the dashboard (`activeSceneAmbient`), and the Rooms `+` opens an Add-Device sheet (mirrors `AddDeviceView`) that adds a planned device to the room. Unit tests run on Vitest (`src/main.test.jsx`, setup in `src/test/setup.js`); end-to-end coverage uses Playwright (`playwright.config.js`, `testDir: ./e2e`). `public/privacy/index.html` and `public/terms/index.html` are fully self-contained (no React) and share one inline stylesheet on the site's palette; the `vercel.json` rewrites map `/privacy` and `/terms` to them.
+
+### Site design constraints
+
+The marketing site was deliberately pulled back from the visual defaults that make a
+landing page read as machine-generated. Keep it that way when extending it:
+
+- **One accent hue.** `--accent-solid` / `--accent-wash` in `App.css` are a single
+  blue. No two-colour ramps, and no gradient-clipped heading text: `h1 em` / `h2 em`
+  are a solid accent colour in both themes.
+- **Sentence case, authored in the markup.** There is no global `text-transform` on
+  headings or nav any more, so the case you write is the case that renders.
+- **No em dashes in site copy.** Use a full stop or a comma. `src/main.test.jsx`
+  guards this against the rendered DOM.
+- **Radius scale is 6-14px** for site chrome. The capsule (`99px`) radius is reserved
+  for progress bars and for the in-phone surfaces that mirror native iOS controls.
+- **One reveal per section.** `FadeIn` is opacity plus a short travel, with no delay
+  prop and no per-card stagger. Do not wrap individual grid items in it.
+- **Icons come from lucide-react**, never emoji or dingbat glyphs.
+- **`public/Lumen-thumbnail.png` is generated, not drawn.** `npm run og` (see
+  `scripts/build-og-image.mjs`) screenshots the running preview and composes the
+  1200x627 card around it, so the link preview always shows the real app. Run
+  `npm run build && npm run preview` first, then `npm run og`. The script fetches
+  the site's webfonts in Node and inlines them into both the card and the page it
+  screenshots, so the render does not depend on the network resolving fonts at
+  screenshot time; it throws rather than quietly shipping a card in a fallback
+  face. Keep `FONT_CSS_URL` in step with the `@import` at the top of `App.css`.
 
 Waitlist validation/delivery logic (`normalizeWaitlistPayload`, `isValidWaitlistEmail`, `postWebhook`/`deliverWaitlist`) is factored into `lib/waitlist.js` and shared by both sides of the submit path: `api/waitlist.js` (the Vercel serverless handler) imports it server-side, and `src/waitlistSubmit.js` (the browser-side submit + provider-fallback chain) imports `DEFAULT_TO_EMAIL` from it. `lib/waitlist.test.js` covers the shared module directly.
 

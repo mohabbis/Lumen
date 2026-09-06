@@ -39,3 +39,7 @@ Packages/
 # Node / web build
 node_modules/
 dist/
+
+# Playwright artifacts
+test-results/
+playwright-report/

@@ -4,7 +4,7 @@ test.describe('Lumen live demo', () => {
   test('hero shows interactive preview and guided steps', async ({ page }) => {
     await page.goto('/');
 
-    await expect(page.getByRole('heading', { level: 1 })).toContainText(/when your home shifts/i);
+    await expect(page.getByRole('heading', { level: 1 })).toContainText(/asks before it acts/i);
     await expect(page.getByText(/^interactive preview$/i)).toBeVisible();
     await expect(page.getByRole('button', { name: /home tab/i })).toBeVisible();
     await expect(page.getByText(/try the flow/i)).toBeVisible();
