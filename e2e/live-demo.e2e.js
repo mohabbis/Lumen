@@ -86,6 +86,49 @@ test.describe('Lumen live demo', () => {
     await expect(page.locator('.app-fullscreen')).toHaveCount(0);
   });
 
+  test('preview rows keep their height instead of being crushed', async ({ page }) => {
+    // .app-screen is a column flex container, so its children shrink below
+    // their own content by default rather than letting the screen scroll. That
+    // squeezed the "Lumen noticed" card from 106px down to 14px at common
+    // laptop sizes. Check the short viewport, where the squeeze was worst.
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await page.goto('/');
+
+    const crushed = await page.evaluate(() => {
+      const screen = document.querySelector('.app-preview-stage .app-screen');
+      return [...screen.children]
+        .filter(el => el.scrollHeight > el.clientHeight + 2)
+        .map(el => `${el.className}: ${el.scrollHeight} > ${el.clientHeight}`);
+    });
+
+    expect(crushed).toEqual([]);
+  });
+
+  test('no button in the preview or its chrome is capsule-shaped', async ({ page }) => {
+    // The native app uses RoundedRectangle(cornerRadius: 18) for its buttons;
+    // capsules there are grab handles, progress bars and the iOS switch. A
+    // fully-rounded button is the landing-page tell we removed, so keep it out.
+    await page.goto('/');
+    await page.locator('#demo').getByRole('button', { name: /review evening scene/i }).click();
+    await expect(page.locator('#demo').getByText(/why lumen noticed/i)).toBeVisible();
+
+    const pills = await page.evaluate(() => {
+      const out = [];
+      for (const el of document.querySelectorAll('button, a[href]')) {
+        if (el.offsetParent === null) continue;
+        const h = el.getBoundingClientRect().height;
+        const cs = getComputedStyle(el);
+        if (!h || cs.borderRadius.includes('%')) continue; // circular icon buttons are fine
+        if (parseFloat(cs.borderRadius) >= h / 2 - 0.5) {
+          out.push(`${el.className}: r=${cs.borderRadius} h=${Math.round(h)}`);
+        }
+      }
+      return out;
+    });
+
+    expect(pills).toEqual([]);
+  });
+
   test('mobile stage is tappable without a nested bezel', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto('/');

@@ -32,7 +32,7 @@ struct EmptyStateView: View {
                         .font(.body.bold())
                         .padding(.horizontal, 24)
                         .padding(.vertical, 10)
-                        .background(Color("MuhaBrown"), in: Capsule())
+                        .background(Color("MuhaBrown"), in: RoundedRectangle(cornerRadius: 18))
                         .foregroundStyle(Color("MuhaCream"))
                 }
                 .padding(.top, 4)

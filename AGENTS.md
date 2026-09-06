@@ -287,8 +287,15 @@ landing page read as machine-generated. Keep it that way when extending it:
   headings or nav any more, so the case you write is the case that renders.
 - **No em dashes in site copy.** Use a full stop or a comma. `src/main.test.jsx`
   guards this against the rendered DOM.
-- **Radius scale is 6-14px** for site chrome. The capsule (`99px`) radius is reserved
-  for progress bars and for the in-phone surfaces that mirror native iOS controls.
+- **No capsule buttons anywhere.** Site chrome sits on a 6-14px radius scale; the
+  in-phone buttons use ~7px, which is `RoundedRectangle(cornerRadius: 18)` from the
+  Swift consent sheets at the stage's scale. The `99px` radius is reserved for
+  progress bars, slider tracks, sheet grab handles, the iOS switch and the toast,
+  all of which are capsule in the native app too. An e2e test enforces this.
+- **`.app-screen` children carry `flex-shrink: 0`.** It is a column flex container,
+  so without it a screen taller than the stage squeezes the last card instead of
+  scrolling. That silently collapsed the "Lumen noticed" card to a 14px sliver at
+  common laptop sizes; an e2e test now guards it.
 - **One reveal per section.** `FadeIn` is opacity plus a short travel, with no delay
   prop and no per-card stagger. Do not wrap individual grid items in it.
 - **Icons come from lucide-react**, never emoji or dingbat glyphs.
