@@ -14,6 +14,43 @@ import { mkdtemp, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
+// The site's own font set, kept in step with the @import at the top of App.css,
+// so both the card and the screenshot inside it use the real typefaces.
+const FONT_CSS_URL = 'https://fonts.googleapis.com/css2'
+  + '?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300;1,9..144,400'
+  + '&family=Inter:wght@400;500;600;700;800'
+  + '&family=JetBrains+Mono:wght@400;500;600&display=swap';
+// Google Fonts serves woff2 only to browser-ish clients.
+const FONT_UA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36';
+
+/**
+ * Fetch the webfont CSS and inline every font file it points at as a data URI.
+ *
+ * The card used to <link> straight to Google Fonts, which made the render
+ * depend on the network at screenshot time. When that request lost, the page
+ * still rendered, just in a fallback face, and a card that did not match the
+ * site shipped without anyone noticing. Fetching here instead makes the render
+ * itself offline and deterministic, and a failure loud.
+ */
+async function inlineWebfonts() {
+  const res = await fetch(FONT_CSS_URL, { headers: { 'User-Agent': FONT_UA } });
+  if (!res.ok) throw new Error(`font CSS request failed: ${res.status} ${res.statusText}`);
+  let css = await res.text();
+
+  const urls = [...new Set([...css.matchAll(/url\((https:\/\/[^)]+)\)/g)].map(m => m[1]))];
+  if (urls.length === 0) throw new Error('font CSS contained no font files');
+
+  const files = await Promise.all(urls.map(async url => {
+    const font = await fetch(url, { headers: { 'User-Agent': FONT_UA } });
+    if (!font.ok) throw new Error(`font file request failed: ${url} (${font.status})`);
+    const body = Buffer.from(await font.arrayBuffer());
+    return [url, `data:font/woff2;base64,${body.toString('base64')}`];
+  }));
+
+  for (const [url, dataUri] of files) css = css.replaceAll(url, dataUri);
+  return css;
+}
+
 const SITE = process.env.OG_SITE_URL ?? 'http://127.0.0.1:4173/';
 const OUT = new URL('../public/Lumen-thumbnail.png', import.meta.url).pathname;
 const EXECUTABLE_PATH = process.env.CHROMIUM_PATH || undefined;
@@ -23,11 +60,11 @@ const HEADLINE_ACCENT = 'asks before it acts.';
 const SUBHEAD = 'One suggestion at a time, explained in plain language. '
   + 'Nothing runs until you tap Apply.';
 
-function card(phoneDataUri) {
+function card(phoneDataUri, fontCss) {
   return `<!doctype html><html><head><meta charset="utf-8"/>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet"/>
+<style>
+${fontCss}
+</style>
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
   body{width:1200px;height:627px;overflow:hidden;
@@ -62,6 +99,7 @@ function card(phoneDataUri) {
 </body></html>`;
 }
 
+const fontCss = await inlineWebfonts();
 const browser = await chromium.launch({ executablePath: EXECUTABLE_PATH });
 const work = await mkdtemp(join(tmpdir(), 'lumen-og-'));
 
@@ -72,6 +110,10 @@ try {
     deviceScaleFactor: 3,
   });
   await site.goto(SITE, { waitUntil: 'networkidle' });
+  // The site pulls the same faces over the network. Inject the inlined copies
+  // so the screenshot is in the real typefaces even when that request loses.
+  await site.addStyleTag({ content: fontCss });
+  await site.evaluate(() => document.fonts.ready);
   await site.waitForTimeout(1200);
   const phonePath = join(work, 'phone.png');
   await site.locator('.app-preview-stage').first().screenshot({ path: phonePath });
@@ -81,13 +123,28 @@ try {
 
   // 2. Lay it out beside the headline and shoot the card at 1200x627.
   const cardPath = join(work, 'card.html');
-  await writeFile(cardPath, card(phoneDataUri));
+  await writeFile(cardPath, card(phoneDataUri, fontCss));
   const page = await browser.newPage({
     viewport: { width: 1200, height: 627 },
     deviceScaleFactor: 2,
   });
   await page.goto(`file://${cardPath}`, { waitUntil: 'networkidle' });
   await page.waitForTimeout(1500);
+
+  // The faces are inlined, so this should never trip. It stays as a backstop:
+  // a card in the wrong typeface is not obviously wrong at a glance.
+  const loaded = await page.evaluate(() => {
+    const families = new Set([...document.fonts].map(f => f.family.replace(/["']/g, '')));
+    return { inter: families.has('Inter'), mono: families.has('JetBrains Mono') };
+  });
+
+  if (!loaded.inter || !loaded.mono) {
+    throw new Error(
+      `web fonts did not load (Inter: ${loaded.inter}, JetBrains Mono: ${loaded.mono}). `
+      + 'The card would render in a fallback face that does not match the site.',
+    );
+  }
+
   await page.screenshot({ path: OUT });
   console.log(`wrote ${OUT}`);
 } finally {

@@ -295,7 +295,11 @@ landing page read as machine-generated. Keep it that way when extending it:
 - **`public/Lumen-thumbnail.png` is generated, not drawn.** `npm run og` (see
   `scripts/build-og-image.mjs`) screenshots the running preview and composes the
   1200x627 card around it, so the link preview always shows the real app. Run
-  `npm run build && npm run preview` first, then `npm run og`.
+  `npm run build && npm run preview` first, then `npm run og`. The script fetches
+  the site's webfonts in Node and inlines them into both the card and the page it
+  screenshots, so the render does not depend on the network resolving fonts at
+  screenshot time; it throws rather than quietly shipping a card in a fallback
+  face. Keep `FONT_CSS_URL` in step with the `@import` at the top of `App.css`.
 
 Waitlist validation/delivery logic (`normalizeWaitlistPayload`, `isValidWaitlistEmail`, `postWebhook`/`deliverWaitlist`) is factored into `lib/waitlist.js` and shared by both sides of the submit path: `api/waitlist.js` (the Vercel serverless handler) imports it server-side, and `src/waitlistSubmit.js` (the browser-side submit + provider-fallback chain) imports `DEFAULT_TO_EMAIL` from it. `lib/waitlist.test.js` covers the shared module directly.
 
