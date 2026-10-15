@@ -17,6 +17,7 @@ struct LumenApp: App {
     @State private var locationService = LocationService()
     @State private var remoteService = RemoteService()
     @State private var localDeviceService: LocalDeviceService
+    @State private var nfcService: NFCService
 
     init() {
         let c = PersistenceCoordinator.makeContainer()
@@ -28,12 +29,14 @@ struct LumenApp: App {
         let dev   = DeviceService(modelContext: ctx, stateStore: store)
         let scene = SceneService(modelContext: ctx, deviceService: dev)
         let local = LocalDeviceService(modelContext: ctx, deviceService: dev)
+        let nfc   = NFCService(sceneService: scene, modelContext: ctx)
 
         _stateStore    = State(wrappedValue: store)
         _homeService   = State(wrappedValue: home)
         _deviceService = State(wrappedValue: dev)
         _sceneService  = State(wrappedValue: scene)
         _localDeviceService = State(wrappedValue: local)
+        _nfcService    = State(wrappedValue: nfc)
     }
 
     var body: some SwiftUI.Scene {
@@ -48,9 +51,21 @@ struct LumenApp: App {
                 .environment(locationService)
                 .environment(remoteService)
                 .environment(localDeviceService)
-                // Sensory reduce-motion is read from AppState.sensoryProfile in views;
-                // accessibilityReduceMotion is not a writable environment key.
+                .environment(nfcService)
+                .onOpenURL { handleIncomingURL($0) }
         }
         .modelContainer(container)
+    }
+
+    /// Deep links use `lumen://scene/<uuid>` and only queue for approval — never execute.
+    private func handleIncomingURL(_ url: URL) {
+        guard url.scheme == "lumen",
+              url.host == "scene",
+              let sceneIDString = url.pathComponents.last,
+              let sceneID = UUID(uuidString: sceneIDString) else {
+            return
+        }
+        appState.pendingExternalSceneID = sceneID
+        appState.selectedTab = .auto
     }
 }

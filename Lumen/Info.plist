@@ -33,6 +33,19 @@
 	<string>Lumen uses your location to understand whether you are home or away and show relevant home status in the app.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>Lumen uses background location to detect home arrival and departure so configured scene routines and local alerts can respond to those changes.</string>
+	<key>NFCReaderUsageDescription</key>
+	<string>Lumen can read and write NFC tags that open a scene for your confirmation — nothing runs until you approve it.</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.muharafiq.lumen.scene</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>lumen</string>
+			</array>
+		</dict>
+	</array>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>

@@ -152,13 +152,17 @@ struct RootView: View {
         
         // Request notification permissions for automation alerts
         _ = await NotificationService.shared.requestNotificationPermissions()
-        
+
+        TransitionWarningService.shared.scheduleWarnings(profile: appState.sensoryProfile)
+
         // Start geofence event monitoring
         sceneService.startMonitoringGeofenceEvents(from: locationService)
 
         // Start daily-schedule monitoring (scheduled scenes fire directly)
         sceneService.startMonitoringScheduledScenes()
-        
+
+        // NFC is user-initiated only (long-press a scene). No auto-scan on launch.
+
         if ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] == nil {
             let hkBridge = HomeKitBridge()
             deviceService.registerBridge(hkBridge)

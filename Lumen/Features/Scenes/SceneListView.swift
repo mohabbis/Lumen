@@ -9,6 +9,8 @@ struct SceneListView: View {
     @Query(sort: \Scene.sortOrder) private var scenes: [Scene]
     @State private var newSceneName = ""
     @Environment(\.horizontalSizeClass) private var sizeClass
+    @Environment(AppState.self) private var appState
+    @Environment(NFCService.self) private var nfcService
     @FocusState private var isSceneNameFocused: Bool
 
     private var isIPad: Bool { sizeClass == .regular }
@@ -51,6 +53,29 @@ struct SceneListView: View {
             Button("OK", role: .cancel) { viewModel.error = nil }
         } message: {
             Text(viewModel.error?.localizedDescription ?? "Please try again.")
+        }
+        .onAppear { consumeExternalSceneRequest() }
+        .onChange(of: appState.pendingExternalSceneID) { _, _ in
+            consumeExternalSceneRequest()
+        }
+        .onChange(of: nfcService.discoveredSceneID) { _, newID in
+            guard let newID else { return }
+            if let consumed = nfcService.consumeDiscoveredSceneID() {
+                appState.pendingExternalSceneID = consumed
+            } else {
+                appState.pendingExternalSceneID = newID
+            }
+            appState.selectedTab = .auto
+        }
+    }
+
+    private func consumeExternalSceneRequest() {
+        guard let sceneID = appState.pendingExternalSceneID else { return }
+        appState.pendingExternalSceneID = nil
+        if let scene = scenes.first(where: { $0.id == sceneID }) {
+            viewModel.requestApproval(scene)
+        } else {
+            viewModel.error = AppError.sceneNotFound(sceneID)
         }
     }
 
@@ -121,13 +146,21 @@ struct SceneListView: View {
             if isIPad {
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
                     ForEach(scenes, id: \.id) { scene in
-                        SceneDarkRow(scene: scene, viewModel: viewModel)
+                        SceneDarkRow(
+                            scene: scene,
+                            viewModel: viewModel,
+                            onAssignNFC: { nfcService.writeSceneToTag(scene) }
+                        )
                     }
                 }
             } else {
                 VStack(spacing: 10) {
                     ForEach(scenes, id: \.id) { scene in
-                        SceneDarkRow(scene: scene, viewModel: viewModel)
+                        SceneDarkRow(
+                            scene: scene,
+                            viewModel: viewModel,
+                            onAssignNFC: { nfcService.writeSceneToTag(scene) }
+                        )
                     }
                 }
             }
@@ -271,6 +304,7 @@ private struct ActiveSceneCard: View {
 private struct SceneDarkRow: View {
     let scene: Scene
     @State var viewModel: SceneViewModel
+    var onAssignNFC: (() -> Void)?
 
     var body: some View {
         HStack(spacing: 14) {
@@ -325,6 +359,11 @@ private struct SceneDarkRow: View {
                     scene.isFavorite ? "Remove Favorite" : "Favorite",
                     systemImage: scene.isFavorite ? "star.slash" : "star"
                 )
+            }
+            if let onAssignNFC {
+                Button(action: onAssignNFC) {
+                    Label("Write to NFC Tag", systemImage: "tag.fill")
+                }
             }
             Divider()
             Button(role: .destructive) {

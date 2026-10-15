@@ -18,6 +18,8 @@ final class AppState {
     var enableLocalPreviewControls: Bool = true
     var showDebugDetails: Bool = false
     var hapticFeedbackEnabled: Bool = true
+    /// Scene ID from a deep link or NFC read — consumed by Scenes for approval.
+    var pendingExternalSceneID: UUID?
     var sensoryProfile: SensoryProfile {
         didSet { saveSensoryProfile() }
     }

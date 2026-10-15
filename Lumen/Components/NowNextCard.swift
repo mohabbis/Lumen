@@ -120,6 +120,11 @@ struct RhythmTiming: Equatable {
     var nextStartFormatted: String {
         nextBlockStart.formatted(date: .omitted, time: .shortened)
     }
+
+    /// Whole minutes until the next rhythm block starts.
+    var minutesUntilNextBlock: Double {
+        nextBlockStart.timeIntervalSince(referenceDate) / 60.0
+    }
 }
 
 extension TimeOfDay {

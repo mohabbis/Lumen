@@ -12,6 +12,8 @@ struct HomeDashboardView: View {
     @Query private var executions: [ExecutionEvent]
     @Environment(\.horizontalSizeClass) private var sizeClass
     @Environment(LocationService.self) private var locationService
+    @Environment(DeviceStateStore.self) private var stateStore
+    @Environment(DeviceService.self) private var deviceService
     @Environment(AppState.self) private var appState
     @State private var isRenamingHome = false
     @State private var renameText = ""
@@ -20,6 +22,7 @@ struct HomeDashboardView: View {
     @State private var pendingScene: Scene?
     @State private var statusOverlayID = UUID()
     @State private var isStatusOverlayVisible = false
+    @State private var isShowingTimeline = false
 
     private var timeOfDay: TimeOfDay { .current }
     private var isRegularLayout: Bool { sizeClass == .regular }
@@ -57,7 +60,15 @@ struct HomeDashboardView: View {
                     .zIndex(2)
             }
             ambientBackground.ignoresSafeArea()
-            if viewModel.hasHome {
+            if appState.sensoryProfile.calmModeEnabled && viewModel.hasHome {
+                CalmModeDashboard(
+                    timeOfDay: timeOfDay,
+                    homeName: viewModel.home?.name ?? "Home",
+                    scenes: scenes,
+                    onSelectScene: { scene in pendingScene = scene },
+                    onExitCalmMode: { appState.sensoryProfile.calmModeEnabled = false }
+                )
+            } else if viewModel.hasHome {
                 dashboardContent
             } else {
                 OnboardingView { name in viewModel.createHome(name: name) }
@@ -169,6 +180,21 @@ struct HomeDashboardView: View {
             }
             compactStats
             NowNextCard(now: timeOfDay)
+                .onTapGesture {
+                    withAnimation(.easeInOut(duration: 0.25)) {
+                        isShowingTimeline.toggle()
+                    }
+                }
+            if isShowingTimeline {
+                VisualTimelineView(
+                    now: timeOfDay,
+                    referenceDate: Date(),
+                    executionHistory: todayTimelineEvents
+                )
+            }
+            if !quickControlDevices.isEmpty {
+                FavoriteDevicesCard(devices: quickControlDevices, onToggle: toggleFavoriteDevice)
+            }
             if dashboardSetupPresentation.shouldShow {
                 dashboardSetupSection
             } else {
@@ -339,12 +365,66 @@ struct HomeDashboardView: View {
                         room: room,
                         viewModel: viewModel.makeRoomViewModel()
                     )) {
-                        RoomCard(room: room)
+                        ActiveRoomCard(
+                            room: room,
+                            activeDeviceCount: activeDeviceCount(in: room),
+                            totalDeviceCount: room.deviceCount
+                        )
                     }
                     .buttonStyle(.plain)
                 }
             }
         }
+    }
+
+    // MARK: - Quick Controls
+
+    private var quickControlDevices: [FavoriteDevice] {
+        stateStore.allDevices
+            .filter { $0.supports(.onOff) && $0.reachability.isOperational }
+            .sorted { $0.displayName < $1.displayName }
+            .prefix(4)
+            .map { device in
+                FavoriteDevice(
+                    id: device.id,
+                    name: device.displayName,
+                    roomName: device.roomName ?? "Home",
+                    iconName: device.category.systemImage,
+                    isOn: stateStore.controlState(for: device).isPowered,
+                    category: device.category
+                )
+            }
+    }
+
+    private func toggleFavoriteDevice(_ device: FavoriteDevice) {
+        Task {
+            do {
+                try await deviceService.setPower(!device.isOn, deviceID: device.id)
+            } catch {
+                viewModel.error = error
+            }
+        }
+    }
+
+    private func activeDeviceCount(in room: Room) -> Int {
+        stateStore.devices(inRoom: room.name)
+            .filter { stateStore.controlState(for: $0).isPowered }
+            .count
+    }
+
+    private var todayTimelineEvents: [TimelineEvent] {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        return executions
+            .filter { calendar.isDate($0.timestamp, inSameDayAs: today) }
+            .map { event in
+                TimelineEvent(
+                    id: event.id,
+                    hour: event.hourOfDay,
+                    sceneName: event.sceneName,
+                    succeeded: event.failedCount == 0
+                )
+            }
     }
 
     // MARK: - First-Run Setup
