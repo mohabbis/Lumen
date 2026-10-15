@@ -170,7 +170,7 @@ extension XCTestCase {
     @MainActor
     func waitUntil(
         timeout: TimeInterval = 2.0,
-        _ condition: () -> Bool
+        _ condition: @escaping () -> Bool
     ) async {
         let deadline = Date().addingTimeInterval(timeout)
         while !condition() {

@@ -15,7 +15,9 @@ struct HomeDashboardView: View {
     @Environment(AppState.self) private var appState
     @State private var isRenamingHome = false
     @State private var renameText = ""
-    @State private var lumenSheet: LumenDashboardSheet?
+    @State private var isShowingReasoning = false
+    /// Suggested scene awaiting the same consent surface as the Scenes tab.
+    @State private var pendingScene: Scene?
     @State private var statusOverlayID = UUID()
     @State private var isStatusOverlayVisible = false
 
@@ -77,8 +79,19 @@ struct HomeDashboardView: View {
                 viewModel.addRoom(name: name, type: type, level: level)
             }
         }
-        .sheet(item: $lumenSheet) { sheet in
-            lumenSheetContent(sheet)
+        .sheet(isPresented: $isShowingReasoning) {
+            LumenReasoningView(
+                reasoning: reasoning,
+                onApply: reasoningApplyAction,
+                onDismiss: { isShowingReasoning = false }
+            )
+        }
+        .sheet(item: $pendingScene) { scene in
+            SceneApprovalSheet(
+                scene: scene,
+                onConfirm: { confirmPendingSuggestedScene(scene) },
+                onCancel: { pendingScene = nil }
+            )
         }
         .animation(appState.sensoryProfile.shouldReduceMotion ? .default : .spring(response: 0.42, dampingFraction: 0.86), value: isStatusOverlayVisible)
         .onAppear {
@@ -385,7 +398,7 @@ struct HomeDashboardView: View {
                         detail: noticePresentation.detail,
                         icon: noticePresentation.iconName,
                         isActionable: noticePresentation.isActionable,
-                        action: { lumenSheet = .reasoning }
+                        action: { isShowingReasoning = true }
                     )
                 } else {
                     LumenNoticedCard(
@@ -401,72 +414,31 @@ struct HomeDashboardView: View {
         }
     }
 
-    // MARK: - Lumen Suggestion Handler
-
-    @ViewBuilder
-    private func lumenSheetContent(_ sheet: LumenDashboardSheet) -> some View {
-        switch sheet {
-        case .reasoning:
-            LumenReasoningView(
-                reasoning: reasoning,
-                onApply: reasoningApplyAction,
-                onDismiss: { lumenSheet = nil }
-            )
-        case .action:
-            lumenActionSheet
-        }
-    }
-
-    @ViewBuilder
-    private var lumenActionSheet: some View {
-        if let sceneName = suggestedSceneName, let scene = findScene(named: sceneName) {
-            LumenActionView(
-                scene: scene,
-                onConfirm: { handleLumenSuggestion() },
-                onCancel: { lumenSheet = nil }
-            )
-        } else {
-            // Fallback if the suggested scene becomes unavailable mid-flow.
-            VStack(spacing: 12) {
-                Text("Scene not available")
-                    .font(.title2)
-                    .foregroundStyle(.white)
-                Button("Done") {
-                    lumenSheet = nil
-                }
-                .font(.system(size: 16, weight: .semibold))
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 12)
-                .background(Color.lumenAccent, in: RoundedRectangle(cornerRadius: 18))
-            }
-            .padding(24)
-            .background(Color.lumenBackground.ignoresSafeArea())
-        }
-    }
+    // MARK: - Lumen Suggestion Consent
+    // Product call: Reasoning = explainability; SceneApprovalSheet = sole consent
+    // surface (same sheet as the Scenes tab). No second Apply UI / no silent execute.
 
     private var reasoningApplyAction: (() -> Void)? {
-        if noticePresentation.isActionable {
-            return showLumenActionIfAvailable
-        }
-        return nil
+        guard noticePresentation.isActionable else { return nil }
+        return { requestSuggestedSceneApproval() }
     }
 
-    private func showLumenActionIfAvailable() {
-        guard noticePresentation.isActionable else { return }
-        lumenSheet = .action
+    private func requestSuggestedSceneApproval() {
+        guard noticePresentation.isActionable,
+              let scene = LumenSuggestionConsent.sceneForApproval(
+                suggestedName: suggestedSceneName,
+                in: scenes
+              ) else { return }
+        isShowingReasoning = false
+        pendingScene = scene
     }
 
-    private func handleLumenSuggestion() {
-        lumenSheet = nil
-        
-        // Record that a suggestion was shown today (for sensory profile limits)
+    private func confirmPendingSuggestedScene(_ scene: Scene) {
+        pendingScene = nil
+        // Record after explicit approval (sensory profile daily limits).
         appState.recordSuggestionShown()
-
-        // Execute the same scene the Action sheet displayed — single source of truth.
-        if let sceneName = suggestedSceneName, let scene = findScene(named: sceneName) {
-            Task { await viewModel.executeScene(scene) }
-        }
+        // Execute the scene the approval sheet showed — not a fresh re-lookup.
+        Task { await viewModel.executeScene(scene) }
     }
 
     private func showStatusOverlay() {
@@ -583,13 +555,6 @@ struct HomeDashboardView: View {
     }
 }
 
-private enum LumenDashboardSheet: String, Identifiable {
-    case reasoning
-    case action
-
-    var id: String { rawValue }
-}
-
 private struct StatusOverlay: View {
     let isAtHome: Bool
     let id: UUID
@@ -614,6 +579,7 @@ private struct StatusOverlay: View {
         }
     }
 
+    @ViewBuilder
     private var banner: some View {
         let presentation = StatusOverlayPresentation(isAtHome: isAtHome)
 

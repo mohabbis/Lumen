@@ -17,7 +17,10 @@ final class SuggestionEngineTests: XCTestCase {
             presence: presence,
             reachableDevices: reachable,
             hourOfDay: hour,
-            candidates: candidates
+            candidates: candidates,
+            dailySuggestionLimit: nil,
+            pausedSuggestions: false,
+            hasShownSuggestionToday: false
         )
     }
 

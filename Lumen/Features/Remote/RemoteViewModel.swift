@@ -16,9 +16,10 @@ final class RemoteViewModel {
     var isLearning = false
     var error: (any Error)?
 
-    init(modelContext: ModelContext, remoteService: RemoteService = RemoteService()) {
+    init(modelContext: ModelContext, remoteService: RemoteService? = nil) {
         self.modelContext = modelContext
-        self.remoteService = remoteService
+        // Default arg evaluation is nonisolated — construct on the main actor here.
+        self.remoteService = remoteService ?? RemoteService()
     }
 
     // MARK: - Remote CRUD

@@ -210,7 +210,7 @@ final class LocalNetworkTests: XCTestCase {
         kind: .shellyDimmer
     )
 
-    static func bridge(configs: [LocalDeviceConfig], transport: FakeLocalTransport) -> LocalNetworkBridge {
+    fileprivate static func bridge(configs: [LocalDeviceConfig], transport: FakeLocalTransport) -> LocalNetworkBridge {
         LocalNetworkBridge(configProvider: { configs }, transportFactory: { _ in transport })
     }
 

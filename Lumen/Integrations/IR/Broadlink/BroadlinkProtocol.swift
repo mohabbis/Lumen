@@ -71,6 +71,7 @@ enum BroadlinkProtocol {
     private static func crypt(operation: CCOperation, data: [UInt8], key: [UInt8]) -> [UInt8] {
         var out = [UInt8](repeating: 0, count: data.count + kCCBlockSizeAES128)
         var moved = 0
+        let outCount = out.count
         _ = key.withUnsafeBytes { keyPtr in
             iv.withUnsafeBytes { ivPtr in
                 data.withUnsafeBytes { dataPtr in
@@ -82,7 +83,7 @@ enum BroadlinkProtocol {
                             keyPtr.baseAddress, key.count,
                             ivPtr.baseAddress,
                             dataPtr.baseAddress, data.count,
-                            outPtr.baseAddress, out.count,
+                            outPtr.baseAddress, outCount,
                             &moved
                         )
                     }

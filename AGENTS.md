@@ -81,9 +81,9 @@ Most services are `@Observable @MainActor` classes passed through the SwiftUI en
 These are the views that distinguish Lumen from a generic HomeKit controller:
 
 - **`Lumen/Components/NowNextCard.swift`** — Calm daily rhythm card on the dashboard. Shows current time block (e.g. "Evening") with a progress bar and the next transition ("Night at 9:00 PM"). Math lives in `RhythmTiming` (calendar-injectable, unit-tested).
-- **`Lumen/Features/Scenes/SceneApprovalSheet.swift`** — Sheet that opens when a scene row is tapped. Shows scene name + humanized action list (e.g. "Power · On", "Brightness · 40%"). Confirm or cancel. Humanization lives in `SceneActionDescription` (pure, unit-tested).
-- **`Lumen/Features/Home/LumenReasoningView.swift`** — Sheet that opens when the "Lumen noticed" dashboard card is tapped. Shows the signals (time of day, presence, reachable devices, matching scene) behind the current suggestion, with an explicit Apply button. Logic lives in `ReasoningCalculator` (pure, unit-tested).
-- **`Lumen/Features/Home/LumenActionView.swift`** — Final consent surface for an ambient suggestion. After the user taps Apply in the reasoning view, this sheet shows the humanized action list ("Lumen will…") for the suggested scene and asks for an explicit Apply/Not now confirmation before the scene fires. Reuses `SceneActionDescription` (the same humanizer as `SceneApprovalSheet`).
+- **`Lumen/Features/Scenes/SceneApprovalSheet.swift`** — Canonical consent surface. Used for Scenes-tab runs and for ambient suggestions after reasoning. Shows scene name + humanized action list (e.g. "Power · On", "Brightness · 40%"). Confirm or cancel. Humanization lives in `SceneActionDescription` (pure, unit-tested).
+- **`Lumen/Features/Home/LumenReasoningView.swift`** — Explainability sheet for the "Lumen noticed" card. Shows signals/factors behind the suggestion. Apply does **not** execute — it queues `pendingScene` for `SceneApprovalSheet`. Logic lives in `ReasoningCalculator` (pure, unit-tested); routing lives in `LumenSuggestionConsent`.
+- **`Lumen/Features/Home/LumenActionView.swift`** — Compatibility wrapper around `SceneApprovalSheet` only. Do not add a second consent UI here.
 
 #### Data flow for a scene execution (consent-first)
 
@@ -101,22 +101,22 @@ SceneListView row tap
                 → bridge.executeAction()               // real hardware
 ```
 
-A separate consent path runs from the dashboard's "Lumen noticed" card:
+Ambient suggestions use the **same** approval sheet (not a parallel consent UI):
 
 ```
 LumenNoticedCard tap
   → HomeDashboardView.isShowingReasoning = true
-    → LumenReasoningView renders with ReasoningCalculator output
+    → LumenReasoningView (explainability only)
       → user taps "Apply [Scene]"
-        → HomeDashboardView.isShowingAction = true
-          → LumenActionView renders the suggested scene's action list
-            → user taps "Apply"
-              → HomeDashboardView.handleLumenSuggestion()  // dismisses both sheets
-                → HomeViewModel.executeScene(scene)        // failures stored to viewModel.error
+        → LumenSuggestionConsent.sceneForApproval(...)
+          → pendingScene = scene; reasoning dismissed
+            → SceneApprovalSheet (sole consent surface)
+              → user confirms
+                → HomeViewModel.executeScene(scene)  // the approved instance
                   → SceneService.execute(scene)
 ```
 
-This realizes the 4-mode flow shown on lumen.muharafiq.com end-to-end: **Awareness** (dashboard "Lumen noticed" card) → **Reasoning** (`LumenReasoningView` signals) → **Action** (`LumenActionView` confirmation) → **Execution** (`SceneService.execute`). The reasoning view's Apply button advances to the action confirmation rather than executing directly, keeping consent-before-action explicit. `handleLumenSuggestion` executes whatever `suggestedSceneName` resolves to, so the scene that runs is always the one the Action sheet displayed.
+Flow: **Awareness** → **Reasoning** (why) → **Consent** (`SceneApprovalSheet`) → **Execution**. Product call: one consent surface shared with the Scenes tab — not double-confirm with two Apply UIs, and never silent execute from reasoning.
 
 `HomeViewModel.executeScene` is `async` (not `throws`) — errors are written to `viewModel.error` and surfaced by the dashboard's error alert, matching the pattern used by `createHome` / `addRoom`. Do not introduce `try?` swallows in the dashboard control flow; the alert exists to make failures visible.
 
@@ -129,6 +129,7 @@ A convention: when view code carries non-trivial logic, lift it into a pure `str
 | `RhythmTiming` | `NowNextCard` | Current-block progress + next-block start date (handles midnight wrap) |
 | `SceneActionDescription` | `SceneApprovalSheet` | Humanized (capability, value) pair for a `SceneAction` |
 | `ReasoningCalculator` | `LumenReasoningView` | Signal list + suggestion label from ambient state (incl. confidence / habit signals from the scored layer) |
+| `LumenSuggestionConsent` | `HomeDashboardView` | Resolves which scene enters `SceneApprovalSheet` after reasoning Apply |
 | `SuggestionEngine` | `HomeDashboardView` | Scored-heuristic ranking of scenes → the "Lumen noticed" suggestion + explainable factors (see below) |
 | `SceneService.scenesMatching(event:in:)` | `SceneService.handleGeofenceEvent` | Pure routing — which scenes fire for a given event |
 | `ScheduleTiming` / `SceneService.scenesDue(at:in:lastFired:)` | `SceneService` schedule poller | Pure: whether a daily-schedule scene is due now (grace window, no same-day refire, midnight-safe) |

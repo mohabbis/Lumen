@@ -48,7 +48,8 @@ struct LumenApp: App {
                 .environment(locationService)
                 .environment(remoteService)
                 .environment(localDeviceService)
-                .environment(\.accessibilityReduceMotion, appState.sensoryProfile.shouldReduceMotion)
+                // Sensory reduce-motion is read from AppState.sensoryProfile in views;
+                // accessibilityReduceMotion is not a writable environment key.
         }
         .modelContainer(container)
     }

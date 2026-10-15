@@ -52,7 +52,7 @@ struct SceneActionSnapshot: Sendable {
     let payload: ActionPayload
 }
 
-enum ActionPayload: Sendable {
+enum ActionPayload: Sendable, Equatable {
     case bool(Bool)
     case double(Double)
     case int(Int)

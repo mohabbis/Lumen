@@ -93,8 +93,10 @@ final class RemoteIRTests: XCTestCase {
         try await service.send(command, using: profile)
 
         let host = await fake.capturedHost
-        XCTAssertEqual(await fake.capturedCode, "PWR")
-        XCTAssertEqual(await fake.capturedFormat, .nec)
+        let code = await fake.capturedCode
+        let format = await fake.capturedFormat
+        XCTAssertEqual(code, "PWR")
+        XCTAssertEqual(format, .nec)
         XCTAssertEqual(host?.address, "192.168.1.50")
     }
 
@@ -152,8 +154,10 @@ final class RemoteIRTests: XCTestCase {
 
         try await service.send(command, using: profile)
 
-        XCTAssertTrue(await broadlink.didSend)
-        XCTAssertNil(await http.capturedHost)
+        let didSend = await broadlink.didSend
+        let httpHost = await http.capturedHost
+        XCTAssertTrue(didSend)
+        XCTAssertNil(httpHost)
     }
 
     func testServiceLearnReturnsCode() async throws {

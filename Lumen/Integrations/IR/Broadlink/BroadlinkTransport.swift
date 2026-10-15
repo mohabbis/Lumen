@@ -119,7 +119,7 @@ actor BroadlinkTransport: IRLearningTransport {
 
     /// Like `command` but returns the device error code instead of throwing, so
     /// the learn poll can tell "still waiting" from a real failure.
-    private func rawCommand(_ payload: [UInt8], device: BroadlinkDevice, session: Session, address: String) async throws -> (error: Int16, payload: [UInt8]) {
+    private func rawCommand(_ payload: [UInt8], device: BroadlinkDevice, session: Session, address: String) async throws -> (errorCode: Int16, payload: [UInt8]) {
         let packet = BroadlinkProtocol.buildPacket(
             command: BroadlinkProtocol.Command.normal,
             payload: payload,
