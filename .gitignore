@@ -47,3 +47,6 @@ playwright-report/
 
 # Agent / local analysis outputs
 graphify-out/
+
+# Local design captures
+lumen-first-pass.png
