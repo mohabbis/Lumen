@@ -16,11 +16,10 @@
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",
-    "vite": "latest",
+    "lucide-react": "latest",
     "react": "latest",
     "react-dom": "latest",
-    "lucide-react": "latest",
-    "framer-motion": "latest"
+    "vite": "latest"
   },
   "devDependencies": {
     "@playwright/test": "latest",

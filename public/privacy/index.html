@@ -4,32 +4,31 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="How Lumen handles your home data. Local first, no advertising or tracking SDKs." />
-  <meta name="theme-color" content="#08090d" />
+  <meta name="theme-color" content="#0e0819" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="canonical" href="https://lumen.muharafiq.com/privacy" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <title>Privacy Policy | Lumen</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --bg: #08090d;
+      --bg: #0e0819;
       --bg-card: rgba(255, 255, 255, 0.032);
-      --text: #f4f6fb;
-      --text-dim: rgba(226, 231, 242, 0.74);
-      --muted: rgba(214, 221, 236, 0.5);
-      --accent: #8ab4f8;
+      --text: #f2ede7;
+      --text-dim: #b9b0c4;
+      --muted: #b9b0c4;
+      --accent: #dfbc93;
       --border: rgba(255, 255, 255, 0.08);
     }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 5px; }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto !important; } }
     html { background: var(--bg); scroll-behavior: smooth; }
     body {
       min-height: 100vh;
       background:
-        radial-gradient(ellipse 70% 50% at 50% -10%, rgba(138, 180, 248, 0.10) 0%, transparent 60%),
+        radial-gradient(ellipse 70% 50% at 50% -10%, rgba(196, 154, 108, 0.05) 0%, transparent 60%),
         var(--bg);
       color: var(--text);
-      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       font-size: 15px;
       line-height: 1.72;
       -webkit-font-smoothing: antialiased;
@@ -133,7 +132,7 @@
       <h1>Privacy Policy</h1>
       <p class="lede">How your home data stays yours. Lumen is built around local control, clear permission prompts, and no advertising or tracking SDKs.</p>
       <div class="meta">
-        <span>Last updated June 10, 2026</span>
+        <span>Last updated October 15, 2026</span>
         <span>Lumen for iPhone</span>
         <span>Version 1.0</span>
       </div>
@@ -146,8 +145,8 @@
       </article>
       <article class="item">
         <h2>What we collect</h2>
-        <p>We do not collect, sell, or transmit your personal home data to servers we operate. Rooms, devices, scenes, automations, and usage context are handled locally on your device, unless you turn on platform sync features yourself.</p>
-        <p>If you join the beta waitlist on this site, we store the email address you submit so we can send you a TestFlight invite. We do not use it for anything else and we do not pass it on.</p>
+        <p>We do not collect, sell, or transmit your personal home data to servers we operate. Rooms, devices, scenes, automations, and usage context are handled locally on your device. CloudKit sync is disabled in the beta.</p>
+        <p>If you join the beta waitlist on this site, we store the email address you submit so we can send you a TestFlight invite. We use it only for your beta request and related updates, with delivery providers as described below.</p>
       </article>
       <article class="item">
         <h2>Permissions</h2>

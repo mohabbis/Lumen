@@ -1,0 +1,48 @@
+# Website interaction audit
+
+Date: October 15, 2026. Scope: marketing site and browser simulation only.
+
+## Baselines
+
+The initial checkout embedded an autoplay phone in `App.jsx` and failed to parse at line 179. Lint, Vitest, and build failed; Playwright found no tests. During implementation the workspace was updated to revision `846120b`, which restored the standalone simulator and backend described in the brief. The rebuilt site incorporates that backend and supersedes the older web UI. Native edits and branch operations made elsewhere in the workspace were not part of this implementation.
+
+The inventory below records static review findings and the final implemented contract. A control having an event handler was not treated as proof of correct behavior. The final behavior is covered by unit tests and real browser tests in Chromium, WebKit, and Firefox.
+
+## Interaction inventory
+
+| Element | Intended behavior and baseline issue | Authoritative state | Final feedback and contract | Mobile and accessibility verification |
+| --- | --- | --- | --- | --- |
+| Main navigation | Reach page destinations without a large overlay or dead anchors. Old page had many repetitive destinations. | Navigation disclosure state | Three section links and one consistent waitlist CTA. Selecting a mobile link closes the menu; Escape restores the menu trigger. | Tested at all seven widths; keyboard and visible focus. |
+| Demo tabs | Open the native destinations. Initial checkout used spans; restored version had numerous independent setters. | `tab`, `roomId`, `sheet` | Home, Rooms, Intel, Auto, Settings. Tab changes clear incompatible navigation and pending edits, preserving committed device state. | Semantic navigation buttons, `aria-current`, repeated rapid switching, keyboard and touch tests. |
+| Room cards | Open the matching room and show actual active counts. Previous summaries were not reliably derived from all device state. | Device registry and room selector | Counts derive from reachable powered lights. Home has two favorites; Rooms exposes all four rooms. | Names come from visible text; zero label-in-name violations. |
+| Back buttons | Return to the parent room list without resetting controls. | `roomId` | One clear back path. | Real button, adequate hit target, keyboard/touch tests. |
+| Device rows | Open supported controls and preserve values across destinations. Old device defaults and scene presets were separate concerns. | Device registry | Each device has one ID and one state object used by every screen. | Accessible row names; tested Home/Rooms/Intel synchronization. |
+| Light power | Review a change and update every dependent summary. Earlier control handlers committed directly. | Sheet draft, then device registry | Power is staged. Apply commits; Cancel discards. Changing power off preserves brightness. | Named switch with checked state; click, keyboard, and touch coverage. |
+| Brightness | Adjust a bounded value with understandable power-off behavior. Previous custom pointer slider lacked native range semantics. | Device draft | Controlled native range, 0–100%. Disabled while off. No device mutation until Apply. | Named range with value text, keyboard Home/Arrow keys and touchscreen input. |
+| Color temperature | Set a meaningful temperature rather than an unexplained percentage. | Device draft | 2200–5000 K in 100 K steps. Exact scene values reappear in device controls. | Named controlled range; scene synchronization tested. |
+| Thermostat | Adjust only a simulated, supported setting. | Device draft | 16–28°C in 0.5°C steps, explicit Apply/Cancel. | Named range and boundary test through keyboard End. |
+| Unavailable device | Explain lack of connectivity without a fake successful command. | Device `online` flag | Read-only last-known state, clear unavailable explanation, no Apply control. | Verified in all browser engines; no disabled control masquerading as live control. |
+| Empty room | Explain an empty state without nonfunctional setup controls. | Room/device selector | Office has a purposeful empty state. | First-visitor test opens it; readable mobile layout. |
+| Scene cards | Preview grouped operations that match what actually runs. Previous general presets updated every light while previews described abstract capabilities. | Scene fixtures and device registry | Three focused scenes. Device-specific preview, explicit approval, exact grouped updates. | Scene cancellation, execution, repeated approval, and cross-screen tests. |
+| Partial scene failure | Never claim an unavailable device changed. | Device reachability at execution | Reachable actions apply; unavailable/missing targets are counted and reported. | Pure reducer tests cover both unavailable and missing targets. |
+| Suggestion | Explain context, allow refusal, apply only after a clear decision. Old guided-mode jumps could apply a preset independently of normal approval. | Suggestion state and pending scene | One combined reasoning/review sheet, one Apply action. Not now dismisses without changes. | Browser tests inspect signals, dismiss, and verify unchanged brightness. |
+| Dialog close and Escape | Close one layer and restore useful focus. | Pending sheet and DOM focus refs | Native modal dialog plus explicit focus wrapping. Escape closes the sheet before the expanded preview. Focus returns to its trigger, or the active tab if the trigger was removed. | All three engines; Safari pointer-focus behavior handled explicitly. |
+| Expanded preview | Promote one simulator instead of creating competing instances. | `expanded` with the same mounted subtree | Fixed desktop presentation; edge-to-edge mobile layout. Background is inert and scroll locked. | Focus, scroll lock, restoration, landscape, clipping, and reopen tests. |
+| Guided entry | Explain one useful routine without forcing autoplay or allowing a shortcut to silently run it. | `guide` and regular scene actions | Optional review → decision → result. Skip, Restart, Finish. No timers advance the flow. | Unit and browser tests cover skip, restart, approval, dismissal, and reset. |
+| Reset | Restore every relevant domain together. Original simulation had no complete reset contract. | Initial-state factory | Devices, suggestion, history, draft, navigation, and sensory setting reset. Expansion stays open intentionally. | Reducer and browser tests verify restored 72% brightness and available suggestion. |
+| Settings | Keep visible preferences meaningful. Old simulator mirrored many settings unrelated to the core demonstration. | `reducedStimulation` | Reduced stimulation removes transitions; Reset works. Other native settings are explained rather than faked. | Named switch, checked-state test, reduced-motion browser test. |
+| Add/edit/remove devices | Avoid broad authoring UI with incomplete capability support. | None in the reduced demo | Removed from this focused preview. Native planning remains described in the empty state. | No dead plus buttons, placeholder dialogs, or unsupported removal states. |
+| Theme switch | Avoid maintaining a second marketing theme through conflicting overrides. | None | Removed in favor of the approved aubergine/brass direction. OS reduced motion remains respected. | Contrast checked with axe and Lighthouse. |
+| Signup | Record or deliver a normalized email and report the actual result. Both the initial mailto path and provider HTTP-only acknowledgement could produce false success. | Form status and submission service | One browser request to the preserved internal endpoint; explicit `{ ok: true }` required. Failed/unconfirmed delivery retains email and allows retry. | Validation, HTTP/application/network/timeout errors, duplicate response, double-submit prevention, and retry tests. |
+| Delivery fallback | Preserve existing server integrations without duplicate browser fan-out. | Server provider chain | Existing webhook, Supabase, Resend, Web3Forms, FormSubmit order remains. Transport interruptions stop automatic fallback because delivery may already have occurred. FormSubmit requires explicit success in its response. | API and provider tests use controlled mocks; no real messages were sent. |
+| Signup analytics | Count acknowledged outcomes without exposing email or affecting delivery. | In-memory `dataLayer` | Attempt/success/error events contain source and timestamp only. Analytics failures never alter the signup outcome. | Tests verify success count, excluded email, and blocked analytics sink. |
+| Legal and external links | Reach actual destinations. | Static routes | Existing privacy and terms rewrites preserved; footer links are working links. | Direct legal pages checked in all engines. |
+
+## Deliberate differences from the native application
+
+- Native suggestion routing now separates reasoning from the shared scene approval sheet. The browser demo combines the signals and device review in one sheet, as specified by the approved website plan, while retaining one explicit approval before any state changes.
+- The demo puts the suggestion before favorite rooms and uses a shorter greeting to make the product’s defining interaction visible in the embedded preview.
+- The demo contains three scenes and a small, deterministic household. It does not simulate commissioning, real connectivity, geofencing, schedules, HomeKit authorization, LAN devices, IR remotes, or the full sensory profile.
+- Device adjustments are staged with Apply/Cancel to make the web simulation’s action boundary explicit.
+
+These are intentional preview limitations, not claims that the native application lacks those features.

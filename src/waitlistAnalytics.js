@@ -6,13 +6,12 @@ export function trackWaitlistEvent(event, detail = {}) {
   const payload = {
     event: `waitlist_${event}`,
     timestamp: new Date().toISOString(),
-    ...detail,
+    source: String(detail.source || 'lumen-site').slice(0, 64),
   };
 
-  window.dataLayer = window.dataLayer || [];
-  window.dataLayer.push(payload);
-
-  if (import.meta.env.DEV) {
-    console.info('[waitlist]', payload);
-  }
+  // Analytics must never interrupt a real signup or change its outcome.
+  try {
+    if (!Array.isArray(window.dataLayer)) window.dataLayer = [];
+    window.dataLayer.push(payload);
+  } catch { /* A blocked analytics sink is noncritical. */ }
 }
