@@ -1,24 +1,13 @@
-import { defineConfig, devices } from '@playwright/test';
-
+import { defineConfig } from '@playwright/test';
 export default defineConfig({
-  testDir: './e2e',
-  testMatch: '**/*.e2e.js',
-  fullyParallel: true,
-  forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 1 : 0,
-  workers: process.env.CI ? 1 : undefined,
-  reporter: 'list',
-  use: {
-    baseURL: 'http://127.0.0.1:4173',
-    trace: 'on-first-retry',
-  },
+  testDir: './e2e', testMatch: '**/*.e2e.js', fullyParallel: true, workers: 4,
+  forbidOnly: !!process.env.CI, retries: process.env.CI ? 1 : 0,
+  reporter: [['list'], ['html', { open: 'never' }]],
+  webServer: { command: 'npm run build && npm run preview -- --port 4173', url: 'http://127.0.0.1:4173', reuseExistingServer: !process.env.CI },
   projects: [
-    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+    { name: 'chromium', use: { browserName: 'chromium' } },
+    { name: 'webkit', use: { browserName: 'webkit' } },
+    { name: 'firefox', use: { browserName: 'firefox' } }
   ],
-  webServer: {
-    command: 'npm run preview',
-    url: 'http://127.0.0.1:4173',
-    reuseExistingServer: !process.env.CI,
-    timeout: 120000,
-  },
+  use: { baseURL: 'http://127.0.0.1:4173', trace: 'retain-on-failure', screenshot: 'only-on-failure' }
 });

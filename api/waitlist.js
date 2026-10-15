@@ -29,13 +29,17 @@ export default async function handler(req, res) {
   const normalizedPayload = normalizeWaitlistPayload({
     email: payload.email,
     source: payload.source,
-    userAgent: req.headers['user-agent'] || payload.user_agent || '',
+    userAgent: '',
   });
 
   if (!isValidWaitlistEmail(normalizedPayload.email)) {
     return json(res, 400, { ok: false, error: 'A valid email is required.' });
   }
 
-  const delivered = await deliverWaitlist(normalizedPayload);
-  return json(res, 200, { ok: delivered });
+  try {
+    const delivered = await deliverWaitlist(normalizedPayload);
+    return json(res, delivered ? 200 : 503, { ok: delivered });
+  } catch {
+    return json(res, 503, { ok: false, error: 'Delivery is unconfirmed. Please try again later.' });
+  }
 }

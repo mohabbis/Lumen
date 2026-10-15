@@ -13,6 +13,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: npm install
-      - run: npx playwright install chromium --with-deps
+      - run: npm ci
+      - run: npx playwright install chromium firefox webkit --with-deps
       - run: npm run ci

@@ -1,70 +1,26 @@
-import { DEFAULT_TO_EMAIL } from '../lib/waitlist.js';
+import { isValidWaitlistEmail, normalizeWaitlistPayload } from '../lib/waitlist.js';
+import { getSignupConfig } from './siteConfig.js';
+export const normalizeEmail = email => normalizeWaitlistPayload({ email }).email;
+export const isValidEmail = isValidWaitlistEmail;
 
-async function postJson(url, body) {
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
-
-  let data = null;
+export async function submitWaitlist(email, config = getSignupConfig(), { fetchImpl = fetch, timeoutMs = 12000 } = {}) {
+  const normalized = normalizeEmail(email);
+  if (!isValidEmail(normalized)) throw new Error('Enter a valid email address.');
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    data = await response.json();
-  } catch {
-    // Some providers return empty bodies on success.
-  }
-
-  return { response, data };
-}
-
-async function submitViaApi(email, source) {
-  const endpoint = import.meta.env.VITE_WAITLIST_ENDPOINT || '/api/waitlist';
-  const { response, data } = await postJson(endpoint, { email, source });
-
-  if (!response.ok) return false;
-  if (data && data.ok === false) return false;
-  return true;
-}
-
-async function submitViaWeb3Forms(email, source) {
-  const accessKey = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY;
-  if (!accessKey) return false;
-
-  const { response, data } = await postJson('https://api.web3forms.com/submit', {
-    access_key: accessKey,
-    subject: 'New Lumen waitlist request',
-    from_name: 'Lumen Waitlist',
-    email,
-    message: `Email: ${email}\nSource: ${source}`,
-  });
-
-  return response.ok && data?.success === true;
-}
-
-async function submitViaFormSubmit(email, source) {
-  const to = import.meta.env.VITE_WAITLIST_TO_EMAIL || DEFAULT_TO_EMAIL;
-  const { response, data } = await postJson(`https://formsubmit.co/ajax/${encodeURIComponent(to)}`, {
-    _subject: 'New Lumen waitlist request',
-    _template: 'box',
-    email,
-    source,
-  });
-
-  if (!response.ok) return false;
-  if (data && data.success === false) return false;
-  return true;
-}
-
-export async function submitWaitlist(email, source = 'lumen-site') {
-  const normalizedEmail = String(email || '').trim().toLowerCase();
-
-  if (await submitViaApi(normalizedEmail, source)) {
-    return true;
-  }
-
-  if (await submitViaWeb3Forms(normalizedEmail, source)) {
-    return true;
-  }
-
-  return submitViaFormSubmit(normalizedEmail, source);
+    if (!config.endpoint) throw new Error('Online signup is not configured. Please contact us by email.');
+    const response = await fetchImpl(config.endpoint, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: normalized, source: 'lumen-site' }), signal: controller.signal,
+    });
+    const body = await response.json().catch(() => null);
+    if (response.status === 409 && body?.code === 'already_subscribed') return { status: 'duplicate', email: normalized };
+    if (!response.ok || body?.ok !== true) throw new Error('We couldn’t confirm your signup. Please try again, or contact us below.');
+    return { status: 'success', email: normalized };
+  } catch (error) {
+    if (error.name === 'AbortError') throw new Error('The connection took too long. Your signup is unconfirmed. Please try again.');
+    if (error instanceof TypeError) throw new Error('We couldn’t reach the signup service. Check your connection and try again.');
+    throw error;
+  } finally { clearTimeout(timer); }
 }
