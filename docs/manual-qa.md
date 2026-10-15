@@ -50,8 +50,10 @@ Use this before each TestFlight upload. The automated XCTest suite covers core l
 - Tap the Lumen noticed card.
 - Confirm the reasoning sheet explains time of day, presence, reachable devices, and matching scene when available.
 - Tap Not now and confirm no action occurs.
-- Reopen the sheet and apply the suggestion.
-- Confirm the apply path does not bypass the reasoning surface.
+- Reopen the sheet and tap Apply.
+- Confirm the scene approval sheet opens for the suggested scene, and that nothing has run yet.
+- Cancel and confirm the scene still has not run.
+- Apply again, approve the sheet, and confirm the scene runs.
 
 ## HomeKit Permission
 
@@ -128,7 +130,8 @@ Requires a Broadlink RM-series blaster on the **same Wi-Fi** as the iPhone, alre
 ## Fail The Build If
 
 - First launch hangs or shows a black screen.
-- Any scene executes without an approval surface.
+- A tapped scene, or a "Lumen noticed" suggestion, executes without the approval sheet.
+- An arrival, departure, or scheduled scene runs when that trigger was not configured.
 - Permission denial makes a primary tab unusable.
 - The dashboard repeatedly prompts for location or notifications.
 - Homes, rooms, devices, or scenes disappear after relaunch.

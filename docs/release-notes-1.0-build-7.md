@@ -8,38 +8,34 @@ Internal TestFlight candidate.
 
 - Local preview mode is the primary review and tester path.
 - HomeKit discovery and control are available when permission is granted and the tester has a configured Home.
-- Scene execution remains consent-first: scene rows and Lumen suggestions must show an approval surface before applying changes.
+- Tap-to-run scenes and "Lumen noticed" suggestions open an approval sheet before anything changes. Arrival, departure, and daily schedules run at the configured time and post a local notification.
 - Location-aware home/away behavior and local notifications are included for beta validation.
 - CloudKit sync remains off for this build.
 
 ## Validation
 
-- Native XCTest gate passed on iPhone 17 Pro Max:
+Native gate, last recorded on a Mac (29 June 2026). That result predates later iOS work, including the consent-sheet change. Re-run it before archiving build 7:
 
-  ```sh
-  xcodebuild test -project Lumen.xcodeproj -scheme Lumen \
-    -destination 'platform=iOS Simulator,name=iPhone 17 Pro Max'
-  ```
+```sh
+xcodebuild test -project Lumen.xcodeproj -scheme Lumen \
+  -destination 'platform=iOS Simulator,name=iPhone 17 Pro Max'
+```
 
-- Result bundle from the latest local validation:
+Recorded result bundle from that June run:
 
-  ```text
-  ~/Library/Developer/Xcode/DerivedData/Lumen-eamhwlfegirvdcghiucenbvohqdg/Logs/Test/Test-Lumen-2026.06.29_08-42-30--0500.xcresult
-  ```
+```text
+~/Library/Developer/Xcode/DerivedData/Lumen-eamhwlfegirvdcghiucenbvohqdg/Logs/Test/Test-Lumen-2026.06.29_08-42-30--0500.xcresult
+```
 
-- iPad build smoke check passed:
+iPad smoke from the same era:
 
-  ```sh
-  xcodebuild -project Lumen.xcodeproj -scheme Lumen \
-    -destination 'platform=iOS Simulator,name=iPad Pro 13-inch (M5)' \
-    -configuration Debug build
-  ```
+```sh
+xcodebuild -project Lumen.xcodeproj -scheme Lumen \
+  -destination 'platform=iOS Simulator,name=iPad Pro 13-inch (M5)' \
+  -configuration Debug build
+```
 
-- Web preview CI passed:
-
-  ```sh
-  npm run ci
-  ```
+October 2026 doc pass: `xcodebuild` was not run. This environment has no Xcode. `LumenTests` currently contains 235 `test` methods. Web unit tests (`npm test`) were run with this doc pass. App Store Connect was not checked.
 
 ## Known Limits
 
@@ -47,6 +43,8 @@ Internal TestFlight candidate.
 - Preview controls are sample devices and do not represent real hardware state.
 - HomeKit behavior depends on the tester's Home configuration and accessory support.
 - Matter setup and multi-home workflows are outside this build's launch scope.
+- NFC is not in this build.
+- There is no crash reporter. A fatal store error prints and aborts.
 
 ## Screenshots
 
@@ -58,7 +56,7 @@ Documentation screenshots live in `docs/screenshots/`.
 - `device-discovery.png`
 - `settings.png`
 
-The dashboard, reasoning, scene approval, and device-discovery screenshots are captured from the repo's React/Vite preview, which mirrors the native launch surfaces for review. The settings screenshot is a native-style documentation capture based on `Lumen/Features/Settings/SettingsView.swift`.
+Captured 15 October 2026 from the React/Vite preview (`src/demo`), which mirrors the launch surfaces for review. These are not iOS simulator captures. Replace them with device or simulator shots before App Store submission. The reasoning image is the suggestion sheet (signals plus the proposed changes). The scene-approval image is the Auto-tab confirm sheet.
 
 ## TestFlight Notes
 
