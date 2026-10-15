@@ -16,13 +16,17 @@ Lumen is designed for low cognitive load: calm surfaces, clear explanations, and
 
 ## Status
 
-Native SwiftUI / SwiftData app, iPhone + iPad. Local-first; CloudKit sync is gated off pending final provisioning. ~160 unit tests, build clean.
+Native SwiftUI / SwiftData app, iPhone + iPad. Local-first; CloudKit sync is gated off pending final provisioning. 235 XCTest methods in `LumenTests`. The last recorded simulator pass is 29 June 2026 and needs a clean re-run before a TestFlight archive.
 
 ## Preview
 
-| Dashboard | Scene Approval | Reasoning View |
+| Dashboard | Scene approval | Reasoning |
 |---|---|---|
-| `docs/screenshots/dashboard.png` | `docs/screenshots/scene-approval.png` | `docs/screenshots/reasoning-view.png` |
+| ![Dashboard](docs/screenshots/dashboard.png) | ![Scene approval](docs/screenshots/scene-approval.png) | ![Reasoning](docs/screenshots/reasoning-view.png) |
+
+| Devices | Settings |
+|---|---|
+| ![Devices](docs/screenshots/device-discovery.png) | ![Settings](docs/screenshots/settings.png) |
 
 The app also ships with a React/Vite marketing preview in `src/` that recreates the dashboard, reasoning, and scene approval surfaces for web review.
 
@@ -42,11 +46,11 @@ The app also ships with a React/Vite marketing preview in `src/` that recreates 
 - Location-aware dashboard ("Welcome Home" / Away Mode with distance)
 - Time-of-day ambient palette + "Lumen noticed" contextual cards (scored `SuggestionEngine` with explainable confidence/habit signals)
 - **Now / Next** rhythm card (calm daily-rhythm structure, works without smart devices)
-- **Scene approval sheet** (consent before any scene executes, with humanized action list)
+- **Scene approval sheet** (consent before a tapped scene or a "Lumen noticed" suggestion runs, with a humanized action list). Arrival, departure, and scheduled scenes run when configured and then notify.
 - **Lumen reasoning view** (signals behind every suggestion — time, presence, devices, matching scene)
 - Geofence-triggered scene automations (arrival/departure, 100 m radius; set home location in Settings)
 - HomeKit device discovery, control, and a local preview mode that runs the UI with mock devices
-- SwiftData persistence with versioned schema (V1 → V2 → V3)
+- SwiftData persistence with versioned schema (V1 through V4)
 - Local notifications for automation triggers
 
 **Not yet**

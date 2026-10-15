@@ -24,7 +24,7 @@ The beta scope is intentionally narrow:
 | Notifications | Local automation alerts implemented | Beta-supported after opt-in |
 | CloudKit | Code path exists but `enableCloudKitSync = false` | Do not enable for first beta |
 | Privacy manifest | No tracking; UserDefaults accessed API reason declared | Needs App Store privacy-label review |
-| Tests | XCTest coverage for core logic | Must pass before each TestFlight build |
+| Tests | 235 XCTest methods across `LumenTests` | Must pass on a Mac before each TestFlight archive. The June 2026 result in the release notes is stale. This October doc pass did not re-run `xcodebuild`. |
 
 ## Ship Criteria
 
@@ -53,7 +53,7 @@ App Store submission can start when:
 
 ## P0 Implementation Backlog
 
-- Capture final screenshots into `docs/screenshots/`: dashboard, reasoning view, scene approval, device discovery, settings.
+- `docs/screenshots/` holds the five review surfaces captured from the web preview (dashboard, reasoning, scene approval, device list, settings). Capture the same five from the iOS simulator before App Store submission. The web images are a stand-in, not a device archive.
 - Use `docs/beta-tester-guide.md` for the 10-minute local-preview script and separate HomeKit script.
 - Use `docs/manual-qa.md` for permission denial and recovery: HomeKit, location, notifications.
 - Verify App Store Connect capability setup for HomeKit; leave CloudKit disabled for build 7 unless the container is fully provisioned.
@@ -92,7 +92,7 @@ App Store submission can start when:
 
 Use this as the starting reviewer note:
 
-> Lumen can be reviewed without smart-home hardware. On first launch, local preview mode is enabled by default and shows sample rooms/devices so the dashboard, Now / Next rhythm, reasoning view, scene approval sheet, and settings can be tested immediately. If HomeKit permission is granted on a device with a configured Home, Lumen can also discover and control supported HomeKit accessories. Scene execution always requires explicit confirmation from the user.
+> Lumen can be reviewed without smart-home hardware. On first launch, local preview mode is enabled by default and shows sample rooms and devices, so the dashboard, Now / Next rhythm, reasoning view, scene approval sheet, and settings can be tested immediately. If HomeKit permission is granted on a device with a configured Home, Lumen can also discover and control supported HomeKit accessories. Tapping a scene, or applying a suggestion from "Lumen noticed", opens an approval sheet before anything changes. A scene the reviewer has already scheduled, or set to run on arrival or departure, runs at that moment and posts a local notification. CloudKit sync is off. This build does not include NFC.
 
 ## Launch Copy
 
@@ -102,18 +102,19 @@ Subtitle:
 
 Short description:
 
-> Lumen helps your home feel easier to understand. See the current rhythm of the day, review gentle suggestions, and approve scenes before anything changes.
+> Lumen helps your home feel easier to understand. See the current rhythm of the day, review gentle suggestions, and approve them before anything changes. Routines you schedule, or set for arrival and departure, run at that time and notify you.
 
 Beta tester note:
 
-> Start with preview controls even if you have HomeKit hardware. Then connect HomeKit and tell us where the reasoning, approval, or permission flow feels unclear.
+> Start with preview controls even if you have HomeKit hardware. Then connect HomeKit and tell us where the reasoning, approval, or permission flow feels unclear. Arrival, departure, and scheduled scenes run without a second confirmation once you set them.
 
 ## Rollback Triggers
 
 Pull a TestFlight build or pause rollout if any of these occur:
 
 - First launch hangs or crashes for more than one tester.
-- A scene executes without an approval surface.
+- A tapped scene, or a "Lumen noticed" suggestion, runs without the approval sheet.
+- An arrival, departure, or scheduled scene runs when the tester did not configure that trigger.
 - HomeKit denial leaves the device screen unusable.
 - Location denial causes repeated prompts or broken dashboard state.
 - SwiftData migration or persistence errors lose homes, rooms, devices, or scenes.
